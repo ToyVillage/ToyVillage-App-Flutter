@@ -9,6 +9,7 @@ class ToyVillageAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      backgroundColor: ToyVillageColor.gray10,
       elevation: 0,
       scrolledUnderElevation: 0,
       leading: IconButton(
