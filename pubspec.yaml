@@ -27,15 +27,13 @@ flutter:
       fonts:
         - asset: assets/font/WantedSans-Black.ttf
           weight: 900
-        - asset: assets/font/WantedSans-ExtraBlack.ttf
-          weight: 800
         - asset: assets/font/WantedSans-ExtraBold.ttf
-          weight: 700
+          weight: 800
         - asset: assets/font/WantedSans-Bold.ttf
-          weight: 600
+          weight: 700
         - asset: assets/font/WantedSans-SemiBold.ttf
-          weight: 500
+          weight: 600
         - asset: assets/font/WantedSans-Medium.ttf
-          weight: 400
+          weight: 500
         - asset: assets/font/WantedSans-Regular.ttf
-          weight: 300
+          weight: 400
