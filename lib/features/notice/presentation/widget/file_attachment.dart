@@ -38,14 +38,17 @@ class FileAttachment extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8,),
-            GestureDetector(
-              onTap: onDownload,
-              child: const Icon(
-                Symbols.download,
-                size: 24,
-                color: ToyVillageColor.gray100,
-              ),
-            ),
+            IconButton(
+                onPressed: onDownload,
+                tooltip: '다운로드',
+                padding: EdgeInsets.zero,
+                visualDensity: VisualDensity.compact,
+                icon: Icon(
+                  Symbols.download,
+                  size: 24,
+                  color: ToyVillageColor.gray100,
+                )
+            )
           ],
         ),
       ),
