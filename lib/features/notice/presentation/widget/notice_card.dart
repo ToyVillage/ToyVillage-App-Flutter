@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
-import 'package:toy_village_app/core/utils/time_util.dart';
+import 'package:toy_village_app/features/notice/presentation/widget/notice_time_label.dart';
 
 class NoticeCard extends StatelessWidget {
   final String kind;
@@ -33,27 +33,7 @@ class NoticeCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: ToyVillageColor.redBackground,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                        child: Text(
-                          kind,
-                          style: ToyVillageTextStyle.button5.copyWith(
-                            color: ToyVillageColor.red,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Spacer(),
-                    Text(timeCheck(time), style: ToyVillageTextStyle.caption4.copyWith(color: ToyVillageColor.gray60),)
-                  ],
-                ),
+                NoticeTimeLabel(kind: kind, time: time),
                 SizedBox(height: 8,),
                 Text(title, style: ToyVillageTextStyle.heading3,)
               ],
