@@ -7,7 +7,6 @@ final readNoticeProvider =
       ReadNoticeViewModel.new,
     );
 
-/// 읽은 공지 ID 집합을 SharedPreferences에 저장/관리한다.
 class ReadNoticeViewModel extends AsyncNotifier<Set<int>> {
   static const _key = 'read_notice_ids';
 
@@ -17,8 +16,7 @@ class ReadNoticeViewModel extends AsyncNotifier<Set<int>> {
     final saved = prefs.getStringList(_key) ?? [];
     return saved.map(int.parse).toSet();
   }
-
-  /// 공지를 읽음으로 표시한다.
+  
   Future<void> markAsRead(int id) async {
     final current = state.value ?? <int>{};
     if (current.contains(id)) return;
