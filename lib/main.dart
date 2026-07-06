@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/constants/color.dart';
+import 'package:toy_village_app/core/router/app_router.dart';
 
 void main() {
   runApp(const ToyVillageApp());
@@ -9,28 +11,13 @@ class ToyVillageApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'ToyVillage',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        scaffoldBackgroundColor: ToyVillageColor.gray10,
       ),
-      home: const HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('ToyVillage'),
-      ),
-      body: const Center(
-        child: Text('ToyVillage'),
-      ),
+      routerConfig: appRouter,
     );
   }
 }
