@@ -13,6 +13,7 @@ class ToyVillageAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: ToyVillageColor.gray10,
       elevation: 0,
+      automaticallyImplyLeading: false,
       scrolledUnderElevation: 0,
       leading: closeIcon == true ? IconButton(
         icon: const Icon(
