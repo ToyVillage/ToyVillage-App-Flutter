@@ -3,6 +3,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/time_util.dart';
+import 'package:toy_village_app/features/notice/data/model/notice_kind.dart';
 
 class NoticeTimeLabel extends StatelessWidget {
   final String kind;
@@ -28,7 +29,7 @@ class NoticeTimeLabel extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             child: Text(
-              kind,
+              NoticeKind.labelOf(kind),
               style: ToyVillageTextStyle.button5.copyWith(
                 color: ToyVillageColor.red,
               ),
