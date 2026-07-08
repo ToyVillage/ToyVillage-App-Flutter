@@ -6,10 +6,18 @@ class AuthService {
     BaseOptions(
       baseUrl: AppEnv.current.baseUrl,
       headers: {'Origin': 'https://toyvillage.kr'},
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
     ),
   );
 
-  Future<String> login() async {
+  Future<String>? _inFlight;
+
+  Future<String> login() {
+    return _inFlight ??= _login().whenComplete(() => _inFlight = null);
+  }
+
+  Future<String> _login() async {
     final res = await _dio.post(
       '/auth/login',
       data: {
