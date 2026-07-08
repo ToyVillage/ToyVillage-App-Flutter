@@ -39,7 +39,7 @@ class NoticeCard extends StatelessWidget {
                   children: [
                     NoticeTimeLabel(kind: kind, time: time),
                     SizedBox(height: 8,),
-                    Text(title, style: ToyVillageTextStyle.heading3,)
+                    Text(title, style: ToyVillageTextStyle.heading3.copyWith(fontSize: 20),)
                   ],
                 ),
               ),

@@ -25,17 +25,18 @@ class NoticeDetailView extends ConsumerWidget {
 
     return Scaffold(
       appBar: ToyVillageAppBar(closeIcon: true),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: CustomAsyncValue(
-            value: ref.watch(noticeDetailViewModelProvider(id)),
-            data: (value) => Column(
+      body: CustomAsyncValue(
+        value: ref.watch(noticeDetailViewModelProvider(id)),
+        errorMessage: '공지사항을 불러오지 못했어요.',
+        data: (value) => SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 NoticeTitle(
                   title: value.title,
                   kind: value.kind,
-                  time: value.createAt,
+                  time: value.createdAt,
                 ),
                 const _NoticeDivider(),
                 Text(
@@ -64,8 +65,8 @@ class NoticeDetailView extends ConsumerWidget {
                 ],
               ],
             ),
-        )
-      ),
+          ),
+        ),
     );
   }
 }
