@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toy_village_app/features/notice/data/model/notice_model.dart';
 import 'package:toy_village_app/features/notice/data/repository/notice_repository.dart';
@@ -40,6 +41,8 @@ class NoticeViewModel extends AsyncNotifier<List<NoticeModel>> {
       _page += 1;
       _hasMore = next.length == _size;
       state = AsyncData([...current, ...next]);
+    } catch (e, s) {
+      debugPrint('loadMore failed: $e\n$s');
     } finally {
       _isLoadingMore = false;
     }
