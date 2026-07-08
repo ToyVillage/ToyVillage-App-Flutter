@@ -3,6 +3,8 @@
 *.log
 *.pyc
 *.swp
+
+lib/core/config/app_env.dart
 .DS_Store
 .atom/
 .build/
