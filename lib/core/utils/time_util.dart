@@ -1,10 +1,12 @@
 String timeCheck(DateTime date) {
-  final diff = DateTime.now().difference(date);
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final target = DateTime(date.year, date.month, date.day);
+  final days = today.difference(target).inDays;
 
-  if (diff.inMinutes < 1) return '방금 전';
-  if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
-  if (diff.inHours < 24) return '${diff.inHours}시간 전';
-  if (diff.inDays < 7) return '${diff.inDays}일 전';
-  if (diff.inDays < 30) return '${(diff.inDays / 7).floor()}주 전';
-  return '${(diff.inDays / 30).floor()}개월 전';
+  if (days <= 0) return '오늘';
+  if (days == 1) return '어제';
+  if (days < 7) return '$days일 전';
+  if (days < 30) return '${(days / 7).floor()}주 전';
+  return '${(days / 30).floor()}개월 전';
 }
