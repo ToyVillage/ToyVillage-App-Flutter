@@ -1,10 +1,8 @@
-# toy_village_app
-
-토이빌리지 모바일 앱
+# Toy Village
 
 ## 환경 설정
 
-- `lib/core/config/app_env.dart` : 인증 자격 증명 포함, gitignore 대상 (없으면 빌드/로그인 실패)
+- `lib/core/config/app_env.dart` : gitignore 대상 (없으면 빌드 및 로그인 실패)
 - 최초 클론 후 예제 복사 필요
 
 ```bash
