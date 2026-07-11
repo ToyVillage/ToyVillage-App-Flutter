@@ -1,37 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toy_village_app/core/widgets/app_bar.dart';
+import 'package:toy_village_app/features/day_off/data/model/close_day_model.dart';
+import 'package:toy_village_app/features/day_off/presentation/view_model/close_day_view_model.dart';
 import 'package:toy_village_app/features/day_off/presentation/widget/calendar_header.dart';
 import 'package:toy_village_app/features/day_off/presentation/widget/date_info.dart';
 import 'package:toy_village_app/features/day_off/presentation/widget/day_off_calendar.dart';
 
-class DayOffView extends StatefulWidget {
+class DayOffView extends ConsumerStatefulWidget {
   const DayOffView({super.key});
 
   @override
-  State<DayOffView> createState() => _DayOffViewState();
+  ConsumerState<DayOffView> createState() => _DayOffViewState();
 }
 
-class _DayOffViewState extends State<DayOffView> {
+class _DayOffViewState extends ConsumerState<DayOffView> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
-  // TODO: 서버 연동 시 휴관일 목록으로 교체
-  final Map<DateTime, String> _dayOffs = {
-    DateTime.utc(2026, 6, 17): '동물 정기검진으로 인한 휴관',
-  };
-
-  String? _reasonFor(DateTime day) {
-    for (final entry in _dayOffs.entries) {
-      final d = entry.key;
-      if (d.year == day.year && d.month == day.month && d.day == day.day) {
-        return entry.value;
+  Set<DateTime> _closeDates(List<CloseDayModel> closeDays) {
+    final dates = <DateTime>{};
+    for (final c in closeDays) {
+      var d = _dateOnly(c.startCloseTime);
+      final end = _dateOnly(c.endCloseTime);
+      while (!d.isAfter(end)) {
+        dates.add(d);
+        d = d.add(const Duration(days: 1));
       }
+    }
+    return dates;
+  }
+
+  String? _reasonFor(List<CloseDayModel> closeDays, DateTime day) {
+    final target = _dateOnly(day);
+    for (final c in closeDays) {
+      final start = _dateOnly(c.startCloseTime);
+      final end = _dateOnly(c.endCloseTime);
+      if (!target.isBefore(start) && !target.isAfter(end)) return c.title;
     }
     return null;
   }
 
+  DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
   @override
   Widget build(BuildContext context) {
+    final closeDays = ref.watch(closeDayViewModelProvider).value ?? const [];
     final infoDay = _selectedDay ?? DateTime.now();
 
     return Scaffold(
@@ -49,7 +63,7 @@ class _DayOffViewState extends State<DayOffView> {
                   child: DayOffCalendar(
                     focusedDay: _focusedDay,
                     selectedDay: _selectedDay,
-                    dayOffs: _dayOffs.keys.toSet(),
+                    dayOffs: _closeDates(closeDays),
                     onDaySelected: (selected, focused) {
                       setState(() {
                         _selectedDay = selected;
@@ -63,7 +77,7 @@ class _DayOffViewState extends State<DayOffView> {
                 ),
                 DateInfo(
                   title: '${infoDay.month}월 ${infoDay.day}일',
-                  content: _reasonFor(infoDay),
+                  content: _reasonFor(closeDays, infoDay),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
