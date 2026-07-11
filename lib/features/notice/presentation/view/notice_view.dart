@@ -8,6 +8,7 @@ import 'package:toy_village_app/core/widgets/title.dart';
 import 'package:toy_village_app/features/notice/presentation/view_model/notice_view_model.dart';
 import 'package:toy_village_app/features/notice/presentation/view_model/read_notice_view_model.dart';
 import 'package:toy_village_app/features/notice/presentation/widget/notice_card.dart';
+import 'package:toy_village_app/features/notice/presentation/widget/notice_list_skeleton.dart';
 
 class NoticeView extends ConsumerWidget {
   const NoticeView({super.key});
@@ -21,6 +22,7 @@ class NoticeView extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: CustomAsyncValue(
             value: ref.watch(noticeViewModelProvider),
+            loading: const NoticeListSkeleton(),
             data: (value) {
               final readIds = ref.watch(readNoticeProvider).value ?? <int>{};
               final hasMore =
