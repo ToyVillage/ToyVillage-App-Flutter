@@ -23,6 +23,16 @@ abstract final class ToyVillageTextStyle {
     fontWeight: FontWeight.w600,
   );
 
+  static TextStyle heading5 = defaultTextStyle.copyWith(
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+  );
+
+  static TextStyle heading6 = defaultTextStyle.copyWith(
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+  );
+
   /// SubTitle
   static TextStyle subTitle1 = defaultTextStyle.copyWith(
     fontSize: 24,
