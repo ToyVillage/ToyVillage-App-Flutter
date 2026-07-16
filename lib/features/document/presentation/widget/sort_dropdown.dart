@@ -67,7 +67,7 @@ class _SortDropdownState extends State<SortDropdown> {
 
   Widget _menu() {
     return Container(
-      width: 100,
+      width: 80,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: ToyVillageColor.white,
@@ -83,12 +83,12 @@ class _SortDropdownState extends State<SortDropdown> {
       child: Material(
         color: Colors.transparent,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               for (var i = 0; i < SortOrder.values.length; i++) ...[
-                if (i > 0) const SizedBox(height: 5),
+                if (i > 0) const SizedBox(height: 10),
                 _item(SortOrder.values[i]),
               ],
             ],
