@@ -49,67 +49,77 @@ class _DayOffViewState extends ConsumerState<DayOffView> {
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(closeDayViewModelProvider);
-    final closeDays = async.value ?? const <CloseDayModel>[];
-    final infoDay = _selectedDay ?? DateTime.now();
 
     return Scaffold(
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ToyVillageAppBar(),
-                if (async.isLoading)
-                  const DayOffSkeleton()
-                else if (async.hasError)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 60),
-                    child: Center(
-                      child: Text(
-                        '휴관 정보를 불러오지 못했어요.',
-                        style: ToyVillageTextStyle.body5.copyWith(
-                          color: ToyVillageColor.gray60,
-                        ),
-                      ),
-                    ),
-                  )
-                else ...[
-                  Center(child: CalendarHeader(focusedDay: _focusedDay)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: DayOffCalendar(
-                      focusedDay: _focusedDay,
-                      selectedDay: _selectedDay,
-                      dayOffs: _closeDates(closeDays),
-                      onDaySelected: (selected, focused) {
-                        setState(() {
-                          _selectedDay = selected;
-                          _focusedDay = focused;
-                        });
-                      },
-                      onPageChanged: (focused) {
-                        setState(() => _focusedDay = focused);
-                      },
-                    ),
-                  ),
-                  DateInfo(
-                    title: '${infoDay.month}월 ${infoDay.day}일',
-                    content: _reasonFor(closeDays, infoDay),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: DateInfo(
-                      title: '운영시간',
-                      operatingHours: '10:00 ~ 20:00',
-                    ),
-                  ),
-                ],
-              ],
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ToyVillageAppBar(),
+              Expanded(child: _content(async)),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _content(AsyncValue<List<CloseDayModel>> async) {
+    if (async.isLoading) {
+      return const SingleChildScrollView(child: DayOffSkeleton());
+    }
+
+    if (async.hasError) {
+      return Align(
+        alignment: const Alignment(0, -0.1),
+        child: Text(
+          '휴관 정보를 불러오지 못했어요.',
+          style: ToyVillageTextStyle.body5.copyWith(
+            color: ToyVillageColor.gray60,
+          ),
+        ),
+      );
+    }
+
+    final closeDays = async.value ?? const <CloseDayModel>[];
+    final infoDay = _selectedDay ?? DateTime.now();
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(child: CalendarHeader(focusedDay: _focusedDay)),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: DayOffCalendar(
+              focusedDay: _focusedDay,
+              selectedDay: _selectedDay,
+              dayOffs: _closeDates(closeDays),
+              onDaySelected: (selected, focused) {
+                setState(() {
+                  _selectedDay = selected;
+                  _focusedDay = focused;
+                });
+              },
+              onPageChanged: (focused) {
+                setState(() => _focusedDay = focused);
+              },
+            ),
+          ),
+          DateInfo(
+            title: '${infoDay.month}월 ${infoDay.day}일',
+            content: _reasonFor(closeDays, infoDay),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: DateInfo(
+              title: '운영시간',
+              operatingHours: '10:00 ~ 20:00',
+            ),
+          ),
+        ],
       ),
     );
   }
