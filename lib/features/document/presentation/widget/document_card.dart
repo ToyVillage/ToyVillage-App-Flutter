@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/file_util.dart';
+import 'package:toy_village_app/features/document/presentation/widget/document_preview_modal.dart';
 
 class DocumentCard extends StatelessWidget {
   final String title;
@@ -46,7 +47,11 @@ class DocumentCard extends StatelessWidget {
               Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: () {},
+                  onTap: () => showDocumentPreview(
+                    context,
+                    title: title,
+                    type: type,
+                  ),
                   borderRadius: BorderRadius.circular(4),
                   child: Container(
                     decoration: BoxDecoration(
