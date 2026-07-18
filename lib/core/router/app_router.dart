@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/features/day_off/presentation/view/day_off_view.dart';
+import 'package:toy_village_app/features/document/presentation/view/document_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_detail_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_view.dart';
 
@@ -8,7 +9,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/notice',
+  initialLocation: '/document',
   routes: [
     GoRoute(
       path: '/notice',
@@ -31,6 +32,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/dayOff',
       builder: (context, state) => DayOffView()
+    ),
+    GoRoute(
+      path: '/document',
+      builder: (context, state) => const DocumentView(),
     ),
   ],
 );
