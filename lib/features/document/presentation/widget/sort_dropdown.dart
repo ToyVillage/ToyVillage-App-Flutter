@@ -4,12 +4,13 @@ import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 
 enum SortOrder {
-  latest('최신순'),
-  oldest('오래된순');
+  latest('최신순', 'DESC'),
+  oldest('오래된순', 'ASC');
 
   final String label;
+  final String direction;
 
-  const SortOrder(this.label);
+  const SortOrder(this.label, this.direction);
 }
 
 class SortDropdown extends StatefulWidget {

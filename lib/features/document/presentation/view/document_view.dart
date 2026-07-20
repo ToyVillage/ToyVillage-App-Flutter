@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toy_village_app/core/widgets/app_bar.dart';
+import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/title.dart';
+import 'package:toy_village_app/features/document/presentation/view_model/document_view_model.dart';
 import 'package:toy_village_app/features/document/presentation/widget/document_card.dart';
 import 'package:toy_village_app/features/document/presentation/widget/sort_dropdown.dart';
 
-class DocumentView extends StatefulWidget {
+class DocumentView extends ConsumerStatefulWidget {
   const DocumentView({super.key});
 
   @override
-  State<DocumentView> createState() => _DocumentViewState();
+  ConsumerState<DocumentView> createState() => _DocumentViewState();
 }
 
-class _DocumentViewState extends State<DocumentView> {
+class _DocumentViewState extends ConsumerState<DocumentView> {
   SortOrder _sort = SortOrder.latest;
 
   @override
@@ -33,21 +36,31 @@ class _DocumentViewState extends State<DocumentView> {
                   const Spacer(),
                   SortDropdown(
                     value: _sort,
-                    onChanged: (order) => setState(() => _sort = order),
+                    onChanged: (order) {
+                      setState(() => _sort = order);
+                      ref
+                          .read(documentViewModelProvider.notifier)
+                          .changeOrder(order);
+                    },
                   ),
                 ],
               ),
               Expanded(
-                child: ListView.builder(
-                  itemCount: 4,
-                  itemBuilder: (BuildContext context, int index) {
-                    return DocumentCard(
-                      title: '토이빌리지 동물관리 안내사항',
-                      type: 'JPG',
-                    );
-                  },
+                child: CustomAsyncValue(
+                  value: ref.watch(documentViewModelProvider),
+                  data: (documents) => ListView.builder(
+                    itemCount: documents.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final document = documents[index];
+                      return DocumentCard(
+                        id: document.id,
+                        title: document.title,
+                        type: document.type,
+                      );
+                    },
+                  ),
                 ),
-              )
+              ),
             ],
           ),
         ),
