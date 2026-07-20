@@ -5,6 +5,7 @@ import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/title.dart';
 import 'package:toy_village_app/features/document/presentation/view_model/document_view_model.dart';
 import 'package:toy_village_app/features/document/presentation/widget/document_card.dart';
+import 'package:toy_village_app/features/document/presentation/widget/document_list_skeleton.dart';
 import 'package:toy_village_app/features/document/presentation/widget/sort_dropdown.dart';
 
 class DocumentView extends ConsumerStatefulWidget {
@@ -48,6 +49,7 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
               Expanded(
                 child: CustomAsyncValue(
                   value: ref.watch(documentViewModelProvider),
+                  loading: const DocumentListSkeleton(),
                   data: (documents) => ListView.builder(
                     itemCount: documents.length,
                     itemBuilder: (BuildContext context, int index) {
