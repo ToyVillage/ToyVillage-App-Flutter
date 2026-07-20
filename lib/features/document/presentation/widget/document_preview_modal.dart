@@ -1,28 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
+import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/features/document/presentation/view_model/document_detail_view_model.dart';
 
 void showDocumentPreview(
   BuildContext context, {
+  required int id,
   required String title,
   required String type,
 }) {
   showDialog(
     context: context,
     barrierColor: Colors.black.withValues(alpha: 0.5),
-    builder: (_) => _DocumentPreviewModal(title: title, type: type),
+    builder: (_) => _DocumentPreviewModal(id: id, title: title, type: type),
   );
 }
 
-class _DocumentPreviewModal extends StatelessWidget {
+class _DocumentPreviewModal extends ConsumerWidget {
+  final int id;
   final String title;
   final String type;
 
-  const _DocumentPreviewModal({required this.title, required this.type});
+  const _DocumentPreviewModal({
+    required this.id,
+    required this.title,
+    required this.type,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
@@ -55,11 +64,29 @@ class _DocumentPreviewModal extends StatelessWidget {
                     color: ToyVillageColor.white,
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  alignment: Alignment.center,
-                  // TODO: 실제 미리보기로 교체
-                  child: Text(
-                    '$type 미리보기',
-                    style: ToyVillageTextStyle.body3,
+                  padding: const EdgeInsets.all(20),
+                  child: CustomAsyncValue(
+                    value: ref.watch(documentDetailViewModelProvider(id)),
+                    // TODO: fileKey로 실제 파일(이미지/PDF) 렌더링
+                    data: (detail) => Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(detail.title, style: ToyVillageTextStyle.body3),
+                          const SizedBox(height: 12),
+                          for (final file in detail.files)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                file.fileName,
+                                style: ToyVillageTextStyle.body5.copyWith(
+                                  color: ToyVillageColor.gray60,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),

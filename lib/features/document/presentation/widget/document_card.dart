@@ -6,11 +6,13 @@ import 'package:toy_village_app/core/utils/file_util.dart';
 import 'package:toy_village_app/features/document/presentation/widget/document_preview_modal.dart';
 
 class DocumentCard extends StatelessWidget {
+  final int id;
   final String title;
   final String type;
 
   const DocumentCard({
     super.key,
+    required this.id,
     required this.title,
     required this.type
   });
@@ -49,6 +51,7 @@ class DocumentCard extends StatelessWidget {
                 child: InkWell(
                   onTap: () => showDocumentPreview(
                     context,
+                    id: id,
                     title: title,
                     type: type,
                   ),
