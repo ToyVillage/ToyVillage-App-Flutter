@@ -37,5 +37,23 @@ final GoRouter appRouter = GoRouter(
       path: '/document',
       builder: (context, state) => const DocumentView(),
     ),
+    GoRoute(
+      path: '/reservation',
+      builder: (context, state) => const ReservationView(),
+      routes: [
+        GoRoute(
+          path: 'detail',
+          builder: (context, state) {
+            final id = state.extra;
+            if (id is! int) {
+              return const Scaffold(
+                body: Center(child: Text('잘못된 접근입니다.')),
+              );
+            }
+            return ReservationDetailView(id: id);
+          },
+        ),
+      ],
+    ),
   ],
 );

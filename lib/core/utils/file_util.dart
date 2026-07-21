@@ -1,12 +1,13 @@
 import 'dart:ui';
 
 import 'package:toy_village_app/core/constants/color.dart';
+import 'package:toy_village_app/core/constants/svg_assets.dart';
 
 enum FileType {
-  pdf(label: 'PDF', icon: 'assets/svg/pdf.svg', backgroundColor: ToyVillageColor.redBackground),
-  jpg(label: 'JPG', icon: 'assets/svg/jpg.svg', backgroundColor: ToyVillageColor.yellowBackground),
-  png(label: 'PNG', icon: 'assets/svg/png.svg', backgroundColor: ToyVillageColor.greenBackground),
-  etc(label: 'FILE', icon: 'assets/svg/etc.svg', backgroundColor: ToyVillageColor.gray20);
+  pdf(label: 'PDF', icon: SvgAssets.pdf, backgroundColor: ToyVillageColor.redBackground),
+  jpg(label: 'JPG', icon: SvgAssets.jpg, backgroundColor: ToyVillageColor.yellowBackground),
+  png(label: 'PNG', icon: SvgAssets.png, backgroundColor: ToyVillageColor.greenBackground),
+  etc(label: 'FILE', icon: SvgAssets.etc, backgroundColor: ToyVillageColor.gray20);
 
   final String label;
   final String icon;
