@@ -29,7 +29,7 @@ class ReservationDetailView extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ToyVillageTitle(
-                  title: '대구 유치원',
+                  title: '대구 유치원', // TODO: 백엔드 수정되면 변경
                   subTitle: '예약인 : ${detail.reservationName}',
                 ),
                 Padding(
@@ -125,8 +125,16 @@ class ReservationDetailView extends ConsumerWidget {
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: ReservationText(
                             label: '예약 시간: ',
-                            value: '7월 12일',
+                            value: '0 : 00', // TODO: 백엔드 수정되면 변경
                             icon: SvgPicture.asset(SvgAssets.clockCheck),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: ReservationText(
+                            label: '입장 시간: ',
+                            value: '9 : 41', // TODO: 백엔드 수정되면 변경
+                            icon: SvgPicture.asset(SvgAssets.clock),
                           ),
                         ),
                         ReservationText(
