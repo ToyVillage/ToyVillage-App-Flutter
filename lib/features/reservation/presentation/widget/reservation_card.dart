@@ -43,7 +43,8 @@ class ReservationCard extends StatelessWidget {
               ),
               ReservationText(
                 label: '방문 시간:   ',
-                value: '${visitDate.hour} : ${visitDate.minute}',
+                value:
+                    '${visitDate.hour} : ${visitDate.minute.toString().padLeft(2, '0')}',
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
