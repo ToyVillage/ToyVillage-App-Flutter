@@ -14,5 +14,6 @@ String timeCheck(DateTime date) {
 String formatTime(String time) {
   final parts = time.split(':');
   if (parts.length < 2) return time;
-  return '${parts[0]}:${parts[1]}';
+  final hour = int.parse(parts[0]);
+  return '$hour : ${parts[1]}';
 }
