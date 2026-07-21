@@ -10,3 +10,9 @@ String timeCheck(DateTime date) {
   if (days < 30) return '${(days / 7).floor()}주 전';
   return '${(days / 30).floor()}개월 전';
 }
+
+String formatTime(String time) {
+  final parts = time.split(':');
+  if (parts.length < 2) return time;
+  return '${parts[0]}:${parts[1]}';
+}
