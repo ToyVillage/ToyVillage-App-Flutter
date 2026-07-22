@@ -6,12 +6,14 @@ class DateInfo extends StatelessWidget {
   final String title;
   final String? content;
   final String? operatingHours;
+  final String? errorMessage;
 
   const DateInfo({
     super.key,
     required this.title,
     this.content,
     this.operatingHours,
+    this.errorMessage,
   });
 
   @override
@@ -33,7 +35,19 @@ class DateInfo extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            if (content != null)
+            if (errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Center(
+                  child: Text(
+                    errorMessage!,
+                    style: ToyVillageTextStyle.caption4.copyWith(
+                      color: ToyVillageColor.gray60,
+                    ),
+                  ),
+                ),
+              )
+            else if (content != null)
               Padding(
                 padding: const EdgeInsets.only(top: 30, bottom: 7),
                 child: Text(content!, style: ToyVillageTextStyle.body5),
