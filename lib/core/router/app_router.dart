@@ -4,6 +4,8 @@ import 'package:toy_village_app/features/day_off/presentation/view/day_off_view.
 import 'package:toy_village_app/features/document/presentation/view/document_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_detail_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_view.dart';
+import 'package:toy_village_app/features/reservation/presentation/view/reservation_detail_view.dart';
+import 'package:toy_village_app/features/reservation/presentation/view/reservation_view.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
