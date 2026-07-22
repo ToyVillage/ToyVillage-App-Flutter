@@ -4,7 +4,9 @@ import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar.dart';
 import 'package:toy_village_app/features/day_off/data/model/close_day_model.dart';
+import 'package:toy_village_app/features/day_off/data/model/open_time_model.dart';
 import 'package:toy_village_app/features/day_off/presentation/view_model/close_day_view_model.dart';
+import 'package:toy_village_app/features/day_off/presentation/view_model/open_time_view_model.dart';
 import 'package:toy_village_app/features/day_off/presentation/widget/calendar_header.dart';
 import 'package:toy_village_app/features/day_off/presentation/widget/date_info.dart';
 import 'package:toy_village_app/features/day_off/presentation/widget/day_off_calendar.dart';
@@ -44,6 +46,14 @@ class _DayOffViewState extends ConsumerState<DayOffView> {
     return null;
   }
 
+  String? _operatingHoursFor(List<OpenTimeModel> openTimes, DateTime day) {
+    final target = _dateOnly(day);
+    for (final o in openTimes) {
+      if (_dateOnly(o.openDate) == target) return o.operatingHours;
+    }
+    return null;
+  }
+
   DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
   @override
@@ -67,7 +77,9 @@ class _DayOffViewState extends ConsumerState<DayOffView> {
   }
 
   Widget _content(AsyncValue<List<CloseDayModel>> async) {
-    if (async.isLoading) {
+    final openAsync = ref.watch(openTimeViewModelProvider);
+
+    if (async.isLoading || openAsync.isLoading) {
       return const SingleChildScrollView(child: DayOffSkeleton());
     }
 
@@ -114,10 +126,17 @@ class _DayOffViewState extends ConsumerState<DayOffView> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
-            child: DateInfo(
-              title: '운영시간',
-              operatingHours: '10:00 ~ 20:00',
-            ),
+            child: switch (openAsync) {
+              AsyncData(:final value) => DateInfo(
+                title: '운영시간',
+                operatingHours: _operatingHoursFor(value, infoDay),
+                emptyMessage: '운영시간 정보가 없습니다.',
+              ),
+              _ => const DateInfo(
+                title: '운영시간',
+                errorMessage: '운영시간을 불러오지 못했어요.',
+              ),
+            },
           ),
         ],
       ),
