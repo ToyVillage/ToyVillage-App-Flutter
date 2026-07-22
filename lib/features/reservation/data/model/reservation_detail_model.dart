@@ -7,6 +7,7 @@ class ReservationDetailModel {
   final DateTime visitDate;
   final String exitTime;
   final DateTime visitSiteDate;
+  final DateTime visitTime;
   final String visitSiteExitTime;
   final int visitSiteCount;
 
@@ -21,6 +22,7 @@ class ReservationDetailModel {
     required this.visitSiteDate,
     required this.visitSiteExitTime,
     required this.visitSiteCount,
+    required this.visitTime,
   });
 
   factory ReservationDetailModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class ReservationDetailModel {
       visitSiteDate: DateTime.parse(json['visitSiteDate'] as String),
       visitSiteExitTime: json['visitSiteExitTime'] as String,
       visitSiteCount: json['visitSiteCount'] as int,
+      visitTime: DateTime.parse(json['visitTime'] as String),
     );
   }
 }
