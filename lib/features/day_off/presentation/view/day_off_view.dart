@@ -130,6 +130,7 @@ class _DayOffViewState extends ConsumerState<DayOffView> {
               AsyncData(:final value) => DateInfo(
                 title: '운영시간',
                 operatingHours: _operatingHoursFor(value, infoDay),
+                emptyMessage: '운영시간 정보가 없습니다.',
               ),
               _ => const DateInfo(
                 title: '운영시간',
