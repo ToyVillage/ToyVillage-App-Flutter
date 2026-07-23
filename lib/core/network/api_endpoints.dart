@@ -9,4 +9,7 @@ class ApiEndpoints {
 
   /// OpenTime
   static const openTime = '/open-time';
+
+  /// Reservation
+  static const reservation = '/reservation';
 }
