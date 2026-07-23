@@ -4,6 +4,10 @@ class ApiEndpoints {
 
   /// CloseDay
   static const closeDay = '/close-day';
+
+  /// Task
+  static const task = '/task';
+
   /// Document
   static const documents = '/documents';
 
