@@ -13,8 +13,13 @@ import 'package:toy_village_app/features/reservation/presentation/widget/reserva
 
 class ReservationDetailView extends ConsumerWidget {
   final int id;
+  final String title;
 
-  const ReservationDetailView({super.key, required this.id});
+  const ReservationDetailView({
+    super.key,
+    required this.id,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,12 +29,13 @@ class ReservationDetailView extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: CustomAsyncValue(
           value: ref.watch(reservationDetailViewModelProvider(id)),
+          onRetry: () => ref.invalidate(reservationDetailViewModelProvider(id)),
           data: (detail) => SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ToyVillageTitle(
-                  title: '대구 유치원', // TODO: 백엔드 수정되면 변경
+                  title: title,
                   subTitle: '예약인 : ${detail.reservationName}',
                 ),
                 Padding(
@@ -103,7 +109,9 @@ class ReservationDetailView extends ConsumerWidget {
                         ),
                         ReservationText(
                           label: '예약일: ',
-                          value: '7월 12일',
+                          value: detail.reservationDate != null
+                              ? '${detail.reservationDate!.month}월 ${detail.reservationDate!.day}일'
+                              : '정보 없음',
                           icon: SvgPicture.asset(SvgAssets.dateToday),
                         ),
                         Padding(
@@ -125,7 +133,9 @@ class ReservationDetailView extends ConsumerWidget {
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: ReservationText(
                             label: '예약 시간: ',
-                            value: '0 : 00', // TODO: 백엔드 수정되면 변경
+                            value: detail.reservationTime != null
+                                ? formatTime(detail.reservationTime!)
+                                : '정보 없음',
                             icon: SvgPicture.asset(SvgAssets.clockCheck),
                           ),
                         ),
@@ -133,7 +143,7 @@ class ReservationDetailView extends ConsumerWidget {
                           padding: const EdgeInsets.only(bottom: 16),
                           child: ReservationText(
                             label: '입장 시간: ',
-                            value: '9 : 41', // TODO: 백엔드 수정되면 변경
+                            value: formatTime(detail.visitTime),
                             icon: SvgPicture.asset(SvgAssets.clock),
                           ),
                         ),

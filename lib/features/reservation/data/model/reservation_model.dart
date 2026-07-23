@@ -4,6 +4,7 @@ class ReservationModel {
   final String reservationName;
   final DateTime visitDate;
   final int reservationCount;
+  final DateTime reservationDate;
 
   ReservationModel({
     required this.id,
@@ -11,6 +12,7 @@ class ReservationModel {
     required this.reservationName,
     required this.visitDate,
     required this.reservationCount,
+    required this.reservationDate,
   });
 
   factory ReservationModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class ReservationModel {
       reservationName: json['reservationName'] as String,
       visitDate: DateTime.parse(json['visitDate'] as String),
       reservationCount: json['reservationCount'] as int,
+      reservationDate: DateTime.parse(json['reservationDate'] as String),
     );
   }
 }
