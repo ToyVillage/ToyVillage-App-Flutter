@@ -1,22 +1,24 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:toy_village_app/core/network/api_endpoints.dart';
+import 'package:toy_village_app/core/network/dio_provider.dart';
 import 'package:toy_village_app/features/reservation/data/model/reservation_detail_model.dart';
 
-final reservationDetailRepositoryProvider =
-    Provider((ref) => ReservationDetailRepository());
+final reservationDetailRepositoryProvider = Provider(
+  (ref) => ReservationDetailRepository(ref.read(dioProvider)),
+);
 
 class ReservationDetailRepository {
-  Future<ReservationDetailModel> loadReservationDetail({required int id}) async {
-    return ReservationDetailModel.fromJson({
-      'id': id,
-      'reservationName': '예약인 성함',
-      'leaderCount': 5,
-      'reservationCount': 20,
-      'location': '위치',
-      'visitDate': '2026-07-12T09:41:00.123',
-      'exitTime': '09:14:14',
-      'visitSiteDate': '2026-07-12T09:41:00.123',
-      'visitSiteExitTime': '09:14:14',
-      'visitSiteCount': 3,
-    });
+  final Dio _dio;
+
+  ReservationDetailRepository(this._dio);
+
+  Future<ReservationDetailModel> loadReservationDetail({
+    required int id,
+  }) async {
+    final response = await _dio.get('${ApiEndpoints.reservation}/$id');
+    return ReservationDetailModel.fromJson(
+      response.data as Map<String, dynamic>,
+    );
   }
 }
