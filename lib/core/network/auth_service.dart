@@ -6,8 +6,8 @@ class AuthService {
     BaseOptions(
       baseUrl: AppEnv.current.baseUrl,
       headers: {'Origin': 'https://toyvillage.kr'},
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      connectTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 5),
     ),
   );
 
