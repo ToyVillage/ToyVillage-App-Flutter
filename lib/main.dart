@@ -23,6 +23,8 @@ class ToyVillageApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         scaffoldBackgroundColor: ToyVillageColor.gray10,
+        splashColor: ToyVillageColor.gray50,
+        highlightColor: ToyVillageColor.gray50,
       ),
       routerConfig: appRouter,
     );
