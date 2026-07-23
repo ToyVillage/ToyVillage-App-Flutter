@@ -13,8 +13,13 @@ import 'package:toy_village_app/features/reservation/presentation/widget/reserva
 
 class ReservationDetailView extends ConsumerWidget {
   final int id;
+  final String title;
 
-  const ReservationDetailView({super.key, required this.id});
+  const ReservationDetailView({
+    super.key,
+    required this.id,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,7 +34,7 @@ class ReservationDetailView extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ToyVillageTitle(
-                  title: '대구 유치원', // TODO: 백엔드 수정되면 변경
+                  title: title,
                   subTitle: '예약인 : ${detail.reservationName}',
                 ),
                 Padding(

@@ -11,7 +11,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/document',
+  initialLocation: '/reservation',
   routes: [
     GoRoute(
       path: '/notice',
@@ -46,13 +46,13 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: 'detail',
           builder: (context, state) {
-            final id = state.extra;
-            if (id is! int) {
+            final extra = state.extra;
+            if (extra is! ({int id, String title})) {
               return const Scaffold(
                 body: Center(child: Text('잘못된 접근입니다.')),
               );
             }
-            return ReservationDetailView(id: id);
+            return ReservationDetailView(id: extra.id, title: extra.title);
           },
         ),
       ],

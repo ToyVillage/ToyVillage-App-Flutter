@@ -44,7 +44,10 @@ class ReservationView extends ConsumerWidget {
                               onTap: () {
                                 context.push(
                                   '/reservation/detail',
-                                  extra: reservation.id,
+                                  extra: (
+                                    id: reservation.id,
+                                    title: reservation.title,
+                                  ),
                                 );
                               },
                               title: reservation.title,
