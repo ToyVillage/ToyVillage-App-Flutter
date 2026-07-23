@@ -8,6 +8,7 @@ class CustomAsyncValue<T> extends StatelessWidget {
   final Widget Function(T) data;
   final Widget? loading;
   final String errorMessage;
+  final VoidCallback? onRetry;
 
   const CustomAsyncValue({
     super.key,
@@ -15,6 +16,7 @@ class CustomAsyncValue<T> extends StatelessWidget {
     required this.data,
     this.loading,
     this.errorMessage = '문제가 발생했어요.\n잠시 후 다시 시도해주세요.',
+    this.onRetry,
   });
 
   @override
@@ -29,12 +31,37 @@ class CustomAsyncValue<T> extends StatelessWidget {
             ),
       AsyncError() => Align(
         alignment: const Alignment(0, -0.1),
-        child: Text(
-          errorMessage,
-          textAlign: TextAlign.center,
-          style: ToyVillageTextStyle.body2.copyWith(
-            color: ToyVillageColor.gray60,
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              errorMessage,
+              textAlign: TextAlign.center,
+              style: ToyVillageTextStyle.body2.copyWith(
+                color: ToyVillageColor.gray60,
+              ),
+            ),
+            if (onRetry != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: OutlinedButton(
+                  onPressed: onRetry,
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: ToyVillageColor.gray60),
+                    overlayColor: ToyVillageColor.gray50,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    '다시 시도',
+                    style: ToyVillageTextStyle.button4.copyWith(
+                      color: ToyVillageColor.gray60,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     };

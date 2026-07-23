@@ -25,6 +25,7 @@ class ReservationView extends ConsumerWidget {
                 child: CustomAsyncValue(
                   value: ref.watch(reservationViewModelProvider),
                   loading: const ReservationListSkeleton(),
+                  onRetry: () => ref.invalidate(reservationViewModelProvider),
                   data: (reservations) => CustomScrollView(
                     slivers: [
                       const SliverToBoxAdapter(

@@ -29,6 +29,7 @@ class ReservationDetailView extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: CustomAsyncValue(
           value: ref.watch(reservationDetailViewModelProvider(id)),
+          onRetry: () => ref.invalidate(reservationDetailViewModelProvider(id)),
           data: (detail) => SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
