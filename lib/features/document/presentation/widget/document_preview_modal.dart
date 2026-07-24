@@ -1,10 +1,27 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gal/gal.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
+import 'package:toy_village_app/core/utils/file_url.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/features/document/data/model/document_detail_model.dart';
 import 'package:toy_village_app/features/document/presentation/view_model/document_detail_view_model.dart';
+
+bool _isImageFile(String name) {
+  final n = name.toLowerCase();
+  return n.endsWith('.jpg') || n.endsWith('.jpeg') || n.endsWith('.png');
+}
+
+bool _isPdfFile(String name) => name.toLowerCase().endsWith('.pdf');
 
 void showDocumentPreview(
   BuildContext context, {
@@ -37,64 +54,88 @@ class _DocumentPreviewModal extends ConsumerWidget {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+          child: CustomAsyncValue(
+            value: ref.watch(documentDetailViewModelProvider(id)),
+            data: (detail) {
+              final file = detail.files.isNotEmpty ? detail.files.first : null;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _pillButton(
-                    icon: Symbols.download,
-                    label: '다운로드',
-                    onTap: () {
-                      // TODO: 파일 다운로드 연동
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  _iconButton(
-                    icon: Icons.close_rounded,
-                    onTap: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: ToyVillageColor.white,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  padding: const EdgeInsets.all(20),
-                  child: CustomAsyncValue(
-                    value: ref.watch(documentDetailViewModelProvider(id)),
-                    // TODO: fileKey로 실제 파일(이미지/PDF) 렌더링
-                    data: (detail) => Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(detail.title, style: ToyVillageTextStyle.body3),
-                          const SizedBox(height: 12),
-                          for (final file in detail.files)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                file.fileName,
-                                style: ToyVillageTextStyle.body5.copyWith(
-                                  color: ToyVillageColor.gray60,
-                                ),
-                              ),
-                            ),
-                        ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (file != null)
+                        _pillButton(
+                          icon: Symbols.download,
+                          label: '다운로드',
+                          onTap: () => _download(context, file),
+                        ),
+                      const SizedBox(width: 8),
+                      _iconButton(
+                        icon: Icons.close_rounded,
+                        onTap: () => Navigator.of(context).pop(),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: Container(
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                        color: ToyVillageColor.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: file == null
+                          ? const _EmptyPreview()
+                          : _FilePreview(file: file),
                     ),
                   ),
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _download(BuildContext context, DocumentFileModel file) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final url = documentFileUrl(file.fileKey);
+    try {
+      if (_isImageFile(file.fileName)) {
+        final dir = await getTemporaryDirectory();
+        final path = '${dir.path}/${file.fileName}';
+        await Dio().download(url, path);
+        await Gal.putImage(path);
+        messenger.showSnackBar(
+          const SnackBar(content: Text('사진에 저장했어요.')),
+        );
+      } else if (Platform.isAndroid) {
+        await FileDownloader.downloadFile(url: url, name: file.fileName);
+        messenger.showSnackBar(
+          const SnackBar(content: Text('다운로드를 시작했어요.')),
+        );
+      } else {
+        final dir = await getTemporaryDirectory();
+        final path = '${dir.path}/${file.fileName}';
+        await Dio().download(url, path);
+        if (!context.mounted) return;
+        final box = context.findRenderObject() as RenderBox?;
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(path)],
+            sharePositionOrigin: box != null
+                ? box.localToGlobal(Offset.zero) & box.size
+                : null,
+          ),
+        );
+      }
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('다운로드에 실패했어요.')),
+      );
+    }
   }
 
   Widget _pillButton({
@@ -137,6 +178,107 @@ class _DocumentPreviewModal extends ConsumerWidget {
         ),
         padding: const EdgeInsets.all(6),
         child: Icon(icon, color: ToyVillageColor.white, size: 22),
+      ),
+    );
+  }
+}
+
+class _FilePreview extends StatelessWidget {
+  final DocumentFileModel file;
+
+  const _FilePreview({required this.file});
+
+  @override
+  Widget build(BuildContext context) {
+    final url = documentFileUrl(file.fileKey);
+    if (_isPdfFile(file.fileName)) return _PdfPreview(url: url);
+    if (!_isImageFile(file.fileName)) return const _EmptyPreview();
+
+    return InteractiveViewer(
+      child: Image.network(
+        url,
+        fit: BoxFit.contain,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return const _PreviewLoading();
+        },
+        errorBuilder: (context, error, stackTrace) => const _EmptyPreview(),
+      ),
+    );
+  }
+}
+
+class _PdfPreview extends StatefulWidget {
+  final String url;
+
+  const _PdfPreview({required this.url});
+
+  @override
+  State<_PdfPreview> createState() => _PdfPreviewState();
+}
+
+class _PdfPreviewState extends State<_PdfPreview> {
+  late final WebViewController _controller;
+  bool _loading = true;
+  bool _error = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final target = Platform.isAndroid
+        ? 'https://docs.google.com/gview?embedded=true&url=${Uri.encodeComponent(widget.url)}'
+        : widget.url;
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (_) => setState(() => _loading = false),
+          onWebResourceError: (error) {
+            if (error.isForMainFrame == false) return;
+            setState(() {
+              _loading = false;
+              _error = true;
+            });
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(target));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_error) return const _EmptyPreview();
+    return Stack(
+      children: [
+        WebViewWidget(controller: _controller),
+        if (_loading) const _PreviewLoading(),
+      ],
+    );
+  }
+}
+
+class _PreviewLoading extends StatelessWidget {
+  const _PreviewLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: CircularProgressIndicator(color: ToyVillageColor.gray60),
+    );
+  }
+}
+
+class _EmptyPreview extends StatelessWidget {
+  const _EmptyPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        '미리보기를 불러오지 못했어요.',
+        style: ToyVillageTextStyle.body5.copyWith(
+          color: ToyVillageColor.gray60,
+        ),
       ),
     );
   }

@@ -23,7 +23,7 @@ class DocumentRepository {
       queryParameters: {
         'page': page,
         'size': size,
-        'orderDirection': orderDirection,
+        'sort': 'createdAt,$orderDirection',
         if (keyword != null && keyword.isNotEmpty) 'keyword': keyword,
       },
     );
