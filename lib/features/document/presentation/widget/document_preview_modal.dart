@@ -224,10 +224,13 @@ class _PdfPreviewState extends State<_PdfPreview> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageFinished: (_) => setState(() => _loading = false),
-          onWebResourceError: (_) => setState(() {
-            _loading = false;
-            _error = true;
-          }),
+          onWebResourceError: (error) {
+            if (error.isForMainFrame == false) return;
+            setState(() {
+              _loading = false;
+              _error = true;
+            });
+          },
         ),
       )
       ..loadRequest(Uri.parse(target));
