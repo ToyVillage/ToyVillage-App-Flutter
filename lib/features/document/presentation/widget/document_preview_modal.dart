@@ -16,6 +16,13 @@ import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/features/document/data/model/document_detail_model.dart';
 import 'package:toy_village_app/features/document/presentation/view_model/document_detail_view_model.dart';
 
+bool _isImageFile(String name) {
+  final n = name.toLowerCase();
+  return n.endsWith('.jpg') || n.endsWith('.jpeg') || n.endsWith('.png');
+}
+
+bool _isPdfFile(String name) => name.toLowerCase().endsWith('.pdf');
+
 void showDocumentPreview(
   BuildContext context, {
   required int id,
@@ -92,16 +99,11 @@ class _DocumentPreviewModal extends ConsumerWidget {
     );
   }
 
-  bool _isImageName(String name) {
-    final n = name.toLowerCase();
-    return n.endsWith('.jpg') || n.endsWith('.jpeg') || n.endsWith('.png');
-  }
-
   Future<void> _download(BuildContext context, DocumentFileModel file) async {
     final messenger = ScaffoldMessenger.of(context);
     final url = documentFileUrl(file.fileKey);
     try {
-      if (_isImageName(file.fileName)) {
+      if (_isImageFile(file.fileName)) {
         final dir = await getTemporaryDirectory();
         final path = '${dir.path}/${file.fileName}';
         await Dio().download(url, path);
@@ -177,12 +179,11 @@ class _FilePreview extends StatelessWidget {
 
   const _FilePreview({required this.file});
 
-  bool get _isPdf => file.fileName.toLowerCase().endsWith('.pdf');
-
   @override
   Widget build(BuildContext context) {
     final url = documentFileUrl(file.fileKey);
-    if (_isPdf) return _PdfPreview(url: url);
+    if (_isPdfFile(file.fileName)) return _PdfPreview(url: url);
+    if (!_isImageFile(file.fileName)) return const _EmptyPreview();
 
     return InteractiveViewer(
       child: Image.network(
