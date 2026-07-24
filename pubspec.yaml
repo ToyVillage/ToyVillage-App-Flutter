@@ -20,6 +20,11 @@ dependencies:
   dio: ^5.7.0
   table_calendar: ^3.2.0
   skeletonizer: ^2.1.3
+  webview_flutter: ^4.14.1
+  share_plus: ^13.2.1
+  path_provider: ^2.1.6
+  gal: ^2.3.2
+  flutter_file_downloader: ^2.1.1
 
 dev_dependencies:
   flutter_test:
@@ -47,3 +52,6 @@ flutter:
 
   assets:
     - assets/svg/
+
+dependency_overrides:
+  path_provider_foundation: 2.4.1
