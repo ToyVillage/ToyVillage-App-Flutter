@@ -120,7 +120,16 @@ class _DocumentPreviewModal extends ConsumerWidget {
         final dir = await getTemporaryDirectory();
         final path = '${dir.path}/${file.fileName}';
         await Dio().download(url, path);
-        await SharePlus.instance.share(ShareParams(files: [XFile(path)]));
+        if (!context.mounted) return;
+        final box = context.findRenderObject() as RenderBox?;
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(path)],
+            sharePositionOrigin: box != null
+                ? box.localToGlobal(Offset.zero) & box.size
+                : null,
+          ),
+        );
       }
     } catch (_) {
       messenger.showSnackBar(
