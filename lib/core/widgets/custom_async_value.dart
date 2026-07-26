@@ -48,7 +48,7 @@ class CustomAsyncValue<T> extends StatelessWidget {
                   onPressed: onRetry,
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: ToyVillageColor.gray60),
-                    overlayColor: ToyVillageColor.gray50,
+                    overlayColor: ToyVillageColor.gray30,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
