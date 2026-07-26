@@ -177,7 +177,7 @@ class ReservationDetailView extends ConsumerWidget {
                         ),
                         child: Row(
                           children: [
-                            Text('200,000', style: ToyVillageTextStyle.heading3),
+                            Text('${detail.money}', style: ToyVillageTextStyle.heading3),
                             const SizedBox(width: 8),
                             Text('원', style: ToyVillageTextStyle.subTitle4),
                           ],
