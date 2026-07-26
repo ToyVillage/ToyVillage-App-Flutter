@@ -17,3 +17,6 @@ String formatTime(String time) {
   final hour = int.parse(parts[0]);
   return '$hour : ${parts[1]}';
 }
+
+String formatTimeOf(DateTime date) =>
+    formatTime('${date.hour}:${date.minute.toString().padLeft(2, '0')}');
