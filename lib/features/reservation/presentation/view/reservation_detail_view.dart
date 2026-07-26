@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/svg_assets.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
+import 'package:toy_village_app/core/utils/number_util.dart';
 import 'package:toy_village_app/core/utils/time_util.dart';
 import 'package:toy_village_app/core/widgets/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
@@ -177,7 +178,10 @@ class ReservationDetailView extends ConsumerWidget {
                         ),
                         child: Row(
                           children: [
-                            Text('${detail.money}', style: ToyVillageTextStyle.heading3),
+                            Text(
+                              formatNumber(detail.money),
+                              style: ToyVillageTextStyle.heading3,
+                            ),
                             const SizedBox(width: 8),
                             Text('원', style: ToyVillageTextStyle.subTitle4),
                           ],
