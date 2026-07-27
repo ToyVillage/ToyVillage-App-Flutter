@@ -128,7 +128,7 @@ class _DocumentPreviewModal extends ConsumerWidget {
         );
       }
     } catch (_) {
-      showTopToast(overlay, '다운로드에 실패했어요.');
+      showTopToast(overlay, '다운로드에 실패했어요.', isError: true);
     }
   }
 
