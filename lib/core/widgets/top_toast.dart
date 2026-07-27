@@ -34,6 +34,7 @@ class _TopToastState extends State<_TopToast>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _anim;
+  final _dismissKey = UniqueKey();
   bool _removed = false;
 
   @override
@@ -81,7 +82,7 @@ class _TopToastState extends State<_TopToast>
             child: Align(
               alignment: Alignment.topCenter,
               child: Dismissible(
-                key: const ValueKey('top_toast'),
+                key: _dismissKey,
                 direction: DismissDirection.up,
                 onDismissed: (_) => _dismiss(),
                 child: Material(
