@@ -3,11 +3,12 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 
-void showTopToast(OverlayState overlay, String message) {
+void showTopToast(OverlayState overlay, String message, {bool isError = false}) {
   late OverlayEntry entry;
   entry = OverlayEntry(
     builder: (context) => _TopToast(
       message: message,
+      isError: isError,
       onDismiss: () => entry.remove(),
     ),
   );
@@ -16,9 +17,14 @@ void showTopToast(OverlayState overlay, String message) {
 
 class _TopToast extends StatefulWidget {
   final String message;
+  final bool isError;
   final VoidCallback onDismiss;
 
-  const _TopToast({required this.message, required this.onDismiss});
+  const _TopToast({
+    required this.message,
+    required this.isError,
+    required this.onDismiss,
+  });
 
   @override
   State<_TopToast> createState() => _TopToastState();
@@ -95,7 +101,12 @@ class _TopToastState extends State<_TopToast>
                   ),
                     child: Row(
                       children: [
-                        Icon(Symbols.check, color: ToyVillageColor.green),
+                        Icon(
+                          widget.isError ? Symbols.close : Symbols.check,
+                          color: widget.isError
+                              ? ToyVillageColor.red
+                              : ToyVillageColor.green,
+                        ),
                         const SizedBox(width: 5),
                         Text(
                           widget.message,
