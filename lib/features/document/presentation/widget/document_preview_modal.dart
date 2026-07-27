@@ -13,6 +13,7 @@ import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/file_url.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/core/widgets/top_toast.dart';
 import 'package:toy_village_app/features/document/data/model/document_detail_model.dart';
 import 'package:toy_village_app/features/document/presentation/view_model/document_detail_view_model.dart';
 
@@ -100,7 +101,8 @@ class _DocumentPreviewModal extends ConsumerWidget {
   }
 
   Future<void> _download(BuildContext context, DocumentFileModel file) async {
-    final messenger = ScaffoldMessenger.of(context);
+    final overlay = Overlay.of(context, rootOverlay: true);
+    final box = context.findRenderObject() as RenderBox?;
     final url = documentFileUrl(file.fileKey);
     try {
       if (_isImageFile(file.fileName)) {
@@ -108,20 +110,14 @@ class _DocumentPreviewModal extends ConsumerWidget {
         final path = '${dir.path}/${file.fileName}';
         await Dio().download(url, path);
         await Gal.putImage(path);
-        messenger.showSnackBar(
-          const SnackBar(content: Text('사진에 저장했어요.')),
-        );
+        showTopToast(overlay, '사진을 저장했어요.');
       } else if (Platform.isAndroid) {
         await FileDownloader.downloadFile(url: url, name: file.fileName);
-        messenger.showSnackBar(
-          const SnackBar(content: Text('다운로드를 시작했어요.')),
-        );
+        showTopToast(overlay, '다운로드를 시작했어요.');
       } else {
         final dir = await getTemporaryDirectory();
         final path = '${dir.path}/${file.fileName}';
         await Dio().download(url, path);
-        if (!context.mounted) return;
-        final box = context.findRenderObject() as RenderBox?;
         await SharePlus.instance.share(
           ShareParams(
             files: [XFile(path)],
@@ -132,9 +128,7 @@ class _DocumentPreviewModal extends ConsumerWidget {
         );
       }
     } catch (_) {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('다운로드에 실패했어요.')),
-      );
+      showTopToast(overlay, '다운로드에 실패했어요.');
     }
   }
 
