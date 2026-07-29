@@ -25,20 +25,20 @@ class TaskView extends ConsumerWidget {
                 child: CustomAsyncValue(
                   value: ref.watch(taskViewModelProvider),
                   loading: const TaskListSkeleton(),
-                  data: (tasks) => CustomScrollView(
-                    slivers: [
-                      const SliverToBoxAdapter(
-                        child: Padding(
-                          padding: EdgeInsets.only(bottom: 20),
-                          child: ToyVillageTitle(
-                            title: '오늘의 업무',
-                            subTitle: '오늘 자신의 업무를 조회합니다',
-                          ),
+                  data: (tasks) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 20),
+                        child: ToyVillageTitle(
+                          title: '오늘의 업무',
+                          subTitle: '오늘 자신의 업무를 조회합니다',
                         ),
                       ),
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: tasks.length,
+                          itemBuilder: (context, index) {
                             final task = tasks[index];
                             return TaskCard(
                               title: task.title,
@@ -51,7 +51,6 @@ class TaskView extends ConsumerWidget {
                               ),
                             );
                           },
-                          childCount: tasks.length,
                         ),
                       ),
                     ],
