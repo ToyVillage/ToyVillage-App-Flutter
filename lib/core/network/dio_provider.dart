@@ -16,7 +16,7 @@ final dioProvider = Provider<Dio>((ref) {
       baseUrl: AppEnv.current.baseUrl,
       headers: {'Origin': 'https://toyvillage.kr'},
       connectTimeout: const Duration(seconds: 5),
-      receiveTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 15),
     ),
   );
 
