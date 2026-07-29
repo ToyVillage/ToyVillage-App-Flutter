@@ -26,20 +26,20 @@ class ReservationView extends ConsumerWidget {
                   value: ref.watch(reservationViewModelProvider),
                   loading: const ReservationListSkeleton(),
                   onRetry: () => ref.invalidate(reservationViewModelProvider),
-                  data: (reservations) => CustomScrollView(
-                    slivers: [
-                      const SliverToBoxAdapter(
-                        child: Padding(
-                          padding: EdgeInsets.only(bottom: 20),
-                          child: ToyVillageTitle(
-                            title: '단체예약 확인',
-                            subTitle: '토이빌리지 단체예약 확인 및 관리',
-                          ),
+                  data: (reservations) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 20),
+                        child: ToyVillageTitle(
+                          title: '단체예약 확인',
+                          subTitle: '토이빌리지 단체예약 확인 및 관리',
                         ),
                       ),
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: reservations.length,
+                          itemBuilder: (context, index) {
                             final reservation = reservations[index];
                             return ReservationCard(
                               onTap: () {
@@ -57,7 +57,6 @@ class ReservationView extends ConsumerWidget {
                               reservationCount: reservation.reservationCount,
                             );
                           },
-                          childCount: reservations.length,
                         ),
                       ),
                     ],

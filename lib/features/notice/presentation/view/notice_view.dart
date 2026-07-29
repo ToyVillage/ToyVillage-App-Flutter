@@ -27,20 +27,20 @@ class NoticeView extends ConsumerWidget {
               final readIds = ref.watch(readNoticeProvider).value ?? <int>{};
               final hasMore =
                   ref.read(noticeViewModelProvider.notifier).hasMore;
-              return CustomScrollView(
-                slivers: [
-                  const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 20),
-                      child: ToyVillageTitle(
-                        title: '공지사항',
-                        subTitle: '토이빌리지의 중요한 공지사항',
-                      ),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 20),
+                    child: ToyVillageTitle(
+                      title: '공지사항',
+                      subTitle: '토이빌리지의 중요한 공지사항',
                     ),
                   ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: value.length + (hasMore ? 1 : 0),
+                      itemBuilder: (BuildContext context, int index) {
                         if (index >= value.length) {
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 16),
@@ -70,7 +70,6 @@ class NoticeView extends ConsumerWidget {
                             }
                         );
                       },
-                      childCount: value.length + (hasMore ? 1 : 0),
                     ),
                   ),
                 ],

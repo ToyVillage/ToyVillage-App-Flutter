@@ -21,36 +21,36 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: ToyVillageAppBar(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ToyVillageAppBar(),
-              ToyVillageTitle(
-                title: '자료실',
-                subTitle: '토이빌리지의 모든 자료가 모인 곳',
-              ),
-              Row(
-                children: [
-                  const Spacer(),
-                  SortDropdown(
-                    value: _sort,
-                    onChanged: (order) {
-                      setState(() => _sort = order);
-                      ref
-                          .read(documentViewModelProvider.notifier)
-                          .changeOrder(order);
-                    },
-                  ),
-                ],
-              ),
-              Expanded(
-                child: CustomAsyncValue(
-                  value: ref.watch(documentViewModelProvider),
-                  loading: const DocumentListSkeleton(),
-                  data: (documents) => ListView.builder(
+          child: CustomAsyncValue(
+            value: ref.watch(documentViewModelProvider),
+            loading: const DocumentListSkeleton(),
+            data: (documents) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ToyVillageTitle(
+                  title: '자료실',
+                  subTitle: '토이빌리지의 모든 자료가 모인 곳',
+                ),
+                Row(
+                  children: [
+                    const Spacer(),
+                    SortDropdown(
+                      value: _sort,
+                      onChanged: (order) {
+                        setState(() => _sort = order);
+                        ref
+                            .read(documentViewModelProvider.notifier)
+                            .changeOrder(order);
+                      },
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: ListView.builder(
                     itemCount: documents.length,
                     itemBuilder: (BuildContext context, int index) {
                       final document = documents[index];
@@ -62,8 +62,8 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
                     },
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
