@@ -16,6 +16,22 @@ bool isImageFileName(String name) {
 
 bool isPdfFileName(String name) => name.toLowerCase().endsWith('.pdf');
 
+String _safeFileName(String fileName) {
+  final base = fileName.split(RegExp(r'[\\/]')).last;
+  if (base.isEmpty || base == '.' || base == '..') {
+    throw ArgumentError.value(fileName, 'fileName', '유효하지 않은 파일명입니다.');
+  }
+  return base;
+}
+
+Future<String> _downloadToTemp(String url, String safeName) async {
+  final dir = await getTemporaryDirectory();
+  final unique = await Directory(dir.path).createTemp('download_');
+  final path = '${unique.path}/$safeName';
+  await Dio().download(url, path);
+  return path;
+}
+
 Future<void> downloadFile(
   BuildContext context, {
   required String fileName,
@@ -26,19 +42,16 @@ Future<void> downloadFile(
   final box = renderObject is RenderBox ? renderObject : null;
   final url = documentFileUrl(fileKey);
   try {
-    if (isImageFileName(fileName)) {
-      final dir = await getTemporaryDirectory();
-      final path = '${dir.path}/$fileName';
-      await Dio().download(url, path);
+    final safeName = _safeFileName(fileName);
+    if (isImageFileName(safeName)) {
+      final path = await _downloadToTemp(url, safeName);
       await Gal.putImage(path);
       showTopToast(overlay, '사진에 저장했어요.');
     } else if (Platform.isAndroid) {
-      await FileDownloader.downloadFile(url: url, name: fileName);
+      await FileDownloader.downloadFile(url: url, name: safeName);
       showTopToast(overlay, '다운로드를 시작했어요.');
     } else {
-      final dir = await getTemporaryDirectory();
-      final path = '${dir.path}/$fileName';
-      await Dio().download(url, path);
+      final path = await _downloadToTemp(url, safeName);
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(path)],
