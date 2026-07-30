@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
+import 'package:toy_village_app/core/utils/file_download.dart';
 import 'package:toy_village_app/core/utils/word_util.dart';
 import 'package:toy_village_app/core/widgets/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
@@ -16,13 +17,6 @@ class NoticeDetailView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // TODO: 서버 연동 시 첨부파일 목록으로 교체
-    final List<String> files = [
-      '당일 지침.pdf',
-      '휴관안내.jpg',
-      '휴관안내.png',
-    ];
-
     return Scaffold(
       appBar: ToyVillageAppBar(closeIcon: true),
       body: CustomAsyncValue(
@@ -43,24 +37,31 @@ class NoticeDetailView extends ConsumerWidget {
                   breakByWord(value.content),
                   style: ToyVillageTextStyle.body5,
                 ),
-                if (files.isNotEmpty) ...[
+                if (value.files.isNotEmpty) ...[
                   const _NoticeDivider(),
                   Text('첨부파일', style: ToyVillageTextStyle.subTitle4),
                   const SizedBox(height: 16),
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: files.length,
+                    itemCount: value.files.length,
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
                       mainAxisExtent: 60,
                     ),
-                    itemBuilder: (context, index) => FileAttachment(
-                      fileName: files[index],
-                      onDownload: () {},
-                    ),
+                    itemBuilder: (context, index) {
+                      final file = value.files[index];
+                      return FileAttachment(
+                        fileName: file.fileName,
+                        onDownload: () => downloadFile(
+                          context,
+                          fileName: file.fileName,
+                          fileKey: file.fileKey,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ],

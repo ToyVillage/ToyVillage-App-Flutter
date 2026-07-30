@@ -1,28 +1,16 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gal/gal.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
+import 'package:toy_village_app/core/utils/file_download.dart';
 import 'package:toy_village_app/core/utils/file_url.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
-import 'package:toy_village_app/core/widgets/top_toast.dart';
 import 'package:toy_village_app/features/document/data/model/document_detail_model.dart';
 import 'package:toy_village_app/features/document/presentation/view_model/document_detail_view_model.dart';
-
-bool _isImageFile(String name) {
-  final n = name.toLowerCase();
-  return n.endsWith('.jpg') || n.endsWith('.jpeg') || n.endsWith('.png');
-}
-
-bool _isPdfFile(String name) => name.toLowerCase().endsWith('.pdf');
 
 void showDocumentPreview(
   BuildContext context, {
@@ -69,7 +57,11 @@ class _DocumentPreviewModal extends ConsumerWidget {
                         _pillButton(
                           icon: Symbols.download,
                           label: '다운로드',
-                          onTap: () => _download(context, file),
+                          onTap: () => downloadFile(
+                          context,
+                          fileName: file.fileName,
+                          fileKey: file.fileKey,
+                        ),
                         ),
                       const SizedBox(width: 8),
                       _iconButton(
@@ -98,38 +90,6 @@ class _DocumentPreviewModal extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _download(BuildContext context, DocumentFileModel file) async {
-    final overlay = Overlay.of(context, rootOverlay: true);
-    final box = context.findRenderObject() as RenderBox?;
-    final url = documentFileUrl(file.fileKey);
-    try {
-      if (_isImageFile(file.fileName)) {
-        final dir = await getTemporaryDirectory();
-        final path = '${dir.path}/${file.fileName}';
-        await Dio().download(url, path);
-        await Gal.putImage(path);
-        showTopToast(overlay, '사진을 저장했어요.');
-      } else if (Platform.isAndroid) {
-        await FileDownloader.downloadFile(url: url, name: file.fileName);
-        showTopToast(overlay, '다운로드를 시작했어요.');
-      } else {
-        final dir = await getTemporaryDirectory();
-        final path = '${dir.path}/${file.fileName}';
-        await Dio().download(url, path);
-        await SharePlus.instance.share(
-          ShareParams(
-            files: [XFile(path)],
-            sharePositionOrigin: box != null
-                ? box.localToGlobal(Offset.zero) & box.size
-                : null,
-          ),
-        );
-      }
-    } catch (_) {
-      showTopToast(overlay, '다운로드에 실패했어요.', isError: true);
-    }
   }
 
   Widget _pillButton({
@@ -185,8 +145,8 @@ class _FilePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final url = documentFileUrl(file.fileKey);
-    if (_isPdfFile(file.fileName)) return _PdfPreview(url: url);
-    if (!_isImageFile(file.fileName)) return const _EmptyPreview();
+    if (isPdfFileName(file.fileName)) return _PdfPreview(url: url);
+    if (!isImageFileName(file.fileName)) return const _EmptyPreview();
 
     return InteractiveViewer(
       child: Image.network(
