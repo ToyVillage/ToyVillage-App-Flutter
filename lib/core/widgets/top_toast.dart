@@ -97,7 +97,7 @@ class _TopToastState extends State<_TopToast>
                     vertical: 14,
                   ),
                   decoration: BoxDecoration(
-                    color: ToyVillageColor.white,
+                    color: ToyVillageColor.gray100,
                     borderRadius: BorderRadius.circular(30),
                   ),
                     child: Row(
@@ -112,7 +112,7 @@ class _TopToastState extends State<_TopToast>
                         Text(
                           widget.message,
                           textAlign: TextAlign.center,
-                          style: ToyVillageTextStyle.body5,
+                          style: ToyVillageTextStyle.body5.copyWith(color: ToyVillageColor.white),
                         ),
                       ],
                     ),
