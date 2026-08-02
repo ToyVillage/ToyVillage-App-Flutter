@@ -6,14 +6,14 @@ import 'package:toy_village_app/features/notice/presentation/view/notice_detail_
 import 'package:toy_village_app/features/notice/presentation/view/notice_view.dart';
 import 'package:toy_village_app/features/reservation/presentation/view/reservation_detail_view.dart';
 import 'package:toy_village_app/features/reservation/presentation/view/reservation_view.dart';
-import 'package:toy_village_app/features/task/presentation/view/task_report_view.dart';
+import 'package:toy_village_app/features/task/presentation/view/task_detail_view.dart';
 import 'package:toy_village_app/features/task/presentation/view/task_view.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/reservation',
+  initialLocation: '/task',
   routes: [
     GoRoute(
       path: '/notice',
@@ -64,10 +64,15 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const TaskView(),
       routes: [
         GoRoute(
-          path: 'report',
+          path: 'detail',
           builder: (context, state) {
             final id = state.extra;
-            return TaskReportView(taskId: id is int ? id : null);
+            if (id is! int) {
+              return const Scaffold(
+                body: Center(child: Text('잘못된 접근입니다.')),
+              );
+            }
+            return TaskDetailView(id: id);
           },
         ),
       ],
