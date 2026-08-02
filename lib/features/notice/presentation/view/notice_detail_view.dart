@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
-import 'package:toy_village_app/core/utils/file_download.dart';
 import 'package:toy_village_app/core/utils/word_util.dart';
 import 'package:toy_village_app/core/widgets/app_bar.dart';
+import 'package:toy_village_app/core/widgets/attachment_section.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/core/widgets/section_divider.dart';
 import 'package:toy_village_app/features/notice/presentation/view_model/notice_detail_view_model.dart';
-import 'package:toy_village_app/features/notice/presentation/widget/file_attachment.dart';
 import 'package:toy_village_app/features/notice/presentation/widget/notice_title.dart';
 
 class NoticeDetailView extends ConsumerWidget {
@@ -25,61 +24,27 @@ class NoticeDetailView extends ConsumerWidget {
         data: (value) => SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                NoticeTitle(
-                  title: value.title,
-                  kind: value.kind,
-                  time: value.createdAt,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              NoticeTitle(
+                title: value.title,
+                kind: value.kind,
+                time: value.createdAt,
+              ),
+              const SectionDivider(),
+              Text(breakByWord(value.content), style: ToyVillageTextStyle.body5),
+              if (value.files.isNotEmpty) ...[
+                const SectionDivider(),
+                AttachmentSection(
+                  files: value.files
+                      .map((f) => (fileName: f.fileName, fileKey: f.fileKey))
+                      .toList(),
                 ),
-                const _NoticeDivider(),
-                Text(
-                  breakByWord(value.content),
-                  style: ToyVillageTextStyle.body5,
-                ),
-                if (value.files.isNotEmpty) ...[
-                  const _NoticeDivider(),
-                  Text('첨부파일', style: ToyVillageTextStyle.subTitle4),
-                  const SizedBox(height: 16),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: value.files.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      mainAxisExtent: 60,
-                    ),
-                    itemBuilder: (context, index) {
-                      final file = value.files[index];
-                      return FileAttachment(
-                        fileName: file.fileName,
-                        onDownload: () => downloadFile(
-                          context,
-                          fileName: file.fileName,
-                          fileKey: file.fileKey,
-                        ),
-                      );
-                    },
-                  ),
-                ],
               ],
-            ),
+            ],
           ),
         ),
-    );
-  }
-}
-
-class _NoticeDivider extends StatelessWidget {
-  const _NoticeDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 24),
-      child: Divider(thickness: 1, color: ToyVillageColor.gray60),
+      ),
     );
   }
 }
