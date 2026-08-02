@@ -5,25 +5,24 @@ class TaskModel {
   final String title;
   final DateTime createdAt;
   final TaskStatus status;
-  final bool isReported;
+  final DateTime? deadline;
 
   TaskModel({
     required this.id,
     required this.title,
     required this.createdAt,
     required this.status,
-    required this.isReported,
+    required this.deadline,
   });
 
-  bool get isCompleted => status == TaskStatus.completed;
-
   factory TaskModel.fromJson(Map<String, dynamic> json) {
+    final deadline = json['deadline'] as String?;
     return TaskModel(
       id: json['id'] as int,
       title: json['title'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
       status: TaskStatus.fromCode(json['status'] as String),
-      isReported: json['isReported'] as bool? ?? false,
+      deadline: deadline != null ? DateTime.parse(deadline) : null,
     );
   }
 }
