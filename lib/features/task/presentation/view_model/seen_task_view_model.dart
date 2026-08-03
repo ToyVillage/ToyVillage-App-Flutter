@@ -19,15 +19,20 @@ class SeenTaskViewModel extends AsyncNotifier<Set<int>> {
   }
 
   Future<void> markAsSeen(int id) async {
-    final current = state.value ?? <int>{};
+    final current = await future;
     if (current.contains(id)) return;
 
     state = AsyncData({...current, id});
 
     _writeQueue = _writeQueue.then((_) async {
-      final prefs = await SharedPreferences.getInstance();
-      final latest = state.value ?? <int>{};
-      await prefs.setStringList(_key, latest.map((e) => e.toString()).toList());
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final latest = state.value ?? <int>{};
+        await prefs.setStringList(
+          _key,
+          latest.map((e) => e.toString()).toList(),
+        );
+      } catch (_) {}
     });
     await _writeQueue;
   }
