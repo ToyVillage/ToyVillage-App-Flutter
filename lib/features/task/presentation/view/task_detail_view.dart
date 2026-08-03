@@ -59,7 +59,7 @@ class TaskDetailView extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                 child: GestureDetector(
                   onTap: () {
-                    context.push('task/report', extra: 1);
+                    context.push('task/report', extra: task.id);
                   },
                   child: Container(
                     width: double.infinity,
