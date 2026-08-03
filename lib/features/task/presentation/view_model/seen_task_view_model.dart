@@ -9,6 +9,8 @@ final seenTaskProvider = AsyncNotifierProvider<SeenTaskViewModel, Set<int>>(
 class SeenTaskViewModel extends AsyncNotifier<Set<int>> {
   static const _key = 'seen_task_ids';
 
+  Future<void> _writeQueue = Future.value();
+
   @override
   Future<Set<int>> build() async {
     final prefs = await SharedPreferences.getInstance();
@@ -20,10 +22,13 @@ class SeenTaskViewModel extends AsyncNotifier<Set<int>> {
     final current = state.value ?? <int>{};
     if (current.contains(id)) return;
 
-    final updated = {...current, id};
-    state = AsyncData(updated);
+    state = AsyncData({...current, id});
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_key, updated.map((e) => e.toString()).toList());
+    _writeQueue = _writeQueue.then((_) async {
+      final prefs = await SharedPreferences.getInstance();
+      final latest = state.value ?? <int>{};
+      await prefs.setStringList(_key, latest.map((e) => e.toString()).toList());
+    });
+    await _writeQueue;
   }
 }
