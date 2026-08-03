@@ -1,18 +1,35 @@
 enum TaskStatus {
-  pending('PENDING', '진행 전'),
-  inProgress('IN_PROGRESS', '진행 중'),
-  completed('COMPLETED', '완료됨');
+  notSubmitted('NOT_SUBMITTED'),
+  submitted('SUBMITTED'),
+  rejected('REJECTED'),
+  completed('COMPLETED');
 
   final String code;
-  final String label;
 
-  const TaskStatus(this.code, this.label);
+  const TaskStatus(this.code);
 
-  /// 서버 status 코드를 TaskStatus로 변환한다. 모르는 코드는 pending으로 취급.
   static TaskStatus fromCode(String code) {
     for (final status in TaskStatus.values) {
       if (status.code == code) return status;
     }
-    return TaskStatus.pending;
+    return TaskStatus.notSubmitted;
+  }
+}
+
+enum TaskPriority {
+  high('HIGH', '상'),
+  medium('MEDIUM', '중'),
+  low('LOW', '하');
+
+  final String code;
+  final String label;
+
+  const TaskPriority(this.code, this.label);
+
+  static TaskPriority fromCode(String code) {
+    for (final priority in TaskPriority.values) {
+      if (priority.code == code) return priority;
+    }
+    return TaskPriority.medium;
   }
 }

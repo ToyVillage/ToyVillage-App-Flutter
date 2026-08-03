@@ -11,8 +11,6 @@ final taskViewModelProvider =
 class TaskViewModel extends AsyncNotifier<List<TaskModel>> {
   @override
   Future<List<TaskModel>> build() async {
-    // TODO: 서버 연동 시 아래 더미데이터를 실제 호출로 교체
-    // return ref.read(taskRepositoryProvider).loadTodayTasks();
     final now = DateTime.now();
     final threeHoursAgo = now.subtract(const Duration(hours: 3));
 
@@ -21,29 +19,29 @@ class TaskViewModel extends AsyncNotifier<List<TaskModel>> {
         id: 1,
         title: '카피바라 사육장 청소',
         createdAt: threeHoursAgo,
-        status: TaskStatus.pending,
-        isReported: false,
+        status: TaskStatus.notSubmitted,
+        deadline: now.add(const Duration(days: 3)),
       ),
       TaskModel(
         id: 2,
-        title: '카피바라 사육장 청소',
+        title: '기린 먹이 주기',
         createdAt: threeHoursAgo,
-        status: TaskStatus.inProgress,
-        isReported: true,
+        status: TaskStatus.notSubmitted,
+        deadline: now.subtract(const Duration(hours: 1)),
       ),
       TaskModel(
         id: 3,
-        title: '카피바라 사육장 청소',
+        title: '펭귄관 온도 점검',
         createdAt: threeHoursAgo,
-        status: TaskStatus.inProgress,
-        isReported: true,
+        status: TaskStatus.rejected,
+        deadline: now.add(const Duration(days: 1)),
       ),
       TaskModel(
         id: 4,
-        title: '카피바라 사육장 청소',
+        title: '수달 먹이 준비',
         createdAt: threeHoursAgo,
         status: TaskStatus.completed,
-        isReported: true,
+        deadline: now.subtract(const Duration(days: 1)),
       ),
     ];
   }
