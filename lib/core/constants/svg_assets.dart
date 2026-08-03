@@ -11,4 +11,5 @@ class SvgAssets {
   static const out = 'assets/svg/out.svg';
   static const clock = 'assets/svg/clock.svg';
   static const clockCheck = 'assets/svg/clock_check.svg';
+  static const upload = 'assets/svg/upload.svg';
 }
