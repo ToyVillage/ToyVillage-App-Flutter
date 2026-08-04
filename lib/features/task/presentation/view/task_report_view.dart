@@ -273,20 +273,24 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
     required VoidCallback onTap,
     Border? border,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(8),
-          border: border,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.5),
-          child: Center(
-            child: Text(
-              label,
-              style: ToyVillageTextStyle.button3.copyWith(color: textColor),
+    return Material(
+      color: background,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: border,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12.5),
+            child: Center(
+              child: Text(
+                label,
+                style: ToyVillageTextStyle.button4.copyWith(color: textColor),
+              ),
             ),
           ),
         ),
