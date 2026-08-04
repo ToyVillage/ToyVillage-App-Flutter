@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:toy_village_app/features/daily_log/data/model/daily_log.dart';
+import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_create_view.dart';
+import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_view.dart';
 import 'package:toy_village_app/features/day_off/presentation/view/day_off_view.dart';
 import 'package:toy_village_app/features/document/presentation/view/document_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_detail_view.dart';
@@ -14,7 +17,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/task',
+  initialLocation: '/dailyLog/create',
   routes: [
     GoRoute(
       path: '/notice',
@@ -25,19 +28,14 @@ final GoRouter appRouter = GoRouter(
           builder: (context, state) {
             final id = state.extra;
             if (id is! int) {
-              return const Scaffold(
-                body: Center(child: Text('잘못된 접근입니다.')),
-              );
+              return const Scaffold(body: Center(child: Text('잘못된 접근입니다.')));
             }
             return NoticeDetailView(id: id);
           },
         ),
       ],
     ),
-    GoRoute(
-      path: '/dayOff',
-      builder: (context, state) => DayOffView()
-    ),
+    GoRoute(path: '/dayOff', builder: (context, state) => DayOffView()),
     GoRoute(
       path: '/document',
       builder: (context, state) => const DocumentView(),
@@ -51,9 +49,7 @@ final GoRouter appRouter = GoRouter(
           builder: (context, state) {
             final extra = state.extra;
             if (extra is! ({int id, String title})) {
-              return const Scaffold(
-                body: Center(child: Text('잘못된 접근입니다.')),
-              );
+              return const Scaffold(body: Center(child: Text('잘못된 접근입니다.')));
             }
             return ReservationDetailView(id: extra.id, title: extra.title);
           },
@@ -69,9 +65,7 @@ final GoRouter appRouter = GoRouter(
           builder: (context, state) {
             final id = state.extra;
             if (id is! int) {
-              return const Scaffold(
-                body: Center(child: Text('잘못된 접근입니다.')),
-              );
+              return const Scaffold(body: Center(child: Text('잘못된 접근입니다.')));
             }
             return TaskDetailView(id: id);
           },
@@ -81,11 +75,24 @@ final GoRouter appRouter = GoRouter(
           builder: (context, state) {
             final id = state.extra;
             if (id is! int) {
-              return const Scaffold(
-                body: Center(child: Text('잘못된 접근입니다.')),
-              );
+              return const Scaffold(body: Center(child: Text('잘못된 접근입니다.')));
             }
             return TaskReportView(id: id);
+          },
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/dailyLog',
+      builder: (context, state) => const DailyLogView(),
+      routes: [
+        GoRoute(
+          path: 'create',
+          builder: (context, state) {
+            final extra = state.extra;
+            return DailyLogCreateView(
+              log: extra is DailyLog ? extra : null,
+            );
           },
         ),
       ],
