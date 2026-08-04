@@ -7,6 +7,7 @@ import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/daily_log/data/model/daily_log.dart';
+import 'package:toy_village_app/features/daily_log/data/repository/daily_log_draft_repository.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_view_model.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/template_dropdown_field.dart';
 
@@ -25,12 +26,27 @@ class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
 
   bool get _isEdit => widget.log != null;
 
+  DailyLogDraftRepository get _repo =>
+      ref.read(dailyLogDraftRepositoryProvider);
+
   @override
   void initState() {
     super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final id = widget.log?.id;
+    final draft = await _repo.load(id);
+    if (!mounted) return;
+    if (draft != null && !draft.isEmpty) {
+      setState(() => _template = draft.templateName);
+      _contentController.text = draft.content;
+      return;
+    }
     final log = widget.log;
     if (log != null) {
-      _template = log.templateName;
+      setState(() => _template = log.templateName);
       _contentController.text = log.content;
     }
   }
@@ -70,20 +86,33 @@ class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
     return true;
   }
 
-  void _saveDraft() {
+  Future<void> _saveDraft() async {
     final overlay = Overlay.of(context, rootOverlay: true);
-    showTopToast(overlay, '임시저장 됐어요.');
+    try {
+      await _repo.save(
+        widget.log?.id,
+        DailyLogDraft(
+          templateName: _template,
+          content: _contentController.text,
+        ),
+      );
+      showTopToast(overlay, '임시저장 됐어요.');
+    } catch (_) {
+      showTopToast(overlay, '임시저장에 실패했어요. 다시 시도해주세요.', isError: true);
+    }
   }
 
-  void _complete() {
+  Future<void> _complete() async {
     if (!_validate()) return;
     ref
         .read(dailyLogViewModelProvider.notifier)
         .add(templateName: _template!, content: _contentController.text.trim());
+    await _repo.clear(widget.log?.id);
+    if (!mounted) return;
     _leave();
   }
 
-  void _saveEdit() {
+  Future<void> _saveEdit() async {
     if (!_validate()) return;
     ref
         .read(dailyLogViewModelProvider.notifier)
@@ -92,6 +121,8 @@ class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
           templateName: _template!,
           content: _contentController.text.trim(),
         );
+    await _repo.clear(widget.log!.id);
+    if (!mounted) return;
     _leave();
   }
 
