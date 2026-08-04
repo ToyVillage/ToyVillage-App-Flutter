@@ -8,6 +8,7 @@ import 'package:toy_village_app/features/task/data/model/task_status.dart';
 import 'package:toy_village_app/features/task/presentation/view_model/seen_task_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/view_model/task_report_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/view_model/task_view_model.dart';
+import 'package:toy_village_app/features/task/data/model/task_model.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_card.dart';
 
 class TaskView extends ConsumerWidget {
@@ -34,32 +35,10 @@ class TaskView extends ConsumerWidget {
                 child: CustomAsyncValue(
                   value: ref.watch(taskViewModelProvider),
                   data: (tasks) {
-                    final seenIds = ref.watch(seenTaskProvider).value ?? <int>{};
                     return ListView.builder(
                       itemCount: tasks.length,
-                      itemBuilder: (context, index) {
-                        final task = tasks[index];
-                        final hasReport =
-                            ref.watch(taskReportProvider(task.id)).value !=
-                            null;
-                        final status =
-                            hasReport && task.status == TaskStatus.notSubmitted
-                            ? TaskStatus.submitted
-                            : task.status;
-                        return TaskCard(
-                          title: task.title,
-                          createdAt: task.createdAt,
-                          status: status,
-                          deadline: task.deadline,
-                          isNew: !seenIds.contains(task.id),
-                          onTap: () {
-                            ref
-                                .read(seenTaskProvider.notifier)
-                                .markAsSeen(task.id);
-                            context.push('/task/detail', extra: task.id);
-                          },
-                        );
-                      },
+                      itemBuilder: (context, index) =>
+                          _TaskListItem(task: tasks[index]),
                     );
                   },
                 ),
@@ -68,6 +47,33 @@ class TaskView extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _TaskListItem extends ConsumerWidget {
+  final TaskModel task;
+
+  const _TaskListItem({required this.task});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hasReport = ref.watch(taskReportProvider(task.id)).value != null;
+    final status = hasReport && task.status == TaskStatus.notSubmitted
+        ? TaskStatus.submitted
+        : task.status;
+    final seenIds = ref.watch(seenTaskProvider).value ?? <int>{};
+
+    return TaskCard(
+      title: task.title,
+      createdAt: task.createdAt,
+      status: status,
+      deadline: task.deadline,
+      isNew: !seenIds.contains(task.id),
+      onTap: () {
+        ref.read(seenTaskProvider.notifier).markAsSeen(task.id);
+        context.push('/task/detail', extra: task.id);
+      },
     );
   }
 }
