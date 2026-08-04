@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toy_village_app/core/network/api_endpoints.dart';
@@ -11,9 +13,9 @@ class FileRepository {
 
   FileRepository(this._dio);
 
-  Future<String> upload(String path, String fileName) async {
+  Future<String> upload(Uint8List bytes, String fileName) async {
     final formData = FormData.fromMap({
-      'files': await MultipartFile.fromFile(path, filename: fileName),
+      'files': MultipartFile.fromBytes(bytes, filename: fileName),
     });
     final res = await _dio.post(ApiEndpoints.file, data: formData);
     return res.data['fileKey'] as String;

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -26,7 +27,7 @@ Future<ReportAttachment?> pickAndUploadAttachment(
   final picked = await _pick(source);
   if (picked == null) return null;
 
-  if (picked.size > _maxBytes) {
+  if (picked.bytes.length > _maxBytes) {
     showTopToast(overlay, '50MB가 넘는 파일은 첨부할 수 없어요.', isError: true);
     return null;
   }
@@ -34,7 +35,7 @@ Future<ReportAttachment?> pickAndUploadAttachment(
   try {
     final key = await ref
         .read(fileRepositoryProvider)
-        .upload(picked.path, picked.name);
+        .upload(picked.bytes, picked.name);
     return ReportAttachment(fileName: picked.name, fileKey: key);
   } catch (_) {
     showTopToast(overlay, '파일 업로드에 실패했어요.', isError: true);
@@ -42,13 +43,13 @@ Future<ReportAttachment?> pickAndUploadAttachment(
   }
 }
 
-Future<({String path, String name, int size})?> _pick(_PickSource source) async {
+Future<({Uint8List bytes, String name})?> _pick(_PickSource source) async {
   if (source == _PickSource.file) {
-    final result = await FilePicker.platform.pickFiles();
+    final result = await FilePicker.platform.pickFiles(withData: true);
     if (result == null || result.files.isEmpty) return null;
     final file = result.files.first;
-    if (file.path == null) return null;
-    return (path: file.path!, name: file.name, size: file.size);
+    if (file.bytes == null) return null;
+    return (bytes: file.bytes!, name: file.name);
   }
 
   final image = await ImagePicker().pickImage(
@@ -57,8 +58,8 @@ Future<({String path, String name, int size})?> _pick(_PickSource source) async 
         : ImageSource.gallery,
   );
   if (image == null) return null;
-  final size = await image.length();
-  return (path: image.path, name: image.name, size: size);
+  final bytes = await image.readAsBytes();
+  return (bytes: bytes, name: image.name);
 }
 
 Future<_PickSource?> _showSourceSheet(BuildContext context) {

@@ -12,9 +12,12 @@ class FileAddBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: DottedBorder(
+    return Semantics(
+      button: true,
+      label: '파일 업로드',
+      child: GestureDetector(
+        onTap: onTap,
+        child: DottedBorder(
         options: const RoundedRectDottedBorderOptions(
           radius: Radius.circular(8),
           padding: EdgeInsets.symmetric(horizontal: 1),
@@ -38,6 +41,7 @@ class FileAddBox extends StatelessWidget {
               ],
             ),
           ),
+        ),
         ),
       ),
     );
