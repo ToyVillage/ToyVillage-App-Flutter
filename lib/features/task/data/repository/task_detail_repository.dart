@@ -49,6 +49,7 @@ class TaskDetailRepository {
         'deadline': now.add(const Duration(days: 1)).toIso8601String(),
         'createdAt': now.subtract(const Duration(days: 1)).toIso8601String(),
         'files': const [],
+        'rejectionReason': '점검 항목이 누락되었습니다. 수조 온도 측정값을 추가해 다시 제출해 주세요.',
       },
       4: {
         'id': 4,

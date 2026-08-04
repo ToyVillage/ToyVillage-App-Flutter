@@ -16,4 +16,7 @@ class ApiEndpoints {
 
   /// Reservation
   static const reservation = '/reservation';
+
+  /// File
+  static const file = '/file';
 }

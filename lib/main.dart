@@ -22,6 +22,11 @@ class ToyVillageApp extends StatelessWidget {
       title: 'ToyVillage',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        textSelectionTheme: const TextSelectionThemeData(
+          selectionColor: ToyVillageColor.gray30,
+          selectionHandleColor: ToyVillageColor.gray100,
+          cursorColor: ToyVillageColor.gray100
+        ),
         scaffoldBackgroundColor: ToyVillageColor.gray10,
         splashColor: ToyVillageColor.gray30,
         highlightColor: ToyVillageColor.gray30,

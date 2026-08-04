@@ -7,7 +7,7 @@ import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:toy_village_app/core/utils/file_url.dart';
-import 'package:toy_village_app/core/widgets/top_toast.dart';
+import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 
 bool isImageFileName(String name) {
   final n = name.toLowerCase();

@@ -16,10 +16,12 @@ class ToyVillageAppBar extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       scrolledUnderElevation: 0,
       leading: closeIcon == true ? IconButton(
+        tooltip: '뒤로가기',
         icon: const Icon(
-          size: 28,
           Symbols.chevron_left_rounded,
+          size: 28,
           color: ToyVillageColor.gray100,
+          semanticLabel: '뒤로가기',
         ),
         onPressed: () => context.pop(),
       ) : null

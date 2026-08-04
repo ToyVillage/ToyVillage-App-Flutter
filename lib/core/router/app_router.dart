@@ -7,6 +7,7 @@ import 'package:toy_village_app/features/notice/presentation/view/notice_view.da
 import 'package:toy_village_app/features/reservation/presentation/view/reservation_detail_view.dart';
 import 'package:toy_village_app/features/reservation/presentation/view/reservation_view.dart';
 import 'package:toy_village_app/features/task/presentation/view/task_detail_view.dart';
+import 'package:toy_village_app/features/task/presentation/view/task_report_view.dart';
 import 'package:toy_village_app/features/task/presentation/view/task_view.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -73,6 +74,18 @@ final GoRouter appRouter = GoRouter(
               );
             }
             return TaskDetailView(id: id);
+          },
+        ),
+        GoRoute(
+          path: 'report',
+          builder: (context, state) {
+            final id = state.extra;
+            if (id is! int) {
+              return const Scaffold(
+                body: Center(child: Text('잘못된 접근입니다.')),
+              );
+            }
+            return TaskReportView(id: id);
           },
         ),
       ],

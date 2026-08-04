@@ -23,6 +23,7 @@ class TaskDetailModel {
   final DateTime? deadline;
   final DateTime createdAt;
   final List<TaskFileModel> files;
+  final String? rejectionReason;
 
   TaskDetailModel({
     required this.id,
@@ -33,6 +34,7 @@ class TaskDetailModel {
     required this.deadline,
     required this.createdAt,
     required this.files,
+    required this.rejectionReason,
   });
 
   factory TaskDetailModel.fromJson(Map<String, dynamic> json) {
@@ -49,6 +51,7 @@ class TaskDetailModel {
       files: files
           .map((e) => TaskFileModel.fromJson(e as Map<String, dynamic>))
           .toList(),
+      rejectionReason: json['rejectionReason'] as String?,
     );
   }
 }

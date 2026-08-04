@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:toy_village_app/core/constants/color.dart';
-import 'package:toy_village_app/core/widgets/title.dart';
+import 'package:toy_village_app/core/widgets/text/title.dart';
 
 class DocumentListSkeleton extends StatelessWidget {
   const DocumentListSkeleton({super.key});
