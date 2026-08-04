@@ -12,6 +12,7 @@ import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/task/data/model/report_attachment.dart';
 import 'package:toy_village_app/features/task/data/repository/task_report_draft_repository.dart';
+import 'package:toy_village_app/features/task/presentation/view_model/task_report_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/widget/attachment_editor.dart';
 import 'package:toy_village_app/features/task/presentation/widget/attachment_picker.dart';
 
@@ -27,9 +28,15 @@ class TaskReportView extends ConsumerStatefulWidget {
 class _TaskReportViewState extends ConsumerState<TaskReportView> {
   final _contentController = TextEditingController();
   final _noteController = TextEditingController();
+  final LayerLink _menuLink = LayerLink();
   List<ReportAttachment> _files = [];
   Timer? _autoSaveTimer;
+  OverlayEntry? _menuEntry;
   bool _loaded = false;
+  bool _isEdit = false;
+
+  TaskReportDraftRepository get _repo =>
+      ref.read(taskReportDraftRepositoryProvider);
 
   @override
   void initState() {
@@ -42,26 +49,33 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   @override
   void dispose() {
     _autoSaveTimer?.cancel();
+    _menuEntry?.remove();
     _contentController.dispose();
     _noteController.dispose();
     super.dispose();
   }
 
   Future<void> _load() async {
-    final draft = await ref
-        .read(taskReportDraftRepositoryProvider)
-        .load(widget.id);
+    final report = await _repo.loadReport(widget.id);
+    final source = report ?? await _repo.load(widget.id);
     if (!mounted) return;
-    if (draft != null) {
-      _contentController.text = draft.content;
-      _noteController.text = draft.note;
-      setState(() => _files = draft.files);
-
-      final overlay = Overlay.of(context, rootOverlay: true);
-      await ref
-          .read(taskReportDraftRepositoryProvider)
-          .save(widget.id, _current());
-      showTopToast(overlay, '저장된 데이터를 불러왔습니다.');
+    if (source != null) {
+      _contentController.text = source.content;
+      _noteController.text = source.note;
+      setState(() {
+        _files = source.files;
+        _isEdit = report != null;
+      });
+      final hasData =
+          source.content.isNotEmpty ||
+          source.note.isNotEmpty ||
+          source.files.isNotEmpty;
+      if (hasData) {
+        showTopToast(
+          Overlay.of(context, rootOverlay: true),
+          '저장된 데이터를 불러왔습니다.',
+        );
+      }
     }
     _loaded = true;
   }
@@ -76,7 +90,7 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
     if (!_loaded) return;
     _autoSaveTimer?.cancel();
     _autoSaveTimer = Timer(const Duration(milliseconds: 1500), () {
-      ref.read(taskReportDraftRepositoryProvider).save(widget.id, _current());
+      _repo.save(widget.id, _current());
     });
   }
 
@@ -95,18 +109,137 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   Future<void> _saveDraft() async {
     final overlay = Overlay.of(context, rootOverlay: true);
     try {
-      await ref
-          .read(taskReportDraftRepositoryProvider)
-          .save(widget.id, _current());
+      await _repo.save(widget.id, _current());
       showTopToast(overlay, '저장되었습니다.');
     } catch (_) {
       showTopToast(overlay, '저장을 실패했습니다. 다시 시도해주세요.', isError: true);
     }
   }
 
+  Future<void> _complete() async {
+    final overlay = Overlay.of(context, rootOverlay: true);
+    if (_contentController.text.trim().isEmpty) {
+      showTopToast(overlay, '내용을 추가해야 합니다.', isError: true);
+      return;
+    }
+    _autoSaveTimer?.cancel();
+    await _repo.saveReport(widget.id, _current());
+    await _repo.clear(widget.id);
+    ref.invalidate(taskReportProvider(widget.id));
+    if (!mounted) return;
+    context.go('/task');
+  }
+
+  void _toggleMenu() => _menuEntry != null ? _closeMenu() : _openMenu();
+
+  void _openMenu() {
+    _menuEntry = OverlayEntry(
+      builder: (context) => Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: _closeMenu,
+            ),
+          ),
+          CompositedTransformFollower(
+            link: _menuLink,
+            showWhenUnlinked: false,
+            targetAnchor: Alignment.bottomRight,
+            followerAnchor: Alignment.topRight,
+            offset: const Offset(0, 8),
+            child: Container(
+              width: 80,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: ToyVillageColor.white,
+                borderRadius: BorderRadius.circular(4),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    offset: Offset.zero,
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          _closeMenu();
+                          _handleDelete();
+                        },
+                        child: Center(
+                          child: Text(
+                            '삭제',
+                            style: ToyVillageTextStyle.caption3.copyWith(
+                              color: ToyVillageColor.red,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    Overlay.of(context).insert(_menuEntry!);
+  }
+
+  void _closeMenu() {
+    _menuEntry?.remove();
+    _menuEntry = null;
+  }
+
+  Future<void> _handleDelete() async {
+    // TODO: 삭제 확인 모달 커스텀 디자인으로 교체 예정
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: ToyVillageColor.white,
+        content: Text('삭제하시겠습니까?', style: ToyVillageTextStyle.body4),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              '취소',
+              style: ToyVillageTextStyle.button4.copyWith(
+                color: ToyVillageColor.gray60,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              '삭제',
+              style: ToyVillageTextStyle.button4.copyWith(
+                color: ToyVillageColor.red,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await _repo.clearReport(widget.id);
+    await _repo.clear(widget.id);
+    ref.invalidate(taskReportProvider(widget.id));
+    if (!mounted) return;
+    context.go('/task');
+  }
+
   @override
   Widget build(BuildContext context) {
-    final spacing = const SizedBox(height: 20);
+    const spacing = SizedBox(height: 20);
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -118,9 +251,31 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 28),
-                  child: ToyVillageTitle(title: '업무 보고서 작성'),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 28),
+                  child: Row(
+                    children: [
+                      const ToyVillageTitle(title: '업무 보고서 작성'),
+                      if (_isEdit) ...[
+                        const Spacer(),
+                        CompositedTransformTarget(
+                          link: _menuLink,
+                          child: IconButton(
+                            onPressed: _toggleMenu,
+                            padding: EdgeInsets.zero,
+                            style: IconButton.styleFrom(
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            icon: const Icon(
+                              Icons.more_vert,
+                              color: ToyVillageColor.gray100,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
                 Expanded(
                   child: SingleChildScrollView(
@@ -149,7 +304,7 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
                           onAdd: _addAttachment,
                           onDelete: _deleteAttachment,
                         ),
-                        spacing
+                        spacing,
                       ],
                     ),
                   ),
@@ -175,12 +330,7 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
                           label: '작성 완료하기',
                           background: ToyVillageColor.gray100,
                           textColor: ToyVillageColor.white,
-                          onTap: () {
-                            context.go('/task');
-                            _contentController.clear();
-                            _noteController.clear();
-                            // TODO: 파일도 삭제되도록
-                          },
+                          onTap: _complete,
                         ),
                       ),
                     ],

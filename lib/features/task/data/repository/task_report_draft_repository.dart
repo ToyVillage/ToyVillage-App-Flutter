@@ -36,22 +36,38 @@ class TaskReportDraft {
 }
 
 class TaskReportDraftRepository {
-  String _key(int id) => 'task_report_draft_$id';
+  String _draftKey(int id) => 'task_report_draft_$id';
+  String _reportKey(int id) => 'task_report_$id';
 
-  Future<TaskReportDraft?> load(int id) async {
+  Future<TaskReportDraft?> _load(String key) async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key(id));
+    final raw = prefs.getString(key);
     if (raw == null) return null;
-    return TaskReportDraft.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    try {
+      return TaskReportDraft.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (_) {
+      await prefs.remove(key);
+      return null;
+    }
   }
 
-  Future<void> save(int id, TaskReportDraft draft) async {
+  Future<void> _save(String key, TaskReportDraft draft) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key(id), jsonEncode(draft.toJson()));
+    await prefs.setString(key, jsonEncode(draft.toJson()));
   }
 
-  Future<void> clear(int id) async {
+  Future<void> _remove(String key) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_key(id));
+    await prefs.remove(key);
   }
+
+  Future<TaskReportDraft?> load(int id) => _load(_draftKey(id));
+  Future<void> save(int id, TaskReportDraft draft) =>
+      _save(_draftKey(id), draft);
+  Future<void> clear(int id) => _remove(_draftKey(id));
+
+  Future<TaskReportDraft?> loadReport(int id) => _load(_reportKey(id));
+  Future<void> saveReport(int id, TaskReportDraft report) =>
+      _save(_reportKey(id), report);
+  Future<void> clearReport(int id) => _remove(_reportKey(id));
 }

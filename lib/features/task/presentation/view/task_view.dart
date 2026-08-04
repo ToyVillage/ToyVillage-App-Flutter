@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:toy_village_app/core/widgets/app_bar.dart';
+import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
-import 'package:toy_village_app/core/widgets/title.dart';
+import 'package:toy_village_app/core/widgets/text/title.dart';
+import 'package:toy_village_app/features/task/data/model/task_status.dart';
 import 'package:toy_village_app/features/task/presentation/view_model/seen_task_view_model.dart';
+import 'package:toy_village_app/features/task/presentation/view_model/task_report_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/view_model/task_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_card.dart';
 
@@ -14,7 +16,7 @@ class TaskView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: ToyVillageAppBar(),
+      appBar: const ToyVillageAppBar(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -37,10 +39,17 @@ class TaskView extends ConsumerWidget {
                       itemCount: tasks.length,
                       itemBuilder: (context, index) {
                         final task = tasks[index];
+                        final hasReport =
+                            ref.watch(taskReportProvider(task.id)).value !=
+                            null;
+                        final status =
+                            hasReport && task.status == TaskStatus.notSubmitted
+                            ? TaskStatus.submitted
+                            : task.status;
                         return TaskCard(
                           title: task.title,
                           createdAt: task.createdAt,
-                          status: task.status,
+                          status: status,
                           deadline: task.deadline,
                           isNew: !seenIds.contains(task.id),
                           onTap: () {
