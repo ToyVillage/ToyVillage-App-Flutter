@@ -81,6 +81,7 @@ class TaskDetailView extends ConsumerWidget {
                   child: GestureDetector(
                     onTap: () async {
                       await context.push('/task/report', extra: task.id);
+                      if (!context.mounted) return;
                       ref.invalidate(taskReportProvider(id));
                     },
                     child: Container(

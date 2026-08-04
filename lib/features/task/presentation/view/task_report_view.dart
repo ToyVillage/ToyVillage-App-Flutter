@@ -66,16 +66,6 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
         _files = source.files;
         _isEdit = report != null;
       });
-      final hasData =
-          source.content.isNotEmpty ||
-          source.note.isNotEmpty ||
-          source.files.isNotEmpty;
-      if (hasData) {
-        showTopToast(
-          Overlay.of(context, rootOverlay: true),
-          '저장된 데이터를 불러왔습니다.',
-        );
-      }
     }
     _loaded = true;
   }
@@ -89,8 +79,10 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   void _scheduleAutoSave() {
     if (!_loaded) return;
     _autoSaveTimer?.cancel();
-    _autoSaveTimer = Timer(const Duration(milliseconds: 1500), () {
-      _repo.save(widget.id, _current());
+    _autoSaveTimer = Timer(const Duration(milliseconds: 1500), () async {
+      try {
+        await _repo.save(widget.id, _current());
+      } catch (_) {}
     });
   }
 
@@ -122,10 +114,11 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
       showTopToast(overlay, '내용을 추가해야 합니다.', isError: true);
       return;
     }
+    final container = ProviderScope.containerOf(context, listen: false);
     _autoSaveTimer?.cancel();
     await _repo.saveReport(widget.id, _current());
     await _repo.clear(widget.id);
-    ref.invalidate(taskReportProvider(widget.id));
+    container.invalidate(taskReportProvider(widget.id));
     if (!mounted) return;
     context.go('/task');
   }
@@ -201,40 +194,99 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   }
 
   Future<void> _handleDelete() async {
-    // TODO: 삭제 확인 모달 커스텀 디자인으로 교체 예정
+    final container = ProviderScope.containerOf(context, listen: false);
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => Dialog(
         backgroundColor: ToyVillageColor.white,
-        content: Text('삭제하시겠습니까?', style: ToyVillageTextStyle.body4),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              '취소',
-              style: ToyVillageTextStyle.button4.copyWith(
-                color: ToyVillageColor.gray60,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 31),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text.rich(
+                const TextSpan(
+                  children: [
+                    TextSpan(text: '정말 '),
+                    TextSpan(
+                      text: '삭제',
+                      style: TextStyle(color: ToyVillageColor.red),
+                    ),
+                    TextSpan(text: '하시겠습니까?'),
+                  ],
+                ),
+                style: ToyVillageTextStyle.heading6,
+                textAlign: TextAlign.center,
               ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              '삭제',
-              style: ToyVillageTextStyle.button4.copyWith(
-                color: ToyVillageColor.red,
+              const SizedBox(height: 12),
+              Text(
+                '삭제한 후에는\n다시 복구할 수 없습니다.',
+                style: ToyVillageTextStyle.body5.copyWith(
+                  color: ToyVillageColor.gray60,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
+              const SizedBox(height: 28),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _dialogButton(
+                    label: '취소',
+                    background: ToyVillageColor.gray60,
+                    textColor: ToyVillageColor.white,
+                    onTap: () => Navigator.pop(ctx, false),
+                  ),
+                  const SizedBox(width: 11),
+                  _dialogButton(
+                    label: '삭제',
+                    background: ToyVillageColor.white,
+                    textColor: ToyVillageColor.red,
+                    border: Border.all(color: ToyVillageColor.red),
+                    onTap: () => Navigator.pop(ctx, true),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
     if (confirmed != true) return;
     await _repo.clearReport(widget.id);
     await _repo.clear(widget.id);
-    ref.invalidate(taskReportProvider(widget.id));
+    container.invalidate(taskReportProvider(widget.id));
     if (!mounted) return;
     context.go('/task');
+  }
+
+  Widget _dialogButton({
+    required String label,
+    required Color background,
+    required Color textColor,
+    required VoidCallback onTap,
+    Border? border,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.circular(8),
+          border: border,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 59, vertical: 12.5),
+          child: Text(
+            label,
+            style: ToyVillageTextStyle.button3.copyWith(color: textColor),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -255,7 +307,9 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
                   padding: const EdgeInsets.only(bottom: 28),
                   child: Row(
                     children: [
-                      const ToyVillageTitle(title: '업무 보고서 작성'),
+                      ToyVillageTitle(
+                        title: _isEdit ? '업무 보고서 수정' : '업무 보고서 작성',
+                      ),
                       if (_isEdit) ...[
                         const Spacer(),
                         CompositedTransformTarget(
