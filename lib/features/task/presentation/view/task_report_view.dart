@@ -232,21 +232,24 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
               ),
               const SizedBox(height: 28),
               Row(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  _dialogButton(
-                    label: '취소',
-                    background: ToyVillageColor.gray60,
-                    textColor: ToyVillageColor.white,
-                    onTap: () => Navigator.pop(ctx, false),
+                  Expanded(
+                    child: _dialogButton(
+                      label: '취소',
+                      background: ToyVillageColor.gray60,
+                      textColor: ToyVillageColor.white,
+                      onTap: () => Navigator.pop(ctx, false),
+                    ),
                   ),
                   const SizedBox(width: 11),
-                  _dialogButton(
-                    label: '삭제',
-                    background: ToyVillageColor.white,
-                    textColor: ToyVillageColor.red,
-                    border: Border.all(color: ToyVillageColor.red),
-                    onTap: () => Navigator.pop(ctx, true),
+                  Expanded(
+                    child: _dialogButton(
+                      label: '삭제',
+                      background: ToyVillageColor.white,
+                      textColor: ToyVillageColor.red,
+                      border: Border.all(color: ToyVillageColor.red),
+                      onTap: () => Navigator.pop(ctx, true),
+                    ),
                   ),
                 ],
               ),
@@ -279,10 +282,12 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
           border: border,
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 59, vertical: 12.5),
-          child: Text(
-            label,
-            style: ToyVillageTextStyle.button3.copyWith(color: textColor),
+          padding: const EdgeInsets.symmetric(vertical: 12.5),
+          child: Center(
+            child: Text(
+              label,
+              style: ToyVillageTextStyle.button3.copyWith(color: textColor),
+            ),
           ),
         ),
       ),
