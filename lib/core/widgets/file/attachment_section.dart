@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/file_download.dart';
-import 'package:toy_village_app/core/widgets/file_attachment.dart';
+import 'package:toy_village_app/core/widgets/file/file_attachment.dart';
 
 class AttachmentSection extends StatelessWidget {
   final List<({String fileName, String fileKey})> files;

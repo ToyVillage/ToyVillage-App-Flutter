@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:toy_village_app/core/constants/color.dart';
+import 'package:toy_village_app/core/constants/svg_assets.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/file_util.dart';
 
 class FileAttachment extends StatelessWidget {
   final String fileName;
-  final VoidCallback onDownload;
+  final VoidCallback? onDownload;
+  final VoidCallback? onDelete;
 
   const FileAttachment({
     super.key,
     required this.fileName,
-    required this.onDownload,
+    this.onDownload,
+    this.onDelete,
   });
 
   @override
@@ -38,17 +41,26 @@ class FileAttachment extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            IconButton(
-              onPressed: onDownload,
-              tooltip: '다운로드',
-              padding: EdgeInsets.zero,
-              visualDensity: VisualDensity.compact,
-              icon: Icon(
-                Symbols.download,
-                size: 24,
-                color: ToyVillageColor.gray100,
+            if (onDelete != null)
+              IconButton(
+                onPressed: onDelete,
+                tooltip: '삭제',
+                padding: EdgeInsets.zero,
+                visualDensity: VisualDensity.compact,
+                icon: SvgPicture.asset(SvgAssets.delete)
+              )
+            else
+              IconButton(
+                onPressed: onDownload,
+                tooltip: '다운로드',
+                padding: EdgeInsets.zero,
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(
+                  Symbols.download,
+                  size: 24,
+                  color: ToyVillageColor.gray100,
+                ),
               ),
-            ),
           ],
         ),
       ),

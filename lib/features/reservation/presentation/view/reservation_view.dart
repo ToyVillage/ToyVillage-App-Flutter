@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:toy_village_app/core/widgets/app_bar.dart';
+import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
-import 'package:toy_village_app/core/widgets/title.dart';
+import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/reservation/presentation/view_model/reservation_view_model.dart';
 import 'package:toy_village_app/features/reservation/presentation/widget/reservation_card.dart';
 import 'package:toy_village_app/features/reservation/presentation/widget/reservation_list_skeleton.dart';
