@@ -67,7 +67,7 @@ class _DayOffViewState extends ConsumerState<DayOffView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ToyVillageAppBar(),
+              const ToyVillageAppBar(),
               Expanded(child: _content(async)),
             ],
           ),

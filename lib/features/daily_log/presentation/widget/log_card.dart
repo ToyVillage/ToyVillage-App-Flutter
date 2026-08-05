@@ -62,7 +62,7 @@ class LogCard extends ConsumerWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 8,),
+              const SizedBox(height: 8,),
               Row(
                 children: [
                   Text(

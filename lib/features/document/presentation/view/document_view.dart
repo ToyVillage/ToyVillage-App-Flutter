@@ -22,6 +22,7 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ToyVillageAppBar(),
+      appBar: const ToyVillageAppBar(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),

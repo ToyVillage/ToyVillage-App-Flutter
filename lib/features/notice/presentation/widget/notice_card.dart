@@ -38,8 +38,8 @@ class NoticeCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     NoticeTimeLabel(kind: kind, time: time),
-                    SizedBox(height: 8,),
-                    Text(title, style: ToyVillageTextStyle.heading5,)
+                    const SizedBox(height: 8,),
+                    Text(title, style: ToyVillageTextStyle.heading4,)
                   ],
                 ),
               ),

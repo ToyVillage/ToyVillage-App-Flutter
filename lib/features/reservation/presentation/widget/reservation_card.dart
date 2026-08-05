@@ -55,7 +55,7 @@ class ReservationCard extends StatelessWidget {
                       label: '방문일: ',
                       value: '${visitDate.month}월 ${visitDate.day}일',
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     ReservationText(
                       icon: SvgPicture.asset(SvgAssets.people),
                       label: '전체인원: ',
