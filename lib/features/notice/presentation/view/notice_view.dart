@@ -17,6 +17,7 @@ class NoticeView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: ToyVillageAppBar(),
+      appBar: const ToyVillageAppBar(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),

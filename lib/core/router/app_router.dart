@@ -35,7 +35,7 @@ final GoRouter appRouter = GoRouter(
         ),
       ],
     ),
-    GoRoute(path: '/dayOff', builder: (context, state) => DayOffView()),
+    GoRoute(path: '/dayOff', builder: (context, state) => const DayOffView()),
     GoRoute(
       path: '/document',
       builder: (context, state) => const DocumentView(),

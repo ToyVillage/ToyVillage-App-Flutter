@@ -17,7 +17,7 @@ class NoticeDetailView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: ToyVillageAppBar(closeIcon: true),
+      appBar: const ToyVillageAppBar(closeIcon: true),
       body: CustomAsyncValue(
         value: ref.watch(noticeDetailViewModelProvider(id)),
         errorMessage: '공지사항을 불러오지 못했어요.',

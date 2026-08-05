@@ -36,10 +36,10 @@ class NoticeTimeLabel extends StatelessWidget {
             ),
           ),
         ),
-        Spacer(),
+        const Spacer(),
         if (clockIcon) ...[
-          Icon(MdiIcons.clockOutline, size: 16, color: ToyVillageColor.gray60),
-          SizedBox(width: 4),
+          const Icon(MdiIcons.clockOutline, size: 16, color: ToyVillageColor.gray60),
+          const SizedBox(width: 4),
         ],
         Text(
           timeCheck(time),
