@@ -109,10 +109,9 @@ class _TopToastState extends State<_TopToast>
                               : ToyVillageColor.green,
                         ),
                         const SizedBox(width: 5),
-                        Expanded(
+                        Flexible(
                           child: Text(
                             widget.message,
-                            textAlign: TextAlign.center,
                             style: ToyVillageTextStyle.body5.copyWith(
                               color: ToyVillageColor.white,
                             ),
