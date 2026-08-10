@@ -12,7 +12,7 @@ import 'package:toy_village_app/core/network/file_repository.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/task/data/model/report_attachment.dart';
 
-const _maxBytes = 50 * 1024 * 1024;
+const _maxBytes = 10 * 1024 * 1024;
 
 enum _PickSource { camera, gallery, file }
 
@@ -28,7 +28,7 @@ Future<ReportAttachment?> pickAndUploadAttachment(
   if (picked == null) return null;
 
   if (picked.bytes.length > _maxBytes) {
-    showTopToast(overlay, '50MB가 넘는 파일은 첨부할 수 없어요.', isError: true);
+    showTopToast(overlay, '10MB가 넘는 파일은 첨부할 수 없어요.', isError: true);
     return null;
   }
 
