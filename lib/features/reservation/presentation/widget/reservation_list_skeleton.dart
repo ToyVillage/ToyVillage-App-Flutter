@@ -1,37 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:toy_village_app/core/constants/color.dart';
-import 'package:toy_village_app/core/widgets/text/title.dart';
 
 class ReservationListSkeleton extends StatelessWidget {
   const ReservationListSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(bottom: 20),
-          child: ToyVillageTitle(
-            title: '단체예약 확인',
-            subTitle: '토이빌리지 단체예약 확인 및 관리',
-          ),
-        ),
-        Expanded(
-          child: Skeletonizer.zone(
-            effect: ShimmerEffect(
-              baseColor: ToyVillageColor.gray20,
-              highlightColor: ToyVillageColor.gray10,
-            ),
-            child: ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 3,
-              itemBuilder: (context, index) => const _SkeletonCard(),
-            ),
-          ),
-        ),
-      ],
+    return Skeletonizer.zone(
+      effect: const ShimmerEffect(
+        baseColor: ToyVillageColor.gray20,
+        highlightColor: ToyVillageColor.gray10,
+      ),
+      child: ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 3,
+        itemBuilder: (context, index) => const _SkeletonCard(),
+      ),
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:toy_village_app/core/constants/color.dart';
+import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
@@ -25,45 +27,57 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: CustomAsyncValue(
-            value: ref.watch(documentViewModelProvider),
-            loading: const DocumentListSkeleton(),
-            data: (documents) => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ToyVillageTitle(
-                  title: '자료실',
-                  subTitle: '토이빌리지의 모든 자료가 모인 곳',
-                ),
-                Row(
-                  children: [
-                    const Spacer(),
-                    SortDropdown(
-                      value: _sort,
-                      onChanged: (order) {
-                        setState(() => _sort = order);
-                        ref
-                            .read(documentViewModelProvider.notifier)
-                            .changeOrder(order);
-                      },
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: documents.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final document = documents[index];
-                      return DocumentCard(
-                        id: document.id,
-                        title: document.title,
-                        type: document.type,
-                      );
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const ToyVillageTitle(
+                title: '자료실',
+                subTitle: '토이빌리지의 모든 자료가 모인 곳',
+              ),
+              Row(
+                children: [
+                  const Spacer(),
+                  SortDropdown(
+                    value: _sort,
+                    onChanged: (order) {
+                      setState(() => _sort = order);
+                      ref
+                          .read(documentViewModelProvider.notifier)
+                          .changeOrder(order);
                     },
                   ),
+                ],
+              ),
+              Expanded(
+                child: CustomAsyncValue(
+                  value: ref.watch(documentViewModelProvider),
+                  loading: const DocumentListSkeleton(),
+                  data: (documents) {
+                    if (documents.isEmpty) {
+                      return Center(
+                        child: Text(
+                          '등록된 자료가 없습니다',
+                          style: ToyVillageTextStyle.body3.copyWith(
+                            color: ToyVillageColor.gray60,
+                          ),
+                        ),
+                      );
+                    }
+                    return ListView.builder(
+                      itemCount: documents.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final document = documents[index];
+                        return DocumentCard(
+                          id: document.id,
+                          title: document.title,
+                          type: document.type,
+                        );
+                      },
+                    );
+                  },
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
