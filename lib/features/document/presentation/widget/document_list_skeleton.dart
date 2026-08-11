@@ -1,37 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:toy_village_app/core/constants/color.dart';
-import 'package:toy_village_app/core/widgets/text/title.dart';
 
 class DocumentListSkeleton extends StatelessWidget {
   const DocumentListSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(bottom: 20),
-          child: ToyVillageTitle(
-            title: '자료실',
-            subTitle: '토이빌리지의 모든 자료가 모인 곳',
-          ),
-        ),
-        Expanded(
-          child: Skeletonizer.zone(
-            effect: ShimmerEffect(
-              baseColor: ToyVillageColor.gray20,
-              highlightColor: ToyVillageColor.gray10,
-            ),
-            child: ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 6,
-              itemBuilder: (context, index) => const _SkeletonCard(),
-            ),
-          ),
-        ),
-      ],
+    return Skeletonizer.zone(
+      effect: const ShimmerEffect(
+        baseColor: ToyVillageColor.gray20,
+        highlightColor: ToyVillageColor.gray10,
+      ),
+      child: ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 6,
+        itemBuilder: (context, index) => const _SkeletonCard(),
+      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
+import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
@@ -16,30 +17,40 @@ class NoticeView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: ToyVillageAppBar(),
       appBar: const ToyVillageAppBar(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: CustomAsyncValue(
-            value: ref.watch(noticeViewModelProvider),
-            loading: const NoticeListSkeleton(),
-            data: (value) {
-              final readIds = ref.watch(readNoticeProvider).value ?? <int>{};
-              final hasMore =
-                  ref.read(noticeViewModelProvider.notifier).hasMore;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 20),
-                    child: ToyVillageTitle(
-                      title: '공지사항',
-                      subTitle: '토이빌리지의 중요한 공지사항',
-                    ),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(bottom: 22),
+                child: ToyVillageTitle(
+                  title: '공지사항',
+                  subTitle: '토이빌리지의 중요한 공지사항',
+                ),
+              ),
+              Expanded(
+                child: CustomAsyncValue(
+                  value: ref.watch(noticeViewModelProvider),
+                  loading: const NoticeListSkeleton(),
+                  data: (value) {
+                    if (value.isEmpty) {
+                      return Center(
+                        child: Text(
+                          '등록된 공지사항이 없습니다',
+                          style: ToyVillageTextStyle.body3.copyWith(
+                            color: ToyVillageColor.gray60,
+                          ),
+                        ),
+                      );
+                    }
+                    final readIds =
+                        ref.watch(readNoticeProvider).value ?? <int>{};
+                    final hasMore =
+                        ref.read(noticeViewModelProvider.notifier).hasMore;
+                    return ListView.builder(
                       itemCount: value.length + (hasMore ? 1 : 0),
                       itemBuilder: (BuildContext context, int index) {
                         if (index >= value.length) {
@@ -59,23 +70,23 @@ class NoticeView extends ConsumerWidget {
                         }
                         final notice = value[index];
                         return NoticeCard(
-                            kind: notice.kind,
-                            title: notice.title,
-                            time: notice.createdAt,
-                            isRead: readIds.contains(notice.id),
-                            onTap: () {
-                              ref
-                                  .read(readNoticeProvider.notifier)
-                                  .markAsRead(notice.id);
-                              context.push('/notice/detail', extra: notice.id);
-                            }
+                          kind: notice.kind,
+                          title: notice.title,
+                          time: notice.createdAt,
+                          isRead: readIds.contains(notice.id),
+                          onTap: () {
+                            ref
+                                .read(readNoticeProvider.notifier)
+                                .markAsRead(notice.id);
+                            context.push('/notice/detail', extra: notice.id);
+                          },
                         );
                       },
-                    ),
-                  ),
-                ],
-              );
-            },
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),

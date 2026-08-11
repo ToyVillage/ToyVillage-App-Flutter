@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:toy_village_app/core/constants/color.dart';
+import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
@@ -35,6 +37,16 @@ class TaskView extends ConsumerWidget {
                 child: CustomAsyncValue(
                   value: ref.watch(taskViewModelProvider),
                   data: (tasks) {
+                    if (tasks.isEmpty) {
+                      return Center(
+                        child: Text(
+                          '오늘 등록된 업무가 없습니다',
+                          style: ToyVillageTextStyle.body3.copyWith(
+                            color: ToyVillageColor.gray60,
+                          ),
+                        ),
+                      );
+                    }
                     return ListView.builder(
                       itemCount: tasks.length,
                       itemBuilder: (context, index) =>
