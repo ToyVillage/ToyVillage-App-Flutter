@@ -28,6 +28,7 @@ class ToyVillageReadonlyField extends StatelessWidget {
         ToyVillageLabel(label: label),
         const SizedBox(height: 8),
         TextFormField(
+          key: ValueKey(value),
           initialValue: value,
           readOnly: true,
           minLines: minLines,
