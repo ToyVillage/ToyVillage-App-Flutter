@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
-import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/core/widgets/empty_state.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/notice/presentation/view_model/notice_view_model.dart';
 import 'package:toy_village_app/features/notice/presentation/view_model/read_notice_view_model.dart';
@@ -37,14 +37,7 @@ class NoticeView extends ConsumerWidget {
                   loading: const NoticeListSkeleton(),
                   data: (value) {
                     if (value.isEmpty) {
-                      return Center(
-                        child: Text(
-                          '등록된 공지사항이 없습니다',
-                          style: ToyVillageTextStyle.body3.copyWith(
-                            color: ToyVillageColor.gray60,
-                          ),
-                        ),
-                      );
+                      return const EmptyState(message: '등록된 공지사항이 없습니다');
                     }
                     final readIds =
                         ref.watch(readNoticeProvider).value ?? <int>{};
