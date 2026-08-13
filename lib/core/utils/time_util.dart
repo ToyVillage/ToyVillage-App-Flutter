@@ -1,14 +1,14 @@
 String timeCheck(DateTime date) {
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  final target = DateTime(date.year, date.month, date.day);
-  final days = today.difference(target).inDays;
+  final diff = DateTime.now().difference(date);
 
-  if (days <= 0) return '오늘';
-  if (days == 1) return '어제';
+  if (diff.inHours < 1) return '방금 전';
+  if (diff.inHours < 24) return '${diff.inHours}시간 전';
+
+  final days = diff.inDays;
   if (days < 7) return '$days일 전';
-  if (days < 30) return '${(days / 7).floor()}주 전';
-  return '${(days / 30).floor()}개월 전';
+  if (days < 30) return '${days ~/ 7}주 전';
+  if (days < 365) return '${days ~/ 30}개월 전';
+  return '${days ~/ 365}년 전';
 }
 
 String formatTime(String time) {
