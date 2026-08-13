@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:toy_village_app/core/constants/color.dart';
-import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
@@ -28,10 +27,8 @@ class TaskReportView extends ConsumerStatefulWidget {
 class _TaskReportViewState extends ConsumerState<TaskReportView> {
   final _contentController = TextEditingController();
   final _noteController = TextEditingController();
-  final LayerLink _menuLink = LayerLink();
   List<ReportAttachment> _files = [];
   Timer? _autoSaveTimer;
-  OverlayEntry? _menuEntry;
   bool _loaded = false;
   bool _isEdit = false;
 
@@ -49,7 +46,6 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   @override
   void dispose() {
     _autoSaveTimer?.cancel();
-    _menuEntry?.remove();
     _contentController.dispose();
     _noteController.dispose();
     super.dispose();
@@ -123,181 +119,6 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
     context.go('/task');
   }
 
-  void _toggleMenu() => _menuEntry != null ? _closeMenu() : _openMenu();
-
-  void _openMenu() {
-    _menuEntry = OverlayEntry(
-      builder: (context) => Stack(
-        children: [
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: _closeMenu,
-            ),
-          ),
-          CompositedTransformFollower(
-            link: _menuLink,
-            showWhenUnlinked: false,
-            targetAnchor: Alignment.bottomRight,
-            followerAnchor: Alignment.topRight,
-            offset: const Offset(0, 8),
-            child: Container(
-              width: 80,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                color: ToyVillageColor.white,
-                borderRadius: BorderRadius.circular(4),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.12),
-                    offset: Offset.zero,
-                    blurRadius: 10,
-                  ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          _closeMenu();
-                          _handleDelete();
-                        },
-                        child: Center(
-                          child: Text(
-                            '삭제',
-                            style: ToyVillageTextStyle.caption3.copyWith(
-                              color: ToyVillageColor.red,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-    Overlay.of(context).insert(_menuEntry!);
-  }
-
-  void _closeMenu() {
-    _menuEntry?.remove();
-    _menuEntry = null;
-  }
-
-  Future<void> _handleDelete() async {
-    final container = ProviderScope.containerOf(context, listen: false);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => Dialog(
-        backgroundColor: ToyVillageColor.white,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 31),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text.rich(
-                const TextSpan(
-                  children: [
-                    TextSpan(text: '정말 '),
-                    TextSpan(
-                      text: '삭제',
-                      style: TextStyle(color: ToyVillageColor.red),
-                    ),
-                    TextSpan(text: '하시겠습니까?'),
-                  ],
-                ),
-                style: ToyVillageTextStyle.heading6,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '삭제한 후에는\n다시 복구할 수 없습니다.',
-                style: ToyVillageTextStyle.body5.copyWith(
-                  color: ToyVillageColor.gray60,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 28),
-              Row(
-                children: [
-                  Expanded(
-                    child: _dialogButton(
-                      label: '취소',
-                      background: ToyVillageColor.gray60,
-                      textColor: ToyVillageColor.white,
-                      onTap: () => Navigator.pop(ctx, false),
-                    ),
-                  ),
-                  const SizedBox(width: 11),
-                  Expanded(
-                    child: _dialogButton(
-                      label: '삭제',
-                      background: ToyVillageColor.white,
-                      textColor: ToyVillageColor.red,
-                      border: Border.all(color: ToyVillageColor.red),
-                      onTap: () => Navigator.pop(ctx, true),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    if (confirmed != true) return;
-    await _repo.clearReport(widget.id);
-    await _repo.clear(widget.id);
-    container.invalidate(taskReportProvider(widget.id));
-    if (!mounted) return;
-    context.go('/task');
-  }
-
-  Widget _dialogButton({
-    required String label,
-    required Color background,
-    required Color textColor,
-    required VoidCallback onTap,
-    Border? border,
-  }) {
-    return Material(
-      color: background,
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: border,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12.5),
-            child: Center(
-              child: Text(
-                label,
-                style: ToyVillageTextStyle.button4.copyWith(color: textColor),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     const spacing = SizedBox(height: 20);
@@ -314,30 +135,8 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(bottom: 28),
-                  child: Row(
-                    children: [
-                      ToyVillageTitle(
-                        title: _isEdit ? '업무 보고서 수정' : '업무 보고서 작성',
-                      ),
-                      if (_isEdit) ...[
-                        const Spacer(),
-                        CompositedTransformTarget(
-                          link: _menuLink,
-                          child: IconButton(
-                            onPressed: _toggleMenu,
-                            padding: EdgeInsets.zero,
-                            style: IconButton.styleFrom(
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            icon: const Icon(
-                              Icons.more_vert,
-                              color: ToyVillageColor.gray100,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
+                  child: ToyVillageTitle(
+                    title: _isEdit ? '업무 보고서 수정' : '업무 보고서 작성',
                   ),
                 ),
                 Expanded(
@@ -377,22 +176,15 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
                   child: Row(
                     children: [
                       Expanded(
-                        flex: 5,
-                        child: _button(
+                        child: ToyVillageButton.outlined(
                           label: '임시저장',
-                          background: ToyVillageColor.gray10,
-                          textColor: ToyVillageColor.gray100,
-                          border: Border.all(color: ToyVillageColor.gray100),
                           onTap: _saveDraft,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        flex: 5,
-                        child: _button(
+                        child: ToyVillageButton(
                           label: '작성 완료하기',
-                          background: ToyVillageColor.gray100,
-                          textColor: ToyVillageColor.white,
                           onTap: _complete,
                         ),
                       ),
@@ -400,34 +192,6 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
                   ),
                 ),
               ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _button({
-    required String label,
-    required Color background,
-    required Color textColor,
-    required VoidCallback onTap,
-    Border? border,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(8),
-          border: border,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 15.5),
-          child: Center(
-            child: Text(
-              label,
-              style: ToyVillageTextStyle.button3.copyWith(color: textColor),
             ),
           ),
         ),
