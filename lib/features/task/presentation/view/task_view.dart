@@ -12,7 +12,7 @@ import 'package:toy_village_app/features/task/presentation/view_model/task_view_
 import 'package:toy_village_app/features/task/data/model/task_model.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_card.dart';
 
-int _rank(WidgetRef ref, TaskModel task) {
+int _rank(WidgetRef ref, TaskModel task, DateTime now) {
   final hasReport = ref.watch(taskReportProvider(task.id)).value != null;
   final status = hasReport && task.status == TaskStatus.notSubmitted
       ? TaskStatus.submitted
@@ -20,7 +20,7 @@ int _rank(WidgetRef ref, TaskModel task) {
   switch (status) {
     case TaskStatus.notSubmitted:
       final deadline = task.deadline;
-      final expired = deadline != null && deadline.isBefore(DateTime.now());
+      final expired = deadline != null && deadline.isBefore(now);
       return expired ? 1 : 0;
     case TaskStatus.rejected:
       return 2;
@@ -58,8 +58,10 @@ class TaskView extends ConsumerWidget {
                     if (tasks.isEmpty) {
                       return const EmptyState(message: '오늘 등록된 업무가 없습니다');
                     }
-                    final sorted = [...tasks]
-                      ..sort((a, b) => _rank(ref, a).compareTo(_rank(ref, b)));
+                    final now = DateTime.now();
+                    final sorted = [...tasks]..sort(
+                      (a, b) => _rank(ref, a, now).compareTo(_rank(ref, b, now)),
+                    );
                     return ListView.builder(
                       itemCount: sorted.length,
                       itemBuilder: (context, index) =>
