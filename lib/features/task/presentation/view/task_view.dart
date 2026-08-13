@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:toy_village_app/core/constants/color.dart';
-import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/core/widgets/empty_state.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/task/data/model/task_status.dart';
 import 'package:toy_village_app/features/task/presentation/view_model/seen_task_view_model.dart';
@@ -12,6 +11,25 @@ import 'package:toy_village_app/features/task/presentation/view_model/task_repor
 import 'package:toy_village_app/features/task/presentation/view_model/task_view_model.dart';
 import 'package:toy_village_app/features/task/data/model/task_model.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_card.dart';
+
+int _rank(WidgetRef ref, TaskModel task, DateTime now) {
+  final hasReport = ref.watch(taskReportProvider(task.id)).value != null;
+  final status = hasReport && task.status == TaskStatus.notSubmitted
+      ? TaskStatus.submitted
+      : task.status;
+  switch (status) {
+    case TaskStatus.notSubmitted:
+      final deadline = task.deadline;
+      final expired = deadline != null && deadline.isBefore(now);
+      return expired ? 1 : 0;
+    case TaskStatus.rejected:
+      return 2;
+    case TaskStatus.submitted:
+      return 3;
+    case TaskStatus.completed:
+      return 4;
+  }
+}
 
 class TaskView extends ConsumerWidget {
   const TaskView({super.key});
@@ -38,19 +56,16 @@ class TaskView extends ConsumerWidget {
                   value: ref.watch(taskViewModelProvider),
                   data: (tasks) {
                     if (tasks.isEmpty) {
-                      return Center(
-                        child: Text(
-                          '오늘 등록된 업무가 없습니다',
-                          style: ToyVillageTextStyle.body3.copyWith(
-                            color: ToyVillageColor.gray60,
-                          ),
-                        ),
-                      );
+                      return const EmptyState(message: '오늘 등록된 업무가 없습니다');
                     }
+                    final now = DateTime.now();
+                    final sorted = [...tasks]..sort(
+                      (a, b) => _rank(ref, a, now).compareTo(_rank(ref, b, now)),
+                    );
                     return ListView.builder(
-                      itemCount: tasks.length,
+                      itemCount: sorted.length,
                       itemBuilder: (context, index) =>
-                          _TaskListItem(task: tasks[index]),
+                          _TaskListItem(task: sorted[index]),
                     );
                   },
                 ),

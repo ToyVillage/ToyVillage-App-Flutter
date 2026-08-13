@@ -4,7 +4,7 @@ import 'package:toy_village_app/features/task/data/model/task_model.dart';
 import 'package:toy_village_app/features/task/data/model/task_status.dart';
 
 final taskViewModelProvider =
-    AsyncNotifierProvider<TaskViewModel, List<TaskModel>>(
+    AsyncNotifierProvider.autoDispose<TaskViewModel, List<TaskModel>>(
       () => TaskViewModel(),
     );
 
@@ -14,7 +14,7 @@ class TaskViewModel extends AsyncNotifier<List<TaskModel>> {
     final now = DateTime.now();
     final threeHoursAgo = now.subtract(const Duration(hours: 3));
 
-    return [
+    final tasks = [
       TaskModel(
         id: 1,
         title: '카피바라 사육장 청소',
@@ -44,5 +44,12 @@ class TaskViewModel extends AsyncNotifier<List<TaskModel>> {
         deadline: now.subtract(const Duration(days: 1)),
       ),
     ];
+
+    final completedCutoff = now.subtract(const Duration(days: 3));
+    return tasks.where((task) {
+      if (task.status != TaskStatus.completed) return true;
+      final deadline = task.deadline;
+      return deadline == null || deadline.isAfter(completedCutoff);
+    }).toList();
   }
 }
