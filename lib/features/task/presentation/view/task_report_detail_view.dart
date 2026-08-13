@@ -41,7 +41,7 @@ class TaskReportDetailView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final report = ref.watch(taskReportProvider(id)).value;
     final status = ref.watch(taskDetailViewModelProvider(id)).value?.status;
-    final canEdit = status != TaskStatus.completed;
+    final canEdit = status != null && status != TaskStatus.completed;
 
     return Scaffold(
       appBar: const ToyVillageAppBar(closeIcon: true),
