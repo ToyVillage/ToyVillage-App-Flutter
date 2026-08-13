@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:toy_village_app/core/constants/color.dart';
-import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/core/widgets/empty_state.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/document/presentation/view_model/document_view_model.dart';
 import 'package:toy_village_app/features/document/presentation/widget/document_card.dart';
@@ -54,14 +53,7 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
                   loading: const DocumentListSkeleton(),
                   data: (documents) {
                     if (documents.isEmpty) {
-                      return Center(
-                        child: Text(
-                          '등록된 자료가 없습니다',
-                          style: ToyVillageTextStyle.body3.copyWith(
-                            color: ToyVillageColor.gray60,
-                          ),
-                        ),
-                      );
+                      return const EmptyState(message: '등록된 자료가 없습니다');
                     }
                     return ListView.builder(
                       itemCount: documents.length,
