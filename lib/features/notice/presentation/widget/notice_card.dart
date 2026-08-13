@@ -24,7 +24,7 @@ class NoticeCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 6),
         child: Container(
           decoration: BoxDecoration(
             color: ToyVillageColor.white,
