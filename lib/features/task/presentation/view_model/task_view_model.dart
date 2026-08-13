@@ -4,7 +4,7 @@ import 'package:toy_village_app/features/task/data/model/task_model.dart';
 import 'package:toy_village_app/features/task/data/model/task_status.dart';
 
 final taskViewModelProvider =
-    AsyncNotifierProvider<TaskViewModel, List<TaskModel>>(
+    AsyncNotifierProvider.autoDispose<TaskViewModel, List<TaskModel>>(
       () => TaskViewModel(),
     );
 
