@@ -7,6 +7,7 @@ import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/time_util.dart';
 import 'package:toy_village_app/core/utils/word_util.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/file/attachment_section.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/section_divider.dart';
@@ -78,30 +79,19 @@ class TaskDetailView extends ConsumerWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                  child: GestureDetector(
+                  child: ToyVillageButton(
+                    label: (hasReport || status != TaskStatus.notSubmitted)
+                        ? '조회하기'
+                        : '업무 보고서 작성하기',
                     onTap: () async {
-                      await context.push('/task/report', extra: task.id);
+                      final route =
+                          (hasReport || status != TaskStatus.notSubmitted)
+                          ? '/task/report/detail'
+                          : '/task/report/create';
+                      await context.push(route, extra: task.id);
                       if (!context.mounted) return;
                       ref.invalidate(taskReportProvider(id));
                     },
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: ToyVillageColor.gray100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 15.5),
-                        child: Center(
-                          child: Text(
-                            hasReport ? '업무 보고서 확인 및 수정' : '업무 보고서 작성하기',
-                            style: ToyVillageTextStyle.button3.copyWith(
-                              color: ToyVillageColor.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
                   ),
                 ),
               ],
