@@ -133,67 +133,74 @@ class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
       child: Scaffold(
         appBar: const ToyVillageAppBar(closeIcon: true),
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 28),
-                  child: ToyVillageTitle(title: _title),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TemplateDropdownField(
-                          label: '양식 선택',
-                          hintText: '업무일지 양식을 선택해주세요',
-                          value: _template,
-                          items: dailyLogTemplates,
-                          onChanged: (value) =>
-                              setState(() => _template = value),
-                        ),
-                        const SizedBox(height: 20),
-                        ToyVillageTextField(
-                          label: '내용',
-                          minLines: 14,
-                          hintText: '내용 입력',
-                          controller: _contentController,
-                        ),
-                        const SizedBox(height: 20),
-                      ],
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 28),
+                      child: ToyVillageTitle(title: _title),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: _isEdit
-                      ? ToyVillageButton(
-                          label: '수정사항 저장하기',
-                          onTap: _saveEdit,
-                        )
-                      : Row(
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.only(bottom: 80),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: ToyVillageButton.outlined(
-                                label: '임시저장',
-                                onTap: _saveDraft,
-                              ),
+                            TemplateDropdownField(
+                              label: '양식 선택',
+                              hintText: '업무일지 양식을 선택해주세요',
+                              value: _template,
+                              items: dailyLogTemplates,
+                              onChanged: (value) =>
+                                  setState(() => _template = value),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ToyVillageButton(
-                                label: '작성 완료하기',
-                                onTap: _complete,
-                              ),
+                            const SizedBox(height: 20),
+                            ToyVillageTextField(
+                              label: '내용',
+                              minLines: 14,
+                              hintText: '내용 입력',
+                              controller: _contentController,
                             ),
+                            const SizedBox(height: 20),
                           ],
                         ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              Positioned(
+                left: 20,
+                right: 20,
+                bottom: 16,
+                child: _isEdit
+                    ? ToyVillageButton(
+                        label: '수정사항 저장하기',
+                        onTap: _saveEdit,
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: ToyVillageButton.outlined(
+                              label: '임시저장',
+                              onTap: _saveDraft,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ToyVillageButton(
+                              label: '작성 완료하기',
+                              onTap: _complete,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ],
           ),
         ),
       ),
