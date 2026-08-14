@@ -13,4 +13,10 @@ class SvgAssets {
   static const clockCheck = 'assets/svg/clock_check.svg';
   static const upload = 'assets/svg/upload.svg';
   static const delete = 'assets/svg/delete.svg';
+
+  static const navMegaphone = 'assets/svg/bottom_icon/megaphone.svg';
+  static const navCalendar = 'assets/svg/bottom_icon/calendar.svg';
+  static const navTask = 'assets/svg/bottom_icon/task.svg';
+  static const navFolder = 'assets/svg/bottom_icon/folder.svg';
+  static const navMenu = 'assets/svg/bottom_icon/menu.svg';
 }

@@ -55,6 +55,7 @@ flutter:
 
   assets:
     - assets/svg/
+    - assets/svg/bottom_icon/
 
 dependency_overrides:
   path_provider_foundation: 2.4.1
