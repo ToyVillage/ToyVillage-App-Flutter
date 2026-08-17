@@ -8,6 +8,7 @@ import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_d
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_view.dart';
 import 'package:toy_village_app/features/day_off/presentation/view/day_off_view.dart';
 import 'package:toy_village_app/features/document/presentation/view/document_view.dart';
+import 'package:toy_village_app/features/menu/presentation/view/menu_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_detail_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_view.dart';
 import 'package:toy_village_app/features/reservation/presentation/view/reservation_detail_view.dart';
@@ -26,7 +27,7 @@ const _invalidAccess = Scaffold(
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/dailyLog',
+  initialLocation: '/notice',
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
@@ -124,29 +125,8 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/dailyLog',
-              builder: (context, state) => const DailyLogView(),
-              routes: [
-                GoRoute(
-                  path: 'create',
-                  parentNavigatorKey: _rootNavigatorKey,
-                  builder: (context, state) {
-                    final extra = state.extra;
-                    return DailyLogCreateView(
-                      log: extra is DailyLog ? extra : null,
-                    );
-                  },
-                ),
-                GoRoute(
-                  path: 'detail',
-                  parentNavigatorKey: _rootNavigatorKey,
-                  builder: (context, state) {
-                    final id = state.extra;
-                    if (id is! int) return _invalidAccess;
-                    return DailyLogDetailView(id: id);
-                  },
-                ),
-              ],
+              path: '/menu',
+              builder: (context, state) => const MenuView(),
             ),
           ],
         ),
@@ -162,6 +142,27 @@ final GoRouter appRouter = GoRouter(
             final extra = state.extra;
             if (extra is! ({int id, String title})) return _invalidAccess;
             return ReservationDetailView(id: extra.id, title: extra.title);
+          },
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/dailyLog',
+      builder: (context, state) => const DailyLogView(),
+      routes: [
+        GoRoute(
+          path: 'create',
+          builder: (context, state) {
+            final extra = state.extra;
+            return DailyLogCreateView(log: extra is DailyLog ? extra : null);
+          },
+        ),
+        GoRoute(
+          path: 'detail',
+          builder: (context, state) {
+            final id = state.extra;
+            if (id is! int) return _invalidAccess;
+            return DailyLogDetailView(id: id);
           },
         ),
       ],
