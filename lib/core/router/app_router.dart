@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/bottom_bar/main_scaffold.dart';
 import 'package:toy_village_app/features/daily_log/data/model/daily_log.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_create_view.dart';
@@ -18,7 +19,10 @@ import 'package:toy_village_app/features/task/presentation/view/task_view.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
-const _invalidAccess = Scaffold(body: Center(child: Text('잘못된 접근입니다.')));
+const _invalidAccess = Scaffold(
+  appBar: ToyVillageAppBar(closeIcon: true),
+  body: Center(child: Text('잘못된 접근입니다.')),
+);
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
