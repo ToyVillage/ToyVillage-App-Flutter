@@ -6,6 +6,8 @@ import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/svg_assets.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 
+const double kBottomBarHeight = 70;
+
 class _NavItem {
   final String label;
   final String icon;
@@ -126,10 +128,7 @@ class _Item extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22),
-              child: SvgPicture.asset(item.icon, width: 24, height: 24),
-            ),
+            SvgPicture.asset(item.icon, width: 24, height: 24),
             const SizedBox(height: 4),
             Text(
               item.label,
