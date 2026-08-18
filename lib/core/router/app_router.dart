@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/bottom_bar/main_scaffold.dart';
+import 'package:toy_village_app/features/auth/presentation/view/login_view.dart';
 import 'package:toy_village_app/features/daily_log/data/model/daily_log.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_create_view.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_detail_view.dart';
@@ -27,7 +28,7 @@ const _invalidAccess = Scaffold(
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/notice',
+  initialLocation: '/login',
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
@@ -167,5 +168,6 @@ final GoRouter appRouter = GoRouter(
         ),
       ],
     ),
+    GoRoute(path: '/login', builder: (context, state) => const LoginView())
   ],
 );
