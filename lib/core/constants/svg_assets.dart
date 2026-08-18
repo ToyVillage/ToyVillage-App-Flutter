@@ -13,6 +13,8 @@ class SvgAssets {
   static const clockCheck = 'assets/svg/clock_check.svg';
   static const upload = 'assets/svg/upload.svg';
   static const delete = 'assets/svg/delete.svg';
+  static const visible = 'assets/svg/visible.svg';
+  static const invisible = 'assets/svg/invisible.svg';
 
   static const navMegaphone = 'assets/svg/bottom_icon/megaphone.svg';
   static const navCalendar = 'assets/svg/bottom_icon/calendar.svg';
