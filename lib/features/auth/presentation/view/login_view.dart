@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
-import 'package:toy_village_app/core/network/dio_provider.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
+import 'package:toy_village_app/features/auth/presentation/view_model/login_view_model.dart';
 
 class LoginView extends ConsumerStatefulWidget {
   const LoginView({super.key});
@@ -20,7 +20,6 @@ class LoginView extends ConsumerStatefulWidget {
 class _LoginViewState extends ConsumerState<LoginView> {
   final _idController = TextEditingController();
   final _pwController = TextEditingController();
-  bool _loading = false;
 
   @override
   void dispose() {
@@ -37,24 +36,20 @@ class _LoginViewState extends ConsumerState<LoginView> {
       showTopToast(overlay, '아이디와 비밀번호를 입력해주세요.', isError: true);
       return;
     }
-    setState(() => _loading = true);
-    try {
-      final token = await ref
-          .read(authServiceProvider)
-          .loginWith(username: username, password: password);
-      ref.read(tokenStoreProvider).accessToken = token;
-      if (!mounted) return;
+    final success = await ref
+        .read(loginViewModelProvider.notifier)
+        .login(username: username, password: password);
+    if (!mounted) return;
+    if (success) {
       context.go('/notice');
-    } catch (_) {
-      if (!mounted) return;
+    } else {
       showTopToast(overlay, '로그인에 실패했어요.\n아이디와 비밀번호를 확인해주세요.', isError: true);
-    } finally {
-      if (mounted) setState(() => _loading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final loading = ref.watch(loginViewModelProvider).isLoading;
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -91,11 +86,11 @@ class _LoginViewState extends ConsumerState<LoginView> {
                 right: 20,
                 bottom: 16,
                 child: ToyVillageButton(
-                  label: _loading ? '로그인 중...' : '로그인',
-                  background: _loading
+                  label: loading ? '로그인 중...' : '로그인',
+                  background: loading
                       ? ToyVillageColor.gray60
                       : ToyVillageColor.gray100,
-                  onTap: _loading ? () {} : _login,
+                  onTap: loading ? () {} : _login,
                 ),
               ),
             ],
