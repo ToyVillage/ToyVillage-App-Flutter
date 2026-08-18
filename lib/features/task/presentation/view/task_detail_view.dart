@@ -38,47 +38,47 @@ class TaskDetailView extends ConsumerWidget {
                 ? TaskStatus.submitted
                 : task.status;
 
-            return Column(
+            return Stack(
               children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _Header(task: task, status: status),
+                SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _Header(task: task, status: status),
+                      const SectionDivider(),
+                      Text(
+                        breakByWord(task.content),
+                        style: ToyVillageTextStyle.body5,
+                      ),
+                      if (task.files.isNotEmpty) ...[
                         const SectionDivider(),
+                        AttachmentSection(
+                          files: task.files
+                              .map(
+                                (f) =>
+                                    (fileName: f.fileName, fileKey: f.fileKey),
+                              )
+                              .toList(),
+                        ),
+                      ],
+                      if (status == TaskStatus.rejected &&
+                          task.rejectionReason != null) ...[
+                        const SectionDivider(),
+                        Text('반려 사유', style: ToyVillageTextStyle.caption4.copyWith(color: ToyVillageColor.gray60)),
+                        const SizedBox(height: 12),
                         Text(
-                          breakByWord(task.content),
+                          breakByWord(task.rejectionReason!),
                           style: ToyVillageTextStyle.body5,
                         ),
-                        if (task.files.isNotEmpty) ...[
-                          const SectionDivider(),
-                          AttachmentSection(
-                            files: task.files
-                                .map(
-                                  (f) =>
-                                      (fileName: f.fileName, fileKey: f.fileKey),
-                                )
-                                .toList(),
-                          ),
-                        ],
-                        if (status == TaskStatus.rejected &&
-                            task.rejectionReason != null) ...[
-                          const SectionDivider(),
-                          Text('반려 사유', style: ToyVillageTextStyle.caption4.copyWith(color: ToyVillageColor.gray60)),
-                          const SizedBox(height: 12),
-                          Text(
-                            breakByWord(task.rejectionReason!),
-                            style: ToyVillageTextStyle.body5,
-                          ),
-                        ],
                       ],
-                    ),
+                    ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                Positioned(
+                  left: 20,
+                  right: 20,
+                  bottom: 16,
                   child: ToyVillageButton(
                     label: (hasReport || status != TaskStatus.notSubmitted)
                         ? '조회하기'
