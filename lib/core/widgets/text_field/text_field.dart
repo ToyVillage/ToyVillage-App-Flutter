@@ -54,6 +54,8 @@ class _ToyVillageTextFieldState extends State<ToyVillageTextField> {
           style: ToyVillageTextStyle.caption3,
           controller: widget.controller,
           obscureText: widget.hasEyesIcon && _obscure,
+          autocorrect: !widget.hasEyesIcon,
+          enableSuggestions: !widget.hasEyesIcon,
           minLines: widget.hasEyesIcon ? 1 : widget.minLines,
           maxLines: widget.hasEyesIcon ? 1 : widget.maxLines,
           keyboardType: widget.hasEyesIcon
@@ -61,14 +63,19 @@ class _ToyVillageTextFieldState extends State<ToyVillageTextField> {
               : TextInputType.multiline,
           decoration: InputDecoration(
             suffixIcon: widget.hasEyesIcon
-                ? GestureDetector(
-                    onTap: () => setState(() => _obscure = !_obscure),
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: SvgPicture.asset(
-                        _obscure ? SvgAssets.visible : SvgAssets.invisible,
-                        width: 24,
-                        height: 24,
+                ? Semantics(
+                    button: true,
+                    label: _obscure ? '비밀번호 표시' : '비밀번호 숨기기',
+                    child: GestureDetector(
+                      excludeFromSemantics: true,
+                      onTap: () => setState(() => _obscure = !_obscure),
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: SvgPicture.asset(
+                          _obscure ? SvgAssets.visible : SvgAssets.invisible,
+                          width: 24,
+                          height: 24,
+                        ),
                       ),
                     ),
                   )
