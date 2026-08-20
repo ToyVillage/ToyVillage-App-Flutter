@@ -132,7 +132,7 @@ class _Item extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               item.label,
-              style: ToyVillageTextStyle.body5,
+              style: ToyVillageTextStyle.body5.copyWith(fontSize: 12),
               maxLines: 1,
               softWrap: false,
               overflow: TextOverflow.visible,
