@@ -25,7 +25,10 @@ class DocumentCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(color: ToyVillageColor.white),
+        decoration: BoxDecoration(
+          color: ToyVillageColor.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Row(
