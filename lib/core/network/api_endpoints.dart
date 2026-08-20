@@ -15,7 +15,7 @@ class ApiEndpoints {
   static const openTime = '/open-time';
 
   /// Reservation
-  static const reservation = '/reservation';
+  static const reservation = '/reservation/employee';
 
   /// File
   static const file = '/file';
