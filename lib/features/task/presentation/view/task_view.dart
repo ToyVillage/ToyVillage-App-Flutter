@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -55,17 +56,31 @@ class TaskView extends ConsumerWidget {
                 child: CustomAsyncValue(
                   value: ref.watch(taskViewModelProvider),
                   data: (tasks) {
-                    if (tasks.isEmpty) {
-                      return const EmptyState(message: '오늘 등록된 업무가 없습니다');
-                    }
                     final now = DateTime.now();
                     final sorted = [...tasks]..sort(
                       (a, b) => _rank(ref, a, now).compareTo(_rank(ref, b, now)),
                     );
-                    return ListView.builder(
-                      itemCount: sorted.length,
-                      itemBuilder: (context, index) =>
-                          _TaskListItem(task: sorted[index]),
+                    return CustomScrollView(
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      slivers: [
+                        CupertinoSliverRefreshControl(
+                          onRefresh: () =>
+                              ref.refresh(taskViewModelProvider.future),
+                        ),
+                        if (sorted.isEmpty)
+                          const SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: EmptyState(message: '오늘 등록된 업무가 없습니다'),
+                          )
+                        else
+                          SliverList.builder(
+                            itemCount: sorted.length,
+                            itemBuilder: (context, index) =>
+                                _TaskListItem(task: sorted[index]),
+                          ),
+                      ],
                     );
                   },
                 ),

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -35,29 +36,43 @@ class ReservationView extends ConsumerWidget {
                   loading: const ReservationListSkeleton(),
                   onRetry: () => ref.invalidate(reservationViewModelProvider),
                   data: (reservations) {
-                    if (reservations.isEmpty) {
-                      return const EmptyState(message: '등록된 단체예약이 없습니다');
-                    }
-                    return ListView.builder(
-                      itemCount: reservations.length,
-                      itemBuilder: (context, index) {
-                        final reservation = reservations[index];
-                        return ReservationCard(
-                          onTap: () {
-                            context.push(
-                              '/reservation/detail',
-                              extra: (
-                                id: reservation.id,
-                                title: reservation.title,
-                              ),
+                    return CustomScrollView(
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      slivers: [
+                        CupertinoSliverRefreshControl(
+                          onRefresh: () =>
+                              ref.refresh(reservationViewModelProvider.future),
+                        ),
+                        if (reservations.isEmpty)
+                          const SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: EmptyState(message: '등록된 단체예약이 없습니다'),
+                          )
+                        else
+                        SliverList.builder(
+                          itemCount: reservations.length,
+                          itemBuilder: (context, index) {
+                            final reservation = reservations[index];
+                            return ReservationCard(
+                              onTap: () {
+                                context.push(
+                                  '/reservation/detail',
+                                  extra: (
+                                    id: reservation.id,
+                                    title: reservation.title,
+                                  ),
+                                );
+                              },
+                              title: reservation.title,
+                              reservationName: reservation.reservationName,
+                              visitDate: reservation.visitDate,
+                              reservationCount: reservation.reservationCount,
                             );
                           },
-                          title: reservation.title,
-                          reservationName: reservation.reservationName,
-                          visitDate: reservation.visitDate,
-                          reservationCount: reservation.reservationCount,
-                        );
-                      },
+                        ),
+                      ],
                     );
                   },
                 ),
