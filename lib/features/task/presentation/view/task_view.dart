@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -62,10 +63,21 @@ class TaskView extends ConsumerWidget {
                     final sorted = [...tasks]..sort(
                       (a, b) => _rank(ref, a, now).compareTo(_rank(ref, b, now)),
                     );
-                    return ListView.builder(
-                      itemCount: sorted.length,
-                      itemBuilder: (context, index) =>
-                          _TaskListItem(task: sorted[index]),
+                    return CustomScrollView(
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      slivers: [
+                        CupertinoSliverRefreshControl(
+                          onRefresh: () =>
+                              ref.refresh(taskViewModelProvider.future),
+                        ),
+                        SliverList.builder(
+                          itemCount: sorted.length,
+                          itemBuilder: (context, index) =>
+                              _TaskListItem(task: sorted[index]),
+                        ),
+                      ],
                     );
                   },
                 ),

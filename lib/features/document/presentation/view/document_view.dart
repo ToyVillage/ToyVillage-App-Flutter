@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
@@ -55,16 +56,27 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
                     if (documents.isEmpty) {
                       return const EmptyState(message: '등록된 자료가 없습니다');
                     }
-                    return ListView.builder(
-                      itemCount: documents.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final document = documents[index];
-                        return DocumentCard(
-                          id: document.id,
-                          title: document.title,
-                          type: document.type,
-                        );
-                      },
+                    return CustomScrollView(
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      slivers: [
+                        CupertinoSliverRefreshControl(
+                          onRefresh: () =>
+                              ref.refresh(documentViewModelProvider.future),
+                        ),
+                        SliverList.builder(
+                          itemCount: documents.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final document = documents[index];
+                            return DocumentCard(
+                              id: document.id,
+                              title: document.title,
+                              type: document.type,
+                            );
+                          },
+                        ),
+                      ],
                     );
                   },
                 ),

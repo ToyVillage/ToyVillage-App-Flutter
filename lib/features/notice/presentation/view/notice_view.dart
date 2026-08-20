@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -43,38 +44,52 @@ class NoticeView extends ConsumerWidget {
                         ref.watch(readNoticeProvider).value ?? <int>{};
                     final hasMore =
                         ref.read(noticeViewModelProvider.notifier).hasMore;
-                    return ListView.builder(
-                      itemCount: value.length + (hasMore ? 1 : 0),
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index >= value.length) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: ToyVillageColor.gray60,
-                              ),
-                            ),
-                          );
-                        }
-                        if (index == value.length - 1) {
-                          ref
-                              .read(noticeViewModelProvider.notifier)
-                              .loadMore();
-                        }
-                        final notice = value[index];
-                        return NoticeCard(
-                          kind: notice.kind,
-                          title: notice.title,
-                          time: notice.createdAt,
-                          isRead: readIds.contains(notice.id),
-                          onTap: () {
-                            ref
-                                .read(readNoticeProvider.notifier)
-                                .markAsRead(notice.id);
-                            context.push('/notice/detail', extra: notice.id);
+                    return CustomScrollView(
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      slivers: [
+                        CupertinoSliverRefreshControl(
+                          onRefresh: () =>
+                              ref.refresh(noticeViewModelProvider.future),
+                        ),
+                        SliverList.builder(
+                          itemCount: value.length + (hasMore ? 1 : 0),
+                          itemBuilder: (BuildContext context, int index) {
+                            if (index >= value.length) {
+                              return const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: ToyVillageColor.gray60,
+                                  ),
+                                ),
+                              );
+                            }
+                            if (index == value.length - 1) {
+                              ref
+                                  .read(noticeViewModelProvider.notifier)
+                                  .loadMore();
+                            }
+                            final notice = value[index];
+                            return NoticeCard(
+                              kind: notice.kind,
+                              title: notice.title,
+                              time: notice.createdAt,
+                              isRead: readIds.contains(notice.id),
+                              onTap: () {
+                                ref
+                                    .read(readNoticeProvider.notifier)
+                                    .markAsRead(notice.id);
+                                context.push(
+                                  '/notice/detail',
+                                  extra: notice.id,
+                                );
+                              },
+                            );
                           },
-                        );
-                      },
+                        ),
+                      ],
                     );
                   },
                 ),
