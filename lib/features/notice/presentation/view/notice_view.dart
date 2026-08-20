@@ -37,9 +37,6 @@ class NoticeView extends ConsumerWidget {
                   value: ref.watch(noticeViewModelProvider),
                   loading: const NoticeListSkeleton(),
                   data: (value) {
-                    if (value.isEmpty) {
-                      return const EmptyState(message: '등록된 공지사항이 없습니다');
-                    }
                     final readIds =
                         ref.watch(readNoticeProvider).value ?? <int>{};
                     final hasMore =
@@ -53,6 +50,12 @@ class NoticeView extends ConsumerWidget {
                           onRefresh: () =>
                               ref.refresh(noticeViewModelProvider.future),
                         ),
+                        if (value.isEmpty)
+                          const SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: EmptyState(message: '등록된 공지사항이 없습니다'),
+                          )
+                        else
                         SliverList.builder(
                           itemCount: value.length + (hasMore ? 1 : 0),
                           itemBuilder: (BuildContext context, int index) {

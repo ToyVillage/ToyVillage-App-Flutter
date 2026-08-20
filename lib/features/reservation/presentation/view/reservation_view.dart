@@ -36,9 +36,6 @@ class ReservationView extends ConsumerWidget {
                   loading: const ReservationListSkeleton(),
                   onRetry: () => ref.invalidate(reservationViewModelProvider),
                   data: (reservations) {
-                    if (reservations.isEmpty) {
-                      return const EmptyState(message: '등록된 단체예약이 없습니다');
-                    }
                     return CustomScrollView(
                       physics: const BouncingScrollPhysics(
                         parent: AlwaysScrollableScrollPhysics(),
@@ -48,6 +45,12 @@ class ReservationView extends ConsumerWidget {
                           onRefresh: () =>
                               ref.refresh(reservationViewModelProvider.future),
                         ),
+                        if (reservations.isEmpty)
+                          const SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: EmptyState(message: '등록된 단체예약이 없습니다'),
+                          )
+                        else
                         SliverList.builder(
                           itemCount: reservations.length,
                           itemBuilder: (context, index) {

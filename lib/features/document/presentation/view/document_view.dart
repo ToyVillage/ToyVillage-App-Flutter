@@ -53,9 +53,6 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
                   value: ref.watch(documentViewModelProvider),
                   loading: const DocumentListSkeleton(),
                   data: (documents) {
-                    if (documents.isEmpty) {
-                      return const EmptyState(message: '등록된 자료가 없습니다');
-                    }
                     return CustomScrollView(
                       physics: const BouncingScrollPhysics(
                         parent: AlwaysScrollableScrollPhysics(),
@@ -65,17 +62,23 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
                           onRefresh: () =>
                               ref.refresh(documentViewModelProvider.future),
                         ),
-                        SliverList.builder(
-                          itemCount: documents.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final document = documents[index];
-                            return DocumentCard(
-                              id: document.id,
-                              title: document.title,
-                              type: document.type,
-                            );
-                          },
-                        ),
+                        if (documents.isEmpty)
+                          const SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: EmptyState(message: '등록된 자료가 없습니다'),
+                          )
+                        else
+                          SliverList.builder(
+                            itemCount: documents.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              final document = documents[index];
+                              return DocumentCard(
+                                id: document.id,
+                                title: document.title,
+                                type: document.type,
+                              );
+                            },
+                          ),
                       ],
                     );
                   },
