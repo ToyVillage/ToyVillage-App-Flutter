@@ -44,6 +44,8 @@ class ToyVillageApp extends StatelessWidget {
         highlightColor: ToyVillageColor.gray30,
       ),
       routerConfig: appRouter,
+      builder: (context, child) =>
+          MediaQuery.withNoTextScaling(child: child ?? const SizedBox.shrink()),
     );
   }
 }
