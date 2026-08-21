@@ -16,7 +16,7 @@ class DailyLogView extends ConsumerWidget {
     final logs = ref.watch(dailyLogViewModelProvider);
 
     return Scaffold(
-      appBar: const ToyVillageAppBar(),
+      appBar: const ToyVillageAppBar(closeIcon: true,),
       body: SafeArea(
         child: Stack(
           children: [
