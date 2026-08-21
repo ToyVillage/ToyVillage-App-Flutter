@@ -21,4 +21,11 @@ class SvgAssets {
   static const navTask = 'assets/svg/bottom_icon/task.svg';
   static const navFolder = 'assets/svg/bottom_icon/folder.svg';
   static const navMenu = 'assets/svg/bottom_icon/menu.svg';
+
+  static const check = 'assets/svg/check.svg';
+  static const bookFilled = 'assets/svg/book_filled.svg';
+  static const pawPrint = 'assets/svg/paw_print.svg';
+  static const meat = 'assets/svg/meat.svg';
+  static const lock = 'assets/svg/lock.svg';
+  static const arrowRight = 'assets/svg/arrow_right.svg';
 }
