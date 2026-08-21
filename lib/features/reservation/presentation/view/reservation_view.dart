@@ -16,13 +16,13 @@ class ReservationView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
+      appBar: const ToyVillageAppBar(closeIcon: true,),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const ToyVillageAppBar(),
               const Padding(
                 padding: EdgeInsets.only(bottom: 20),
                 child: ToyVillageTitle(
