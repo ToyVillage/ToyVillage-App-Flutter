@@ -12,6 +12,7 @@ import 'package:toy_village_app/features/document/presentation/view/document_vie
 import 'package:toy_village_app/features/menu/presentation/view/menu_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_detail_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_view.dart';
+import 'package:toy_village_app/features/password/presentation/view/password_view.dart';
 import 'package:toy_village_app/features/reservation/presentation/view/reservation_detail_view.dart';
 import 'package:toy_village_app/features/reservation/presentation/view/reservation_view.dart';
 import 'package:toy_village_app/features/task/presentation/view/task_detail_view.dart';
@@ -168,6 +169,7 @@ final GoRouter appRouter = GoRouter(
         ),
       ],
     ),
-    GoRoute(path: '/login', builder: (context, state) => const LoginView())
+    GoRoute(path: '/login', builder: (context, state) => const LoginView()),
+    GoRoute(path: '/password', builder: (context, state) => const PasswordView())
   ],
 );
