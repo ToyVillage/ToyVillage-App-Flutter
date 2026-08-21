@@ -8,6 +8,7 @@ class ToyVillageColor {
   static const green = Color(0xFF00B48A);
   static const greenBackground = Color(0xFFA9ECDD);
   static const blue = Color(0xFF4952FF);
+  static const blueBackground = Color(0xFFE8E9FF);
   static const white = Color(0xFFFFFFFF);
 
   static const gray10 = Color(0xFFF5F5F7);
