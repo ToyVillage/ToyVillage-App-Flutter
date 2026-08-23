@@ -3,15 +3,18 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:toy_village_app/core/constants/color.dart';
+import 'package:toy_village_app/core/constants/text_style.dart';
 
 class ToyVillageAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool? closeIcon;
+  final String title;
 
-  const ToyVillageAppBar({super.key, this.closeIcon = false});
+  const ToyVillageAppBar({super.key, this.closeIcon = false, this.title = ''});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      title: Text(title, style: ToyVillageTextStyle.caption2,),
       backgroundColor: ToyVillageColor.gray10,
       elevation: 0,
       automaticallyImplyLeading: false,
