@@ -72,7 +72,7 @@ class _ToyVillageTextFieldState extends State<ToyVillageTextField> {
                       child: Padding(
                         padding: const EdgeInsets.only(right: 16),
                         child: SvgPicture.asset(
-                          _obscure ? SvgAssets.visible : SvgAssets.invisible,
+                          _obscure ? SvgAssets.invisible : SvgAssets.visible,
                           width: 24,
                           height: 24,
                         ),
