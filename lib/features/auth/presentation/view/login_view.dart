@@ -69,6 +69,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                       labelStyle: ToyVillageTextStyle.heading6,
                       hintText: '아이디를 입력해주세요',
                       controller: _idController,
+                      maxLines: 1,
                     ),
                     const SizedBox(height: 20),
                     ToyVillageTextField(
