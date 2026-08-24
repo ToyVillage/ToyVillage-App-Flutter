@@ -57,7 +57,7 @@ class MenuView extends StatelessWidget {
                 icon: SvgAssets.lock,
                 title: '비밀번호 변경하기',
                 onTap: () {
-                  // TODO: 비밀번호 페이지 변경
+                  context.push('/password');
                 },
               ),
             ],
