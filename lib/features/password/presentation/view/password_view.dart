@@ -43,6 +43,7 @@ class _PasswordViewState extends ConsumerState<PasswordView> {
   }
 
   Future<void> _submit() async {
+    if (ref.read(passwordViewModelProvider).isLoading) return;
     final overlay = Overlay.of(context, rootOverlay: true);
     final error = await ref
         .read(passwordViewModelProvider.notifier)
