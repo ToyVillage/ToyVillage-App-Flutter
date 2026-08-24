@@ -1,13 +1,13 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
-import 'package:toy_village_app/features/auth/data/repository/auth_repository.dart';
+import 'package:toy_village_app/features/password/presentation/view_model/password_view_model.dart';
 
 class PasswordView extends ConsumerStatefulWidget {
   const PasswordView({super.key});
@@ -20,7 +20,19 @@ class _PasswordViewState extends ConsumerState<PasswordView> {
   final _currentController = TextEditingController();
   final _newController = TextEditingController();
   final _confirmController = TextEditingController();
-  bool _loading = false;
+
+  bool get _mismatch =>
+      _confirmController.text.isNotEmpty &&
+      _newController.text != _confirmController.text;
+
+  @override
+  void initState() {
+    super.initState();
+    _newController.addListener(_onChanged);
+    _confirmController.addListener(_onChanged);
+  }
+
+  void _onChanged() => setState(() {});
 
   @override
   void dispose() {
@@ -32,55 +44,25 @@ class _PasswordViewState extends ConsumerState<PasswordView> {
 
   Future<void> _submit() async {
     final overlay = Overlay.of(context, rootOverlay: true);
-    final current = _currentController.text;
-    final newPw = _newController.text;
-    final confirm = _confirmController.text;
-
-    if (current.isEmpty || newPw.isEmpty || confirm.isEmpty) {
-      showTopToast(overlay, '모든 항목을 입력해주세요.', isError: true);
-      return;
-    }
-    if (newPw == current) {
-      showTopToast(overlay, '기존 비밀번호와 다르게 설정해주세요.', isError: true);
-      return;
-    }
-    if (newPw != confirm) {
-      showTopToast(overlay, '새 비밀번호가 일치하지 않습니다.', isError: true);
-      return;
-    }
-
-    setState(() => _loading = true);
-    try {
-      await ref
-          .read(authRepositoryProvider)
-          .changePassword(currentPassword: current, newPassword: newPw);
-      if (!mounted) return;
+    final error = await ref
+        .read(passwordViewModelProvider.notifier)
+        .changePassword(
+          current: _currentController.text,
+          newPassword: _newController.text,
+          confirm: _confirmController.text,
+        );
+    if (!mounted) return;
+    if (error == null) {
       showTopToast(overlay, '비밀번호가 변경되었습니다.');
       context.pop();
-    } on DioException catch (e) {
-      if (!mounted) return;
-      showTopToast(overlay, _errorMessage(e), isError: true);
-    } catch (_) {
-      if (!mounted) return;
-      showTopToast(overlay, '비밀번호 변경에 실패했습니다.', isError: true);
-    } finally {
-      if (mounted) setState(() => _loading = false);
+    } else {
+      showTopToast(overlay, error, isError: true);
     }
-  }
-
-  String _errorMessage(DioException e) {
-    final data = e.response?.data;
-    if (data is Map) {
-      final description = data['description'];
-      if (description is String && description.isNotEmpty) return description;
-      final message = data['message'];
-      if (message is String && message.isNotEmpty) return message;
-    }
-    return '비밀번호 변경에 실패했습니다.';
   }
 
   @override
   Widget build(BuildContext context) {
+    final loading = ref.watch(passwordViewModelProvider).isLoading;
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -117,6 +99,18 @@ class _PasswordViewState extends ConsumerState<PasswordView> {
                       hasEyesIcon: true,
                       controller: _confirmController,
                     ),
+                    if (_mismatch) ...[
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '비밀번호가 일치하지 않습니다',
+                          style: ToyVillageTextStyle.caption4.copyWith(
+                            color: ToyVillageColor.red,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -125,8 +119,8 @@ class _PasswordViewState extends ConsumerState<PasswordView> {
                 right: 20,
                 bottom: 16,
                 child: ToyVillageButton(
-                  label: _loading ? '변경 중...' : '변경 완료하기',
-                  onTap: _loading ? () {} : _submit,
+                  label: loading ? '변경 중...' : '변경 완료하기',
+                  onTap: loading ? () {} : _submit,
                 ),
               ),
             ],
