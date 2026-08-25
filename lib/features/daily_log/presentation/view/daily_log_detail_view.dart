@@ -51,7 +51,7 @@ class DailyLogDetailView extends ConsumerWidget {
                         MenuDropdownItem(
                           label: '수정',
                           onTap: () =>
-                              context.push('/dailyLog/create', extra: log),
+                              context.push('/daily-log/create', extra: log),
                         ),
                         MenuDropdownItem(
                           label: '삭제',
@@ -69,7 +69,7 @@ class DailyLogDetailView extends ConsumerWidget {
                                 .read(dailyLogViewModelProvider.notifier)
                                 .remove(id);
                             if (!context.mounted) return;
-                            context.go('/dailyLog');
+                            context.go('/daily-log');
                           },
                         ),
                       ],

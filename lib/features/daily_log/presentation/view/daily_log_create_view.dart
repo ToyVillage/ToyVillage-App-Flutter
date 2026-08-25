@@ -69,7 +69,7 @@ class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
     if (context.canPop()) {
       context.pop();
     } else {
-      context.go('/dailyLog');
+      context.go('/daily-log');
     }
   }
 

@@ -29,7 +29,7 @@ class MenuView extends StatelessWidget {
                 icon: SvgAssets.check,
                 title: '업무일지 작성하기',
                 onTap: () {
-                  context.push('/dailyLog');
+                  context.push('/daily-log');
                 },
               ),
               MenuCard(
@@ -41,9 +41,9 @@ class MenuView extends StatelessWidget {
               ),
               MenuCard(
                 icon: SvgAssets.pawPrint,
-                title: '개체 관리하기',
+                title: '개체 확인하기',
                 onTap: () {
-                  // TODO: 개체 관리 페이지 연결
+                  context.push('/entity-info');
                 },
               ),
               MenuCard(

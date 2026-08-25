@@ -51,7 +51,7 @@ class DailyLogView extends ConsumerWidget {
               bottom: 16,
               child: ToyVillageButton(
                 label: '업무일지 작성',
-                onTap: () => context.push('/dailyLog/create'),
+                onTap: () => context.push('/daily-log/create'),
               ),
             ),
           ],
