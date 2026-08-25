@@ -9,6 +9,7 @@ import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_d
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_view.dart';
 import 'package:toy_village_app/features/day_off/presentation/view/day_off_view.dart';
 import 'package:toy_village_app/features/document/presentation/view/document_view.dart';
+import 'package:toy_village_app/features/entity_info/presentation/view/entity_info_view.dart';
 import 'package:toy_village_app/features/menu/presentation/view/menu_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_detail_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_view.dart';
@@ -57,7 +58,7 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/dayOff',
+              path: '/day-off',
               builder: (context, state) => const DayOffView(),
             ),
           ],
@@ -149,7 +150,7 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
     GoRoute(
-      path: '/dailyLog',
+      path: '/daily-log',
       builder: (context, state) => const DailyLogView(),
       routes: [
         GoRoute(
@@ -170,6 +171,7 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
     GoRoute(path: '/login', builder: (context, state) => const LoginView()),
-    GoRoute(path: '/password', builder: (context, state) => const PasswordView())
+    GoRoute(path: '/password', builder: (context, state) => const PasswordView()),
+    GoRoute(path: '/entity-info', builder: (context, state) => const EntityInfoView())
   ],
 );
