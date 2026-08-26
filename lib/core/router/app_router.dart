@@ -25,7 +25,7 @@ import 'package:toy_village_app/features/task/presentation/view/task_view.dart';
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 const _invalidAccess = Scaffold(
-  appBar: ToyVillageAppBar(closeIcon: true),
+  appBar: ToyVillageAppBar(hasIcon: true),
   body: Center(child: Text('잘못된 접근입니다.')),
 );
 

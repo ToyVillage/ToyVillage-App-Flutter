@@ -25,7 +25,7 @@ class DailyLogDetailView extends ConsumerWidget {
 
     if (log == null) {
       return const Scaffold(
-        appBar: ToyVillageAppBar(closeIcon: true),
+        appBar: ToyVillageAppBar(hasIcon: true),
         body: SafeArea(child: SizedBox.shrink()),
       );
     }
@@ -33,7 +33,7 @@ class DailyLogDetailView extends ConsumerWidget {
     final title = '${log.createdAt.month}월 ${log.createdAt.day}일 업무일지';
 
     return Scaffold(
-      appBar: const ToyVillageAppBar(closeIcon: true),
+      appBar: const ToyVillageAppBar(hasIcon: true),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),

@@ -6,15 +6,15 @@ import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 
 class ToyVillageAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final bool? closeIcon;
+  final bool? hasIcon;
   final String title;
 
-  const ToyVillageAppBar({super.key, this.closeIcon = false, this.title = ''});
+  const ToyVillageAppBar({super.key, this.hasIcon = false, this.title = ''});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(title, style: ToyVillageTextStyle.caption2,),
+      title: Text(title, style: ToyVillageTextStyle.caption2),
       backgroundColor: ToyVillageColor.gray10,
       elevation: 0,
       automaticallyImplyLeading: false,
@@ -27,16 +27,18 @@ class ToyVillageAppBar extends StatelessWidget implements PreferredSizeWidget {
         systemNavigationBarIconBrightness: Brightness.dark,
         systemNavigationBarContrastEnforced: false,
       ),
-      leading: closeIcon == true ? IconButton(
-        tooltip: '뒤로가기',
-        icon: const Icon(
-          Symbols.chevron_left_rounded,
-          size: 28,
-          color: ToyVillageColor.gray100,
-          semanticLabel: '뒤로가기',
-        ),
-        onPressed: () => context.pop(),
-      ) : null
+      leading: hasIcon == true
+          ? IconButton(
+              tooltip: '뒤로가기',
+              icon: const Icon(
+                Symbols.chevron_left_rounded,
+                size: 28,
+                color: ToyVillageColor.gray100,
+                semanticLabel: '뒤로가기',
+              ),
+              onPressed: () => context.pop(),
+            )
+          : null,
     );
   }
 

@@ -26,7 +26,7 @@ class ReservationDetailView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: const ToyVillageAppBar(closeIcon: true),
+      appBar: const ToyVillageAppBar(hasIcon: true),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: CustomAsyncValue(

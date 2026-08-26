@@ -11,7 +11,7 @@ class EntityInfoDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      appBar: ToyVillageAppBar(closeIcon: true,),
+      appBar: ToyVillageAppBar(hasIcon: true,),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20),
         child: Column(
