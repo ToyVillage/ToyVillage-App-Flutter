@@ -22,7 +22,7 @@ class InfoLabel extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12,),
-          Text(value, style: ToyVillageTextStyle.caption2)
+          Expanded(child: Text(value, style: ToyVillageTextStyle.caption2))
         ],
       ),
     );
