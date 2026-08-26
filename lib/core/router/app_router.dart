@@ -171,7 +171,23 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
     GoRoute(path: '/login', builder: (context, state) => const LoginView()),
-    GoRoute(path: '/password', builder: (context, state) => const PasswordView()),
-    GoRoute(path: '/entity-info', builder: (context, state) => const EntityInfoView())
+    GoRoute(
+      path: '/password',
+      builder: (context, state) => const PasswordView(),
+    ),
+    GoRoute(
+      path: '/entity-info',
+      builder: (context, state) => const EntityInfoView(),
+      routes: [
+        GoRoute(
+          path: 'detail',
+          builder: (context, state) {
+            final id = state.extra;
+            if (id is! int) return _invalidAccess;
+            return EntityInfoDetailView(id: id);
+          },
+        ),
+      ]
+    ),
   ],
 );
