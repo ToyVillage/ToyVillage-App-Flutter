@@ -9,6 +9,7 @@ import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_d
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_view.dart';
 import 'package:toy_village_app/features/day_off/presentation/view/day_off_view.dart';
 import 'package:toy_village_app/features/document/presentation/view/document_view.dart';
+import 'package:toy_village_app/features/entity_info/presentation/view/entity_info_detail_view.dart';
 import 'package:toy_village_app/features/entity_info/presentation/view/entity_info_view.dart';
 import 'package:toy_village_app/features/menu/presentation/view/menu_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_detail_view.dart';
