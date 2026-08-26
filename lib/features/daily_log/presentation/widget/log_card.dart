@@ -15,7 +15,7 @@ class LogCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: GestureDetector(
-        onTap: () => context.push('/dailyLog/detail', extra: log.id),
+        onTap: () => context.push('/daily-log/detail', extra: log.id),
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(

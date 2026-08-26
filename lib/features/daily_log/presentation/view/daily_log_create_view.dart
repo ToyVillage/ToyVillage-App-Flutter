@@ -69,7 +69,7 @@ class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
     if (context.canPop()) {
       context.pop();
     } else {
-      context.go('/dailyLog');
+      context.go('/daily-log');
     }
   }
 
@@ -131,7 +131,7 @@ class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        appBar: const ToyVillageAppBar(closeIcon: true),
+        appBar: const ToyVillageAppBar(hasIcon: true),
         body: SafeArea(
           child: Stack(
             children: [

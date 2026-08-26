@@ -44,7 +44,7 @@ class TaskReportDetailView extends ConsumerWidget {
     final canEdit = status != null && status != TaskStatus.completed;
 
     return Scaffold(
-      appBar: const ToyVillageAppBar(closeIcon: true),
+      appBar: const ToyVillageAppBar(hasIcon: true),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),

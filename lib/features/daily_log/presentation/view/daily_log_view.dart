@@ -16,7 +16,7 @@ class DailyLogView extends ConsumerWidget {
     final logs = ref.watch(dailyLogViewModelProvider);
 
     return Scaffold(
-      appBar: const ToyVillageAppBar(closeIcon: true,),
+      appBar: const ToyVillageAppBar(hasIcon: true,),
       body: SafeArea(
         child: Stack(
           children: [
@@ -51,7 +51,7 @@ class DailyLogView extends ConsumerWidget {
               bottom: 16,
               child: ToyVillageButton(
                 label: '업무일지 작성',
-                onTap: () => context.push('/dailyLog/create'),
+                onTap: () => context.push('/daily-log/create'),
               ),
             ),
           ],

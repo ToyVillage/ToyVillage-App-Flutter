@@ -28,7 +28,7 @@ class TaskDetailView extends ConsumerWidget {
     final hasReport = ref.watch(taskReportProvider(id)).value != null;
 
     return Scaffold(
-      appBar: const ToyVillageAppBar(closeIcon: true),
+      appBar: const ToyVillageAppBar(hasIcon: true),
       body: SafeArea(
         child: CustomAsyncValue(
           value: ref.watch(taskDetailViewModelProvider(id)),

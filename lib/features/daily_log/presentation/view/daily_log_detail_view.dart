@@ -25,7 +25,7 @@ class DailyLogDetailView extends ConsumerWidget {
 
     if (log == null) {
       return const Scaffold(
-        appBar: ToyVillageAppBar(closeIcon: true),
+        appBar: ToyVillageAppBar(hasIcon: true),
         body: SafeArea(child: SizedBox.shrink()),
       );
     }
@@ -33,7 +33,7 @@ class DailyLogDetailView extends ConsumerWidget {
     final title = '${log.createdAt.month}월 ${log.createdAt.day}일 업무일지';
 
     return Scaffold(
-      appBar: const ToyVillageAppBar(closeIcon: true),
+      appBar: const ToyVillageAppBar(hasIcon: true),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -51,7 +51,7 @@ class DailyLogDetailView extends ConsumerWidget {
                         MenuDropdownItem(
                           label: '수정',
                           onTap: () =>
-                              context.push('/dailyLog/create', extra: log),
+                              context.push('/daily-log/create', extra: log),
                         ),
                         MenuDropdownItem(
                           label: '삭제',
@@ -69,7 +69,7 @@ class DailyLogDetailView extends ConsumerWidget {
                                 .read(dailyLogViewModelProvider.notifier)
                                 .remove(id);
                             if (!context.mounted) return;
-                            context.go('/dailyLog');
+                            context.go('/daily-log');
                           },
                         ),
                       ],
