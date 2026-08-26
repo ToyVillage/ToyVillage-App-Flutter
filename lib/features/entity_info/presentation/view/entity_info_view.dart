@@ -12,11 +12,37 @@ class EntityInfoView extends StatefulWidget {
   State<EntityInfoView> createState() => _EntityInfoViewState();
 }
 
+class _EntityDummy {
+  final int id;
+  final String entityName;
+  final String animalName;
+  final String category;
+
+  const _EntityDummy({
+    required this.id,
+    required this.entityName,
+    required this.animalName,
+    required this.category,
+  });
+}
+
+const _entities = <_EntityDummy>[
+  _EntityDummy(id: 1, entityName: '하나숭이', animalName: '원숭이', category: '포유류'),
+  _EntityDummy(id: 2, entityName: '두나숭이', animalName: '원숭이', category: '포유류'),
+  _EntityDummy(id: 3, entityName: '니모', animalName: '흰동가리', category: '어류'),
+  _EntityDummy(id: 4, entityName: '뽀글이', animalName: '금붕어', category: '어류'),
+  _EntityDummy(id: 5, entityName: '거부기', animalName: '거북', category: '파충류'),
+  _EntityDummy(id: 6, entityName: '구구', animalName: '비둘기', category: '조류'),
+];
+
 class _EntityInfoViewState extends State<EntityInfoView> {
   String _category = animalCategories.first;
 
   @override
   Widget build(BuildContext context) {
+    final entities =
+        _entities.where((e) => e.category == _category).toList();
+
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true),
       body: Padding(
@@ -33,15 +59,18 @@ class _EntityInfoViewState extends State<EntityInfoView> {
             const SizedBox(height: 18),
             Expanded(
               child: ListView.separated(
-                itemCount: 4,
-                itemBuilder: (context, index) => EntityCard(
-                  entityName: '하나숭이',
-                  animalName: '원숭이',
-                  animalCategory: '포유류',
-                  onTap: () {
-                    context.push('/entity-info/detail', extra: 1);
-                  },
-                ),
+                itemCount: entities.length,
+                itemBuilder: (context, index) {
+                  final entity = entities[index];
+                  return EntityCard(
+                    entityName: entity.entityName,
+                    animalName: entity.animalName,
+                    animalCategory: entity.category,
+                    onTap: () {
+                      context.push('/entity-info/detail', extra: entity.id);
+                    },
+                  );
+                },
                 separatorBuilder: (context, index) => const SizedBox(height: 8),
               ),
             ),
