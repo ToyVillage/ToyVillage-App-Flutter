@@ -57,7 +57,7 @@ class _CategoryChip extends StatelessWidget {
           color: selected ? ToyVillageColor.blue : Colors.transparent,
           borderRadius: BorderRadius.circular(27),
           border: selected
-              ? null
+              ? Border.all(color: ToyVillageColor.blue)
               : Border.all(color: ToyVillageColor.gray40),
         ),
         child: Text(
