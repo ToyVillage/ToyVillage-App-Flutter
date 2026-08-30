@@ -4,6 +4,7 @@ import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/bottom_bar/main_scaffold.dart';
 import 'package:toy_village_app/features/auth/presentation/view/login_view.dart';
 import 'package:toy_village_app/features/daily_log/data/model/daily_log.dart';
+import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_content_view.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_create_view.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_detail_view.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_view.dart';
@@ -160,6 +161,16 @@ final GoRouter appRouter = GoRouter(
             final extra = state.extra;
             return DailyLogCreateView(log: extra is DailyLog ? extra : null);
           },
+          routes: [
+            GoRoute(
+              path: 'content',
+              builder: (context, state) {
+                final template = state.extra;
+                if (template is! String) return _invalidAccess;
+                return DailyLogContentView(templateName: template);
+              },
+            ),
+          ],
         ),
         GoRoute(
           path: 'detail',
