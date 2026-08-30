@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/daily_log/data/model/daily_log.dart';
@@ -51,7 +53,16 @@ class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
   }
 
   void _next() {
-    // TODO: 내용 작성 페이지로 이동
+    final template = _template;
+    if (template == null) {
+      showTopToast(
+        Overlay.of(context, rootOverlay: true),
+        '양식을 선택해주세요.',
+        isError: true,
+      );
+      return;
+    }
+    context.push('/daily-log/create/content', extra: template);
   }
 
   @override
