@@ -4,8 +4,10 @@ import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/bottom_bar/main_scaffold.dart';
 import 'package:toy_village_app/features/auth/presentation/view/login_view.dart';
 import 'package:toy_village_app/features/daily_log/data/model/daily_log.dart';
+import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_content_view.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_create_view.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_detail_view.dart';
+import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_edit_view.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_view.dart';
 import 'package:toy_village_app/features/day_off/presentation/view/day_off_view.dart';
 import 'package:toy_village_app/features/document/presentation/view/document_view.dart';
@@ -160,6 +162,16 @@ final GoRouter appRouter = GoRouter(
             final extra = state.extra;
             return DailyLogCreateView(log: extra is DailyLog ? extra : null);
           },
+          routes: [
+            GoRoute(
+              path: 'content',
+              builder: (context, state) {
+                final templateId = state.extra;
+                if (templateId is! int) return _invalidAccess;
+                return DailyLogContentView(templateId: templateId);
+              },
+            ),
+          ],
         ),
         GoRoute(
           path: 'detail',
@@ -167,6 +179,19 @@ final GoRouter appRouter = GoRouter(
             final id = state.extra;
             if (id is! int) return _invalidAccess;
             return DailyLogDetailView(id: id);
+          },
+        ),
+        GoRoute(
+          path: 'edit',
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra is! ({int workLogId, int templateId})) {
+              return _invalidAccess;
+            }
+            return DailyLogEditView(
+              workLogId: extra.workLogId,
+              templateId: extra.templateId,
+            );
           },
         ),
       ],
@@ -188,7 +213,7 @@ final GoRouter appRouter = GoRouter(
             return EntityInfoDetailView(id: id);
           },
         ),
-      ]
+      ],
     ),
   ],
 );

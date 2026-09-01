@@ -22,6 +22,7 @@ class SvgAssets {
   static const navFolder = 'assets/svg/bottom_icon/folder.svg';
   static const navMenu = 'assets/svg/bottom_icon/menu.svg';
 
+  static const radio = 'assets/svg/radio.svg';
   static const check = 'assets/svg/check.svg';
   static const bookFilled = 'assets/svg/book_filled.svg';
   static const pawPrint = 'assets/svg/paw_print.svg';

@@ -14,6 +14,7 @@ class ToyVillageTextField extends StatefulWidget {
   final bool isOptional;
   final TextStyle? labelStyle;
   final bool hasEyesIcon;
+  final EdgeInsets scrollPadding;
 
   const ToyVillageTextField({
     super.key,
@@ -25,6 +26,7 @@ class ToyVillageTextField extends StatefulWidget {
     this.isOptional = false,
     this.labelStyle,
     this.hasEyesIcon = false,
+    this.scrollPadding = const EdgeInsets.all(20),
   });
 
   @override
@@ -53,6 +55,7 @@ class _ToyVillageTextFieldState extends State<ToyVillageTextField> {
         TextFormField(
           style: ToyVillageTextStyle.caption3,
           controller: widget.controller,
+          scrollPadding: widget.scrollPadding,
           obscureText: widget.hasEyesIcon && _obscure,
           autocorrect: !widget.hasEyesIcon,
           enableSuggestions: !widget.hasEyesIcon,

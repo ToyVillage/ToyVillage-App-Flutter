@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final dailyLogDraftRepositoryProvider =
-    Provider((ref) => DailyLogDraftRepository());
+final dailyLogDraftRepositoryProvider = Provider(
+  (ref) => DailyLogDraftRepository(),
+);
 
 class DailyLogDraft {
   final String? templateName;
@@ -26,7 +27,8 @@ class DailyLogDraft {
 }
 
 class DailyLogDraftRepository {
-  String _key(int? id) => id == null ? 'daily_log_draft' : 'daily_log_draft_$id';
+  String _key(int? id) =>
+      id == null ? 'daily_log_draft' : 'daily_log_draft_$id';
 
   Future<DailyLogDraft?> load(int? id) async {
     final prefs = await SharedPreferences.getInstance();

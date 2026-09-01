@@ -19,9 +19,4 @@ class DailyLog {
   );
 }
 
-const dailyLogTemplates = <String>[
-  '먹이급여일지',
-  '건강관리일지',
-  '사육장점검일지',
-  '마감일지',
-];
+const dailyLogTemplates = <String>['먹이급여일지', '건강관리일지', '사육장점검일지', '마감일지'];
