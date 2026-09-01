@@ -23,7 +23,7 @@ class _FileUploadFieldState extends ConsumerState<FileUploadField> {
 
   Future<void> _add() async {
     final attachment = await pickAndUploadAttachment(context, ref);
-    if (attachment == null) return;
+    if (attachment == null || !mounted) return;
     setState(() => _files.add(attachment));
     widget.onChanged?.call(List.unmodifiable(_files));
   }
