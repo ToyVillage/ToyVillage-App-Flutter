@@ -7,12 +7,14 @@ import 'package:toy_village_app/core/constants/text_style.dart';
 class RadioField extends StatefulWidget {
   final List<String> choices;
   final bool hasEtc;
+  final String? initialValue;
   final ValueChanged<String?>? onChanged;
 
   const RadioField({
     super.key,
     required this.choices,
     this.hasEtc = false,
+    this.initialValue,
     this.onChanged,
   });
 
@@ -26,6 +28,20 @@ class _RadioFieldState extends State<RadioField> {
 
   bool get _isEtcSelected =>
       widget.hasEtc && _selected == widget.choices.length;
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.initialValue;
+    if (initial == null) return;
+    final index = widget.choices.indexOf(initial);
+    if (index >= 0) {
+      _selected = index;
+    } else if (widget.hasEtc) {
+      _selected = widget.choices.length;
+      _etcController.text = initial;
+    }
+  }
 
   @override
   void dispose() {

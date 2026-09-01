@@ -9,8 +9,9 @@ class DailyLogViewModel extends Notifier<List<DailyLog>> {
   @override
   List<DailyLog> build() => ref.read(dailyLogRepositoryProvider).seed();
 
-  int get _nextId =>
-      state.isEmpty ? 1 : state.map((e) => e.id).reduce((a, b) => a > b ? a : b) + 1;
+  int get _nextId => state.isEmpty
+      ? 1
+      : state.map((e) => e.id).reduce((a, b) => a > b ? a : b) + 1;
 
   void add({required String templateName, required String content}) {
     state = [

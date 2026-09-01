@@ -96,9 +96,7 @@ class _TemplateDropdownFieldState extends State<TemplateDropdownField> {
                     ),
                   ),
                   Icon(
-                    _open
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
+                    _open ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                     size: 20,
                     color: ToyVillageColor.gray60,
                   ),

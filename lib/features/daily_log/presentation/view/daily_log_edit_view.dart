@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
@@ -8,33 +9,45 @@ import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
+import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
+import 'package:toy_village_app/features/daily_log/data/model/daily_log_detail.dart';
 import 'package:toy_village_app/features/daily_log/data/model/daily_log_template.dart';
 import 'package:toy_village_app/features/daily_log/data/model/question_type.dart';
+import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_detail_view_model.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_template_view_model.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/checkbox_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/file_upload_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/radio_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/template_dropdown_field.dart';
+import 'package:toy_village_app/features/task/data/model/report_attachment.dart';
 
-class DailyLogContentView extends ConsumerStatefulWidget {
+class DailyLogEditView extends ConsumerStatefulWidget {
+  final int workLogId;
   final int templateId;
 
-  const DailyLogContentView({super.key, required this.templateId});
+  const DailyLogEditView({
+    super.key,
+    required this.workLogId,
+    required this.templateId,
+  });
 
   @override
-  ConsumerState<DailyLogContentView> createState() =>
-      _DailyLogContentViewState();
+  ConsumerState<DailyLogEditView> createState() => _DailyLogEditViewState();
 }
 
-class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
-  static const _titleGap = 28.0;
+class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
   static const _sectionGap = 16.0;
   static const _labelGap = 12.0;
   static const _scrollBottomGap = 80.0;
 
+  bool _initialized = false;
+
   int? _selectedSectionId;
   final Map<int, TextEditingController> _textControllers = {};
+  final Map<int, String?> _radioValues = {};
+  final Map<int, List<String>> _checkboxValues = {};
   final Map<int, String?> _dropdownValues = {};
+  final Map<int, List<ReportAttachment>> _fileValues = {};
 
   @override
   void dispose() {
@@ -44,13 +57,48 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
     super.dispose();
   }
 
+  void _prefill(DailyLogDetail detail) {
+    for (final section in detail.sections) {
+      if (section.answers.isNotEmpty) {
+        _selectedSectionId ??= section.sectionId;
+      }
+      for (final answer in section.answers) {
+        switch (answer.questionType) {
+          case QuestionType.shortText:
+          case QuestionType.longText:
+            _textControllers[answer.questionId] = TextEditingController(
+              text: answer.answerText ?? '',
+            );
+          case QuestionType.multipleChoice:
+          case QuestionType.dropDown:
+            _radioValues[answer.questionId] = answer.answerText;
+            _dropdownValues[answer.questionId] = answer.answerText;
+          case QuestionType.checkBox:
+            _checkboxValues[answer.questionId] = answer.answerText == null
+                ? []
+                : [answer.answerText!];
+          case QuestionType.fileUpload:
+            _fileValues[answer.questionId] = answer.file == null
+                ? []
+                : [answer.file!];
+        }
+      }
+    }
+    _initialized = true;
+  }
+
   TextEditingController _controllerFor(int questionId) {
     return _textControllers.putIfAbsent(questionId, TextEditingController.new);
   }
 
-  void _saveDraft() {}
-
-  void _complete() {}
+  void _save() {
+    final overlay = Overlay.of(context, rootOverlay: true);
+    if (_selectedSectionId == null) {
+      showTopToast(overlay, '구역을 선택해주세요.', isError: true);
+      return;
+    }
+    context.pop();
+  }
 
   Widget _section(String label, Widget child) {
     return Column(
@@ -116,7 +164,12 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
           children: [
             label,
             const SizedBox(height: _labelGap),
-            RadioField(choices: choices, hasEtc: hasEtc),
+            RadioField(
+              choices: choices,
+              hasEtc: hasEtc,
+              initialValue: _radioValues[question.questionId],
+              onChanged: (value) => _radioValues[question.questionId] = value,
+            ),
           ],
         );
       case QuestionType.checkBox:
@@ -125,15 +178,21 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
           children: [
             label,
             const SizedBox(height: _labelGap),
-            CheckboxField(choices: choices, hasEtc: hasEtc),
+            CheckboxField(
+              choices: choices,
+              hasEtc: hasEtc,
+              initialValues: _checkboxValues[question.questionId] ?? const [],
+              onChanged: (value) =>
+                  _checkboxValues[question.questionId] = value,
+            ),
           ],
         );
       case QuestionType.dropDown:
         return TemplateDropdownField(
           label: question.question,
           hintText: '선택',
-          value: _dropdownValues[question.questionId],
           items: choices,
+          value: _dropdownValues[question.questionId],
           onChanged: (value) =>
               setState(() => _dropdownValues[question.questionId] = value),
         );
@@ -143,7 +202,10 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
           children: [
             label,
             const SizedBox(height: _labelGap),
-            const FileUploadField(),
+            FileUploadField(
+              initialFiles: _fileValues[question.questionId] ?? const [],
+              onChanged: (value) => _fileValues[question.questionId] = value,
+            ),
           ],
         );
     }
@@ -154,6 +216,7 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
     final template = ref.watch(
       dailyLogTemplateViewModelProvider(widget.templateId),
     );
+    final detail = ref.watch(dailyLogDetailViewModelProvider(widget.workLogId));
 
     return GestureDetector(
       onTap: FocusScope.of(context).unfocus,
@@ -161,57 +224,48 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
         appBar: const ToyVillageAppBar(hasIcon: true),
         body: SafeArea(
           child: CustomAsyncValue(
-            value: template,
-            data: (template) => Stack(
+            value: detail,
+            data: (detail) {
+              if (!_initialized) _prefill(detail);
+              return CustomAsyncValue(
+                value: template,
+                data: (template) => _form(template),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _form(DailyLogTemplate template) {
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: _scrollBottomGap),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: _sectionGap,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(bottom: _scrollBottomGap),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: _sectionGap,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(
-                            bottom: _titleGap - _sectionGap,
-                          ),
-                          child: ToyVillageTitle(title: '업무일지 작성'),
-                        ),
-                        _section('구역 선택', _sectionGrid(template.sections)),
-                        for (final question in template.questions)
-                          _question(question),
-                      ],
-                    ),
-                  ),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: ToyVillageTitle(title: '업무일지 수정'),
                 ),
-                Positioned(
-                  left: 20,
-                  right: 20,
-                  bottom: 16,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ToyVillageButton.outlined(
-                          label: '임시저장',
-                          onTap: _saveDraft,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ToyVillageButton(
-                          label: '작성 완료하기',
-                          onTap: _complete,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _section('구역 선택', _sectionGrid(template.sections)),
+                for (final question in template.questions) _question(question),
               ],
             ),
           ),
         ),
-      ),
+        Positioned(
+          left: 20,
+          right: 20,
+          bottom: 16,
+          child: ToyVillageButton(label: '수정 완료하기', onTap: _save),
+        ),
+      ],
     );
   }
 }

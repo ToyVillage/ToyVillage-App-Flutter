@@ -5,16 +5,21 @@ import 'package:toy_village_app/features/task/presentation/widget/attachment_edi
 import 'package:toy_village_app/features/task/presentation/widget/attachment_picker.dart';
 
 class FileUploadField extends ConsumerStatefulWidget {
+  final List<ReportAttachment> initialFiles;
   final ValueChanged<List<ReportAttachment>>? onChanged;
 
-  const FileUploadField({super.key, this.onChanged});
+  const FileUploadField({
+    super.key,
+    this.initialFiles = const [],
+    this.onChanged,
+  });
 
   @override
   ConsumerState<FileUploadField> createState() => _FileUploadFieldState();
 }
 
 class _FileUploadFieldState extends ConsumerState<FileUploadField> {
-  final List<ReportAttachment> _files = [];
+  late final List<ReportAttachment> _files = [...widget.initialFiles];
 
   Future<void> _add() async {
     final attachment = await pickAndUploadAttachment(context, ref);

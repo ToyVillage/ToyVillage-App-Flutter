@@ -6,12 +6,14 @@ import 'package:toy_village_app/core/constants/text_style.dart';
 class CheckboxField extends StatefulWidget {
   final List<String> choices;
   final bool hasEtc;
+  final List<String> initialValues;
   final ValueChanged<List<String>>? onChanged;
 
   const CheckboxField({
     super.key,
     required this.choices,
     this.hasEtc = false,
+    this.initialValues = const [],
     this.onChanged,
   });
 
@@ -25,6 +27,20 @@ class _CheckboxFieldState extends State<CheckboxField> {
 
   bool get _isEtcChecked =>
       widget.hasEtc && _selected.contains(widget.choices.length);
+
+  @override
+  void initState() {
+    super.initState();
+    for (final value in widget.initialValues) {
+      final index = widget.choices.indexOf(value);
+      if (index >= 0) {
+        _selected.add(index);
+      } else if (widget.hasEtc) {
+        _selected.add(widget.choices.length);
+        _etcController.text = value;
+      }
+    }
+  }
 
   @override
   void dispose() {

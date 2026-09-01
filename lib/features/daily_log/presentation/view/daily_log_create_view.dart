@@ -62,7 +62,8 @@ class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
       );
       return;
     }
-    context.push('/daily-log/create/content', extra: template);
+    final templateId = dailyLogTemplates.indexOf(template) + 1;
+    context.push('/daily-log/create/content', extra: templateId);
   }
 
   @override
