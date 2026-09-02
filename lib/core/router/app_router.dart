@@ -13,6 +13,8 @@ import 'package:toy_village_app/features/day_off/presentation/view/day_off_view.
 import 'package:toy_village_app/features/document/presentation/view/document_view.dart';
 import 'package:toy_village_app/features/entity_info/presentation/view/entity_info_detail_view.dart';
 import 'package:toy_village_app/features/entity_info/presentation/view/entity_info_view.dart';
+import 'package:toy_village_app/features/feeding/feeding_info/presentation/view/feed_info_view.dart';
+import 'package:toy_village_app/features/feeding/feeding_writing/presentation/view/feed_writing_view.dart';
 import 'package:toy_village_app/features/menu/presentation/view/menu_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_detail_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_view.dart';
@@ -215,5 +217,7 @@ final GoRouter appRouter = GoRouter(
         ),
       ],
     ),
+    GoRoute(path: '/feed-writing', builder: (_, _) => const FeedWritingView()),
+    GoRoute(path: '/feed-info', builder: (_, _) => const FeedInfoView())
   ],
 );
