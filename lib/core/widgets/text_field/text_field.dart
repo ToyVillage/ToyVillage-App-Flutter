@@ -26,7 +26,7 @@ class ToyVillageTextField extends StatefulWidget {
     this.isOptional = false,
     this.labelStyle,
     this.hasEyesIcon = false,
-    this.scrollPadding = const EdgeInsets.all(20),
+    this.scrollPadding = const EdgeInsets.only(bottom: 100),
   });
 
   @override
