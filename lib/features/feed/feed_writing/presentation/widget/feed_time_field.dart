@@ -214,7 +214,7 @@ class _FeedTimeFieldState extends State<FeedTimeField> {
           behavior: HitTestBehavior.opaque,
           onTap: _toggle,
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
             child: Row(
               children: [
                 SvgPicture.asset(SvgAssets.clock),
