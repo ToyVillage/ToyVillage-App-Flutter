@@ -1,67 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/features/feed/feed_info/data/model/feed_record.dart';
+import 'package:toy_village_app/features/feed/feed_info/presentation/view_model/feed_record_view_model.dart';
 
-class _FeedRecord {
-  final String speciesName;
-  final String category;
-  final String feedType;
-  final String amount;
-  final String timeRange;
-  final String note;
-
-  const _FeedRecord({
-    required this.speciesName,
-    required this.category,
-    required this.feedType,
-    required this.amount,
-    required this.timeRange,
-    required this.note,
-  });
-}
-
-const _records = <_FeedRecord>[
-  _FeedRecord(
-    speciesName: '카피바라',
-    category: '포유류',
-    feedType: '소고기',
-    amount: '500 g/ml',
-    timeRange: '12:00 ~ 13:00',
-    note: '특이사항 칸인데 특이사항이 없습니다.',
-  ),
-  _FeedRecord(
-    speciesName: '카피바라',
-    category: '포유류',
-    feedType: '건초',
-    amount: '1.2 kg/L',
-    timeRange: '09:00 ~ 09:30',
-    note: '평소보다 잘 먹었습니다.',
-  ),
-  _FeedRecord(
-    speciesName: '카피바라',
-    category: '포유류',
-    feedType: '사과',
-    amount: '200 g/ml',
-    timeRange: '15:00 ~ 15:20',
-    note: '특이사항이 없습니다.',
-  ),
-  _FeedRecord(
-    speciesName: '카피바라',
-    category: '포유류',
-    feedType: '당근',
-    amount: '300 g/ml',
-    timeRange: '18:00 ~ 18:40',
-    note: '식욕이 다소 떨어졌습니다.',
-  ),
-];
-
-class FeedInfoListView extends StatelessWidget {
+class FeedInfoListView extends ConsumerWidget {
   const FeedInfoListView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final records = ref.watch(feedRecordViewModelProvider);
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true, title: '최근 먹이 급여'),
       body: SafeArea(
@@ -72,9 +23,9 @@ class FeedInfoListView extends StatelessWidget {
               const SizedBox(height: 32),
               Expanded(
                 child: ListView.separated(
-                  itemCount: _records.length,
+                  itemCount: records.length,
                   itemBuilder: (context, index) {
-                    final record = _records[index];
+                    final record = records[index];
                     return _FeedRecordCard(
                       record: record,
                       onTap: () => context.push(
@@ -99,7 +50,7 @@ class FeedInfoListView extends StatelessWidget {
 }
 
 class _FeedRecordCard extends StatelessWidget {
-  final _FeedRecord record;
+  final FeedRecord record;
   final VoidCallback onTap;
 
   const _FeedRecordCard({required this.record, required this.onTap});
