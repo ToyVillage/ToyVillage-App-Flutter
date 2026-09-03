@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/template_dropdown_field.dart';
+import 'package:toy_village_app/features/feed/feed_info/presentation/view_model/feed_detail_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_amount_field.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_date_field.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_time_field.dart';
 
-class FeedWritingView extends StatefulWidget {
+class FeedWritingView extends ConsumerStatefulWidget {
   final String speciesName;
   final String category;
   final bool isEdit;
@@ -22,10 +24,10 @@ class FeedWritingView extends StatefulWidget {
   });
 
   @override
-  State<FeedWritingView> createState() => _FeedWritingViewState();
+  ConsumerState<FeedWritingView> createState() => _FeedWritingViewState();
 }
 
-class _FeedWritingViewState extends State<FeedWritingView> {
+class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
   static const _sectionGap = 16.0;
   static const _labelGap = 12.0;
   static const _scrollBottomGap = 80.0;
@@ -50,14 +52,20 @@ class _FeedWritingViewState extends State<FeedWritingView> {
   void initState() {
     super.initState();
     if (!widget.isEdit) return;
-    _date = DateTime(2026, 8, 27);
-    _startTime = (hour: 10, minute: 0, isPm: false);
-    _endTime = (hour: 11, minute: 0, isPm: false);
-    _target = '${widget.speciesName}1';
-    _amountUnit = 'g / ml';
-    _feedTypeController.text = '건초';
-    _amountController.text = '120';
-    _noteController.text = '잘 먹었음';
+    final detail = ref.read(feedDetailViewModelProvider(widget.speciesName));
+    final parts = detail.date.split('.');
+    _date = DateTime(
+      int.parse(parts[0]),
+      int.parse(parts[1]),
+      int.parse(parts[2]),
+    );
+    _startTime = detail.startTime;
+    _endTime = detail.endTime;
+    _target = detail.target;
+    _amountUnit = detail.unit;
+    _feedTypeController.text = detail.feedType;
+    _amountController.text = detail.amount;
+    _noteController.text = detail.note;
   }
 
   @override

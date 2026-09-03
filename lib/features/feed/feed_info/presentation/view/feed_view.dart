@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
@@ -9,8 +10,10 @@ import 'package:toy_village_app/core/widgets/dropdown/menu_dropdown.dart';
 import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/readonly_field.dart';
+import 'package:toy_village_app/features/feed/feed_info/presentation/view_model/feed_detail_view_model.dart';
+import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_time_field.dart';
 
-class FeedView extends StatelessWidget {
+class FeedView extends ConsumerWidget {
   final String speciesName;
   final String category;
 
@@ -20,8 +23,15 @@ class FeedView extends StatelessWidget {
     required this.category,
   });
 
+  String _formatTime(FeedTime time) {
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour : $minute ${time.isPm ? 'PM' : 'AM'}';
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final detail = ref.watch(feedDetailViewModelProvider(speciesName));
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true),
       body: SafeArea(
@@ -55,25 +65,26 @@ class FeedView extends StatelessWidget {
                     ],
                   ),
                 ),
-                _section('급여 날짜', _dateBox('2026.08.27')),
+                _section('급여 날짜', _dateBox(detail.date)),
                 _section(
                   '급여 시간',
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: _timeBox('시작 시각', '10 : 00 AM')),
+                      Expanded(
+                        child: _timeBox('시작 시각', _formatTime(detail.startTime)),
+                      ),
                       const SizedBox(width: 12),
-                      Expanded(child: _timeBox('종료 시각', '11 : 00 AM')),
+                      Expanded(
+                        child: _timeBox('종료 시각', _formatTime(detail.endTime)),
+                      ),
                     ],
                   ),
                 ),
-                ToyVillageReadonlyField(
-                  label: '대상 개체',
-                  value: '${speciesName}1',
-                ),
-                const ToyVillageReadonlyField(label: '먹이 종류', value: '건초'),
-                _section('먹이 급여량', _amountBox('120', 'g / ml')),
-                const ToyVillageReadonlyField(label: '특이사항', value: '잘 먹었음'),
+                ToyVillageReadonlyField(label: '대상 개체', value: detail.target),
+                ToyVillageReadonlyField(label: '먹이 종류', value: detail.feedType),
+                _section('먹이 급여량', _amountBox(detail.amount, detail.unit)),
+                ToyVillageReadonlyField(label: '특이사항', value: detail.note),
                 const SizedBox(height: 10),
               ],
             ),
