@@ -13,9 +13,11 @@ import 'package:toy_village_app/features/day_off/presentation/view/day_off_view.
 import 'package:toy_village_app/features/document/presentation/view/document_view.dart';
 import 'package:toy_village_app/features/entity_info/presentation/view/entity_info_detail_view.dart';
 import 'package:toy_village_app/features/entity_info/presentation/view/entity_info_view.dart';
-import 'package:toy_village_app/features/feeding/feeding_info/presentation/view/feed_info_view.dart';
-import 'package:toy_village_app/features/feeding/feeding_writing/presentation/view/feed_writing_list_view.dart';
-import 'package:toy_village_app/features/feeding/feeding_writing/presentation/view/feed_writing_view.dart';
+import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_info_list_view.dart';
+import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_info_view.dart';
+import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_view.dart';
+import 'package:toy_village_app/features/feed/feed_writing/presentation/view/feed_writing_list_view.dart';
+import 'package:toy_village_app/features/feed/feed_writing/presentation/view/feed_writing_view.dart';
 import 'package:toy_village_app/features/menu/presentation/view/menu_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_detail_view.dart';
 import 'package:toy_village_app/features/notice/presentation/view/notice_view.dart';
@@ -226,10 +228,32 @@ final GoRouter appRouter = GoRouter(
           path: 'write',
           builder: (context, state) {
             final extra = state.extra;
-            if (extra is! ({String speciesName, String category})) {
+            if (extra
+                is! ({String speciesName, String category, bool isEdit})) {
               return _invalidAccess;
             }
             return FeedWritingView(
+              speciesName: extra.speciesName,
+              category: extra.category,
+              isEdit: extra.isEdit,
+            );
+          },
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/feed-info',
+      builder: (_, _) => const FeedInfoView(),
+      routes: [
+        GoRoute(path: 'list', builder: (_, _) => const FeedInfoListView()),
+        GoRoute(
+          path: 'detail',
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra is! ({String speciesName, String category})) {
+              return _invalidAccess;
+            }
+            return FeedView(
               speciesName: extra.speciesName,
               category: extra.category,
             );
@@ -237,6 +261,5 @@ final GoRouter appRouter = GoRouter(
         ),
       ],
     ),
-    GoRoute(path: '/feed-info', builder: (_, _) => const FeedInfoView()),
   ],
 );
