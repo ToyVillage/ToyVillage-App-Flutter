@@ -27,6 +27,7 @@ class SvgAssets {
   static const bookFilled = 'assets/svg/book_filled.svg';
   static const pawPrint = 'assets/svg/paw_print.svg';
   static const meat = 'assets/svg/meat.svg';
+  static const meatBook = 'assets/svg/meat_book.svg';
   static const lock = 'assets/svg/lock.svg';
   static const arrowRight = 'assets/svg/arrow_right.svg';
 }
