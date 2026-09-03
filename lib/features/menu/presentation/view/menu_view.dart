@@ -57,7 +57,7 @@ class MenuView extends StatelessWidget {
                 icon: SvgAssets.meatBook,
                 title: '먹이 급여 기록 확인하기',
                 onTap: () {
-                  context.push('/feed-info');
+                  context.push('/feed-info/list');
                 },
               ),
               MenuCard(
