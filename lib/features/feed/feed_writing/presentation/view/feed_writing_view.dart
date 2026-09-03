@@ -5,18 +5,20 @@ import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/template_dropdown_field.dart';
-import 'package:toy_village_app/features/feeding/feeding_writing/presentation/widget/feed_amount_field.dart';
-import 'package:toy_village_app/features/feeding/feeding_writing/presentation/widget/feed_date_field.dart';
-import 'package:toy_village_app/features/feeding/feeding_writing/presentation/widget/feed_time_field.dart';
+import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_amount_field.dart';
+import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_date_field.dart';
+import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_time_field.dart';
 
 class FeedWritingView extends StatefulWidget {
   final String speciesName;
   final String category;
+  final bool isEdit;
 
   const FeedWritingView({
     super.key,
     required this.speciesName,
     required this.category,
+    this.isEdit = false,
   });
 
   @override
@@ -43,6 +45,20 @@ class _FeedWritingViewState extends State<FeedWritingView> {
     '${widget.speciesName}2',
     '${widget.speciesName}3',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.isEdit) return;
+    _date = DateTime(2026, 8, 27);
+    _startTime = (hour: 10, minute: 0, isPm: false);
+    _endTime = (hour: 11, minute: 0, isPm: false);
+    _target = '${widget.speciesName}1';
+    _amountUnit = 'g / ml';
+    _feedTypeController.text = '건초';
+    _amountController.text = '120';
+    _noteController.text = '잘 먹었음';
+  }
 
   @override
   void dispose() {
@@ -82,9 +98,11 @@ class _FeedWritingViewState extends State<FeedWritingView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: _sectionGap,
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.only(bottom: 12),
-                        child: ToyVillageTitle(title: '먹이 급여 작성'),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: ToyVillageTitle(
+                          title: widget.isEdit ? '먹이 급여 수정' : '먹이 급여 작성',
+                        ),
                       ),
                       _section(
                         '급여 날짜',
@@ -153,7 +171,10 @@ class _FeedWritingViewState extends State<FeedWritingView> {
                 left: 20,
                 right: 20,
                 bottom: 16,
-                child: ToyVillageButton(label: '작성 완료하기', onTap: _complete),
+                child: ToyVillageButton(
+                  label: widget.isEdit ? '수정 완료하기' : '작성 완료하기',
+                  onTap: _complete,
+                ),
               ),
             ],
           ),

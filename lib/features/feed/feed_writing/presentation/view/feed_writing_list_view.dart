@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/chip/category_filter.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
-import 'package:toy_village_app/features/feeding/feeding_writing/presentation/widget/feed_animal_card.dart';
+import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_animal_card.dart';
 
 class _AnimalSpecies {
   final String speciesName;
@@ -68,6 +68,7 @@ class _FeedWritingListViewState extends State<FeedWritingListView> {
                       extra: (
                         speciesName: animal.speciesName,
                         category: animal.category,
+                        isEdit: false,
                       ),
                     ),
                   );
