@@ -35,7 +35,7 @@ Future<bool> showDeleteConfirmDialog(BuildContext context) async {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 24),
             Row(
               children: [
                 Expanded(
