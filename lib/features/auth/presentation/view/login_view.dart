@@ -5,6 +5,7 @@ import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
+import 'package:toy_village_app/features/auth/presentation/view_model/password_prompt_provider.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
@@ -40,11 +41,12 @@ class _LoginViewState extends ConsumerState<LoginView> {
         .read(loginViewModelProvider.notifier)
         .login(username: username, password: password);
     if (!mounted) return;
-    if (success) {
-      context.go('/notice');
-    } else {
+    if (!success) {
       showTopToast(overlay, '로그인에 실패했어요.\n아이디와 비밀번호를 확인해주세요.', isError: true);
+      return;
     }
+    ref.read(passwordChangePromptProvider.notifier).set(username == password);
+    context.go('/notice');
   }
 
   @override

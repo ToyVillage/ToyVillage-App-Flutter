@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 
-Future<bool> showDeleteConfirmDialog(BuildContext context) async {
-  final confirmed = await showDialog<bool>(
+Future<bool> showPasswordChangeDialog(BuildContext context) async {
+  final goChange = await showDialog<bool>(
     context: context,
     builder: (ctx) => Dialog(
       backgroundColor: ToyVillageColor.white,
@@ -14,22 +14,14 @@ Future<bool> showDeleteConfirmDialog(BuildContext context) async {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text.rich(
-              const TextSpan(
-                children: [
-                  TextSpan(text: '정말 '),
-                  TextSpan(
-                    text: '삭제',
-                    style: TextStyle(color: ToyVillageColor.red),
-                  ),
-                  TextSpan(text: '하시겠습니까?'),
-                ],
-              ),
+            Text(
+              '비밀번호를 변경해주세요',
               style: ToyVillageTextStyle.heading6,
               textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 4),
             Text(
-              '삭제한 후에는\n다시 복구할 수 없습니다.',
+              '계정을 안전하게 지키기 위해\n비밀번호를 다시 설정해주세요',
               style: ToyVillageTextStyle.body5.copyWith(
                 color: ToyVillageColor.gray60,
               ),
@@ -40,7 +32,7 @@ Future<bool> showDeleteConfirmDialog(BuildContext context) async {
               children: [
                 Expanded(
                   child: _button(
-                    label: '취소',
+                    label: '다음에 할게요',
                     background: ToyVillageColor.gray60,
                     textColor: ToyVillageColor.white,
                     onTap: () => Navigator.pop(ctx, false),
@@ -49,10 +41,9 @@ Future<bool> showDeleteConfirmDialog(BuildContext context) async {
                 const SizedBox(width: 11),
                 Expanded(
                   child: _button(
-                    label: '삭제',
-                    background: ToyVillageColor.white,
-                    textColor: ToyVillageColor.red,
-                    border: Border.all(color: ToyVillageColor.red),
+                    label: '변경하러 가기',
+                    background: ToyVillageColor.blue,
+                    textColor: ToyVillageColor.white,
                     onTap: () => Navigator.pop(ctx, true),
                   ),
                 ),
@@ -63,7 +54,7 @@ Future<bool> showDeleteConfirmDialog(BuildContext context) async {
       ),
     ),
   );
-  return confirmed == true;
+  return goChange == true;
 }
 
 Widget _button({
@@ -71,7 +62,6 @@ Widget _button({
   required Color background,
   required Color textColor,
   required VoidCallback onTap,
-  Border? border,
 }) {
   return Material(
     color: background,
@@ -79,18 +69,12 @@ Widget _button({
     child: InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: border,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.5),
-          child: Center(
-            child: Text(
-              label,
-              style: ToyVillageTextStyle.button4.copyWith(color: textColor),
-            ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12.5),
+        child: Center(
+          child: Text(
+            label,
+            style: ToyVillageTextStyle.button4.copyWith(color: textColor),
           ),
         ),
       ),
