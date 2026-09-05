@@ -14,20 +14,29 @@ import 'package:toy_village_app/features/notice/presentation/view_model/read_not
 import 'package:toy_village_app/features/notice/presentation/widget/notice_card.dart';
 import 'package:toy_village_app/features/notice/presentation/widget/notice_list_skeleton.dart';
 
-class NoticeView extends ConsumerWidget {
+class NoticeView extends ConsumerStatefulWidget {
   const NoticeView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (ref.watch(passwordChangePromptProvider)) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (!context.mounted) return;
-        ref.read(passwordChangePromptProvider.notifier).set(false);
-        final goChange = await showPasswordChangeDialog(context);
-        if (goChange && context.mounted) context.push('/password');
-      });
-    }
+  ConsumerState<NoticeView> createState() => _NoticeViewState();
+}
 
+class _NoticeViewState extends ConsumerState<NoticeView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybePromptPassword());
+  }
+
+  Future<void> _maybePromptPassword() async {
+    if (!mounted || !ref.read(passwordChangePromptProvider)) return;
+    ref.read(passwordChangePromptProvider.notifier).set(false);
+    final goChange = await showPasswordChangeDialog(context);
+    if (goChange && mounted) context.push('/password');
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: const ToyVillageAppBar(),
       body: SafeArea(
