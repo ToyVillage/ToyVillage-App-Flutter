@@ -28,7 +28,7 @@ dependencies:
   dotted_border: ^3.1.0
   image_picker: ^1.2.3
   file_picker: ^10.3.2
-  screen_protector: ^1.4.2
+  screen_protector: ^1.5.1
 
 dev_dependencies:
   flutter_test:
