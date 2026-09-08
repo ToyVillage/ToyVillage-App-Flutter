@@ -8,8 +8,10 @@ import 'package:toy_village_app/core/router/app_router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await ScreenProtector.preventScreenshotOn();
-  await ScreenProtector.protectDataLeakageOn();
+  try {
+    await ScreenProtector.preventScreenshotOn();
+    await ScreenProtector.protectDataLeakageOn();
+  } catch (_) {}
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
