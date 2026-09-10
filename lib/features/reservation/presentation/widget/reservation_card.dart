@@ -9,6 +9,7 @@ class ReservationCard extends StatelessWidget {
   final String title;
   final String reservationName;
   final DateTime visitDate;
+  final String visitTime;
   final int reservationCount;
   final VoidCallback onTap;
 
@@ -17,9 +18,16 @@ class ReservationCard extends StatelessWidget {
     required this.title,
     required this.reservationName,
     required this.visitDate,
+    required this.visitTime,
     required this.reservationCount,
     required this.onTap,
   });
+
+  String get _timeLabel {
+    final parts = visitTime.split(':');
+    if (parts.length < 2) return visitTime;
+    return '${parts[0]} : ${parts[1]}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,13 +47,12 @@ class ReservationCard extends StatelessWidget {
               Text(title, style: ToyVillageTextStyle.heading3),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                child: ReservationText(label: '예약인:   ', value: reservationName),
+                child: ReservationText(
+                  label: '예약인:   ',
+                  value: reservationName,
+                ),
               ),
-              ReservationText(
-                label: '방문 시간:   ',
-                value:
-                    '${visitDate.hour} : ${visitDate.minute.toString().padLeft(2, '0')}',
-              ),
+              ReservationText(label: '방문 시간:   ', value: _timeLabel),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Row(
@@ -72,15 +79,22 @@ class ReservationCard extends StatelessWidget {
                     width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: ToyVillageColor.gray60)
+                      border: Border.all(color: ToyVillageColor.gray60),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 14.5),
-                      child: Center(child: Text('더보기', style: ToyVillageTextStyle.button4.copyWith(color: ToyVillageColor.gray60),)),
+                      child: Center(
+                        child: Text(
+                          '더보기',
+                          style: ToyVillageTextStyle.button4.copyWith(
+                            color: ToyVillageColor.gray60,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
