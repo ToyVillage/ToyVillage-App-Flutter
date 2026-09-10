@@ -4,8 +4,9 @@ import 'package:toy_village_app/core/network/api_endpoints.dart';
 import 'package:toy_village_app/core/network/dio_provider.dart';
 import 'package:toy_village_app/features/document/data/model/document_model.dart';
 
-final documentRepositoryProvider =
-    Provider((ref) => DocumentRepository(ref.read(dioProvider)));
+final documentRepositoryProvider = Provider(
+  (ref) => DocumentRepository(ref.read(dioProvider)),
+);
 
 class DocumentRepository {
   final Dio _dio;
@@ -27,7 +28,11 @@ class DocumentRepository {
         if (keyword != null && keyword.isNotEmpty) 'keyword': keyword,
       },
     );
-    final list = res.data as List;
+    final data = res.data;
+    final raw = data is Map<String, dynamic>
+        ? (data['documents'] ?? data['content'] ?? data['data'])
+        : data;
+    final list = raw as List;
     return list
         .map((e) => DocumentModel.fromJson(e as Map<String, dynamic>))
         .toList();
