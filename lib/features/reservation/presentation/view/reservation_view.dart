@@ -16,7 +16,7 @@ class ReservationView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: const ToyVillageAppBar(hasIcon: true,),
+      appBar: const ToyVillageAppBar(hasIcon: true),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -51,27 +51,28 @@ class ReservationView extends ConsumerWidget {
                             child: EmptyState(message: '등록된 단체예약이 없습니다'),
                           )
                         else
-                        SliverList.builder(
-                          itemCount: reservations.length,
-                          itemBuilder: (context, index) {
-                            final reservation = reservations[index];
-                            return ReservationCard(
-                              onTap: () {
-                                context.push(
-                                  '/reservation/detail',
-                                  extra: (
-                                    id: reservation.id,
-                                    title: reservation.title,
-                                  ),
-                                );
-                              },
-                              title: reservation.title,
-                              reservationName: reservation.reservationName,
-                              visitDate: reservation.visitDate,
-                              reservationCount: reservation.reservationCount,
-                            );
-                          },
-                        ),
+                          SliverList.builder(
+                            itemCount: reservations.length,
+                            itemBuilder: (context, index) {
+                              final reservation = reservations[index];
+                              return ReservationCard(
+                                onTap: () {
+                                  context.push(
+                                    '/reservation/detail',
+                                    extra: (
+                                      id: reservation.id,
+                                      title: reservation.title,
+                                    ),
+                                  );
+                                },
+                                title: reservation.title,
+                                reservationName: reservation.reservationName,
+                                visitDate: reservation.visitDate,
+                                visitTime: reservation.visitTime,
+                                reservationCount: reservation.reservationCount,
+                              );
+                            },
+                          ),
                       ],
                     );
                   },
