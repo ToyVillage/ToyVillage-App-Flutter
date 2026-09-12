@@ -10,8 +10,10 @@ import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/task/data/model/report_attachment.dart';
+import 'package:toy_village_app/features/task/data/model/work_report_request.dart';
 import 'package:toy_village_app/features/task/data/repository/task_report_draft_repository.dart';
-import 'package:toy_village_app/features/task/presentation/view_model/task_report_view_model.dart';
+import 'package:toy_village_app/features/task/data/repository/work_report_repository.dart';
+import 'package:toy_village_app/features/task/presentation/view_model/work_report_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/widget/attachment_editor.dart';
 import 'package:toy_village_app/features/task/presentation/widget/attachment_picker.dart';
 
@@ -31,9 +33,12 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   Timer? _autoSaveTimer;
   bool _loaded = false;
   bool _isEdit = false;
+  int? _workReportId;
 
-  TaskReportDraftRepository get _repo =>
+  TaskReportDraftRepository get _draftRepo =>
       ref.read(taskReportDraftRepositoryProvider);
+
+  WorkReportRepository get _repo => ref.read(workReportRepositoryProvider);
 
   @override
   void initState() {
@@ -52,32 +57,53 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   }
 
   Future<void> _load() async {
-    final report = await _repo.loadReport(widget.id);
-    final source = report ?? await _repo.load(widget.id);
+    final report = await _repo.loadMyReport(widget.id);
     if (!mounted) return;
-    if (source != null) {
-      _contentController.text = source.content;
-      _noteController.text = source.note;
+    if (report != null) {
+      _contentController.text = report.content;
+      _noteController.text = report.note ?? '';
       setState(() {
-        _files = source.files;
-        _isEdit = report != null;
+        _files = report.files
+            .map(
+              (f) => ReportAttachment(fileName: f.fileName, fileKey: f.fileKey),
+            )
+            .toList();
+        _isEdit = true;
+        _workReportId = report.id;
       });
+    } else {
+      final draft = await _draftRepo.load(widget.id);
+      if (!mounted) return;
+      if (draft != null) {
+        _contentController.text = draft.content;
+        _noteController.text = draft.note;
+        setState(() => _files = draft.files);
+      }
     }
     _loaded = true;
   }
 
-  TaskReportDraft _current() => TaskReportDraft(
+  TaskReportDraft _currentDraft() => TaskReportDraft(
     content: _contentController.text,
     note: _noteController.text,
     files: _files,
   );
 
+  WorkReportRequest _request() {
+    final note = _noteController.text.trim();
+    return WorkReportRequest(
+      content: _contentController.text.trim(),
+      note: note.isEmpty ? null : note,
+      fileKey: _files.map((f) => f.fileKey).toList(),
+    );
+  }
+
   void _scheduleAutoSave() {
-    if (!_loaded) return;
+    if (!_loaded || _isEdit) return;
     _autoSaveTimer?.cancel();
     _autoSaveTimer = Timer(const Duration(milliseconds: 1500), () async {
       try {
-        await _repo.save(widget.id, _current());
+        await _draftRepo.save(widget.id, _currentDraft());
       } catch (_) {}
     });
   }
@@ -97,7 +123,7 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   Future<void> _saveDraft() async {
     final overlay = Overlay.of(context, rootOverlay: true);
     try {
-      await _repo.save(widget.id, _current());
+      await _draftRepo.save(widget.id, _currentDraft());
       showTopToast(overlay, '저장되었습니다.');
     } catch (_) {
       showTopToast(overlay, '저장을 실패했습니다. 다시 시도해주세요.', isError: true);
@@ -110,13 +136,22 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
       showTopToast(overlay, '내용을 추가해야 합니다.', isError: true);
       return;
     }
-    final container = ProviderScope.containerOf(context, listen: false);
     _autoSaveTimer?.cancel();
-    await _repo.saveReport(widget.id, _current());
-    await _repo.clear(widget.id);
-    container.invalidate(taskReportProvider(widget.id));
-    if (!mounted) return;
-    context.go('/task');
+    try {
+      final workReportId = _workReportId;
+      if (_isEdit && workReportId != null) {
+        await _repo.updateReport(workReportId, _request());
+      } else {
+        await _repo.createReport(widget.id, _request());
+      }
+      await _draftRepo.clear(widget.id);
+      ref.invalidate(workReportProvider(widget.id));
+      if (!mounted) return;
+      context.go('/task');
+    } catch (_) {
+      if (!mounted) return;
+      showTopToast(overlay, '업무 보고 등록에 실패했습니다. 다시 시도해주세요.', isError: true);
+    }
   }
 
   @override
