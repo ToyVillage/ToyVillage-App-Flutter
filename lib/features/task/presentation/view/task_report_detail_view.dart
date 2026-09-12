@@ -67,7 +67,10 @@ class TaskReportDetailView extends ConsumerWidget {
     WidgetRef ref,
     WorkReportModel? report,
   ) {
-    final canEdit = report != null && report.status != ReportStatus.approved;
+    final editableReport =
+        report != null && report.status != ReportStatus.approved
+        ? report
+        : null;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -79,7 +82,7 @@ class TaskReportDetailView extends ConsumerWidget {
             child: Row(
               children: [
                 const ToyVillageTitle(title: '업무 보고서'),
-                if (canEdit) ...[
+                if (editableReport != null) ...[
                   const Spacer(),
                   MenuDropdown(
                     items: [
@@ -90,7 +93,7 @@ class TaskReportDetailView extends ConsumerWidget {
                       MenuDropdownItem(
                         label: '삭제',
                         color: ToyVillageColor.red,
-                        onTap: () => _delete(context, ref, report.id),
+                        onTap: () => _delete(context, ref, editableReport.id),
                       ),
                     ],
                   ),
