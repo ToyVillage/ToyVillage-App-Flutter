@@ -6,7 +6,11 @@ class ApiEndpoints {
   static const closeDay = '/close-day';
 
   /// Task
-  static const task = '/task';
+  static const tasks = '/tasks';
+  static const tasksMy = '/tasks/my';
+
+  /// WorkReport
+  static const workReport = '/work-report';
 
   /// Document
   static const documents = '/documents';
@@ -19,4 +23,11 @@ class ApiEndpoints {
 
   /// File
   static const file = '/file';
+
+  /// WorkLogTemplate
+  static const workLogTemplate = '/work-log/template';
+
+  /// WorkLog
+  static const workLog = '/work-log';
+  static const workLogEmployee = '/work-log/employee';
 }
