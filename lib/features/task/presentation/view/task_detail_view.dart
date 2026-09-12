@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/features/task/presentation/widget/task_detail_skeleton.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,7 +16,7 @@ import 'package:toy_village_app/core/widgets/tag_chip.dart';
 import 'package:toy_village_app/features/task/data/model/task_detail_model.dart';
 import 'package:toy_village_app/features/task/data/model/task_status.dart';
 import 'package:toy_village_app/features/task/presentation/view_model/task_detail_view_model.dart';
-import 'package:toy_village_app/features/task/presentation/view_model/task_report_view_model.dart';
+import 'package:toy_village_app/features/task/presentation/view_model/work_report_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_tag_style.dart';
 
 class TaskDetailView extends ConsumerWidget {
@@ -25,19 +26,18 @@ class TaskDetailView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasReport = ref.watch(taskReportProvider(id)).value != null;
+    final report = ref.watch(workReportProvider(id)).value;
+    final reportStatus = report?.status ?? ReportStatus.missing;
 
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true),
       body: SafeArea(
         child: CustomAsyncValue(
           value: ref.watch(taskDetailViewModelProvider(id)),
+          loading: const TaskDetailSkeleton(),
+          onRetry: () => ref.invalidate(taskDetailViewModelProvider(id)),
           errorMessage: '업무를 불러오지 못했어요.',
           data: (task) {
-            final status = hasReport && task.status == TaskStatus.notSubmitted
-                ? TaskStatus.submitted
-                : task.status;
-
             return Stack(
               fit: StackFit.expand,
               children: [
@@ -46,7 +46,7 @@ class TaskDetailView extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _Header(task: task, status: status),
+                      _Header(task: task, reportStatus: reportStatus),
                       const SectionDivider(),
                       Text(
                         breakByWord(task.content),
@@ -63,13 +63,18 @@ class TaskDetailView extends ConsumerWidget {
                               .toList(),
                         ),
                       ],
-                      if (status == TaskStatus.rejected &&
-                          task.rejectionReason != null) ...[
+                      if (reportStatus == ReportStatus.rejected &&
+                          report?.rejectionReason != null) ...[
                         const SectionDivider(),
-                        Text('반려 사유', style: ToyVillageTextStyle.caption4.copyWith(color: ToyVillageColor.gray60)),
+                        Text(
+                          '반려 사유',
+                          style: ToyVillageTextStyle.caption4.copyWith(
+                            color: ToyVillageColor.gray60,
+                          ),
+                        ),
                         const SizedBox(height: 12),
                         Text(
-                          breakByWord(task.rejectionReason!),
+                          breakByWord(report!.rejectionReason!),
                           style: ToyVillageTextStyle.body5,
                         ),
                       ],
@@ -81,17 +86,16 @@ class TaskDetailView extends ConsumerWidget {
                   right: 20,
                   bottom: 16,
                   child: ToyVillageButton(
-                    label: (hasReport || status != TaskStatus.notSubmitted)
-                        ? '조회하기'
-                        : '업무 보고서 작성하기',
+                    label: reportStatus == ReportStatus.missing
+                        ? '업무 보고서 작성하기'
+                        : '조회하기',
                     onTap: () async {
-                      final route =
-                          (hasReport || status != TaskStatus.notSubmitted)
-                          ? '/task/report/detail'
-                          : '/task/report/create';
+                      final route = reportStatus == ReportStatus.missing
+                          ? '/task/report/create'
+                          : '/task/report/detail';
                       await context.push(route, extra: task.id);
                       if (!context.mounted) return;
-                      ref.invalidate(taskReportProvider(id));
+                      ref.invalidate(workReportProvider(id));
                     },
                   ),
                 ),
@@ -106,16 +110,16 @@ class TaskDetailView extends ConsumerWidget {
 
 class _Header extends StatelessWidget {
   final TaskDetailModel task;
-  final TaskStatus status;
+  final ReportStatus reportStatus;
 
-  const _Header({required this.task, required this.status});
+  const _Header({required this.task, required this.reportStatus});
 
   @override
   Widget build(BuildContext context) {
     final tags = <TagStyle>[taskPriorityTag(task.priority)];
-    final statusTag = taskStatusTag(status, task.deadline);
+    final statusTag = reportStatusTag(reportStatus);
     if (statusTag != null) tags.add(statusTag);
-    final deadlineTag = taskDeadlineTag(task.deadline);
+    final deadlineTag = taskDeadlineTag(task.finishDate);
     if (deadlineTag != null) tags.add(deadlineTag);
 
     return Column(
