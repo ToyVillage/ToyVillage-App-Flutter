@@ -24,10 +24,8 @@ class ApiEndpoints {
   /// File
   static const file = '/file';
 
-  /// WorkLogTemplate
-  static const workLogTemplate = '/work-log/template';
-
   /// WorkLog
   static const workLog = '/work-log';
   static const workLogEmployee = '/work-log/employee';
+  static const workLogTemplate = '/work-log/template';
 }
