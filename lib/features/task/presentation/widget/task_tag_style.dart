@@ -4,30 +4,30 @@ import 'package:toy_village_app/features/task/data/model/task_status.dart';
 
 typedef TagStyle = ({String label, Color text, Color background});
 
-bool _isExpired(DateTime? deadline) =>
-    deadline != null && DateTime.now().isAfter(deadline);
+bool _isExpired(DateTime? finishDate) =>
+    finishDate != null && DateTime.now().isAfter(finishDate);
 
-String _deadlineDate(DateTime deadline) => '${deadline.month}월 ${deadline.day}일';
+String _finishDateLabel(DateTime finishDate) =>
+    '${finishDate.month}월 ${finishDate.day}일';
 
 ({String label, Color color}) taskCardStatus(
   TaskStatus status,
-  DateTime? deadline,
+  DateTime? finishDate,
 ) {
   switch (status) {
     case TaskStatus.completed:
       return (label: '완료됨', color: ToyVillageColor.green);
-    case TaskStatus.rejected:
-      return (label: '반려됨', color: ToyVillageColor.yellow);
-    case TaskStatus.submitted:
-      return (label: '제출됨', color: ToyVillageColor.gray60);
-    case TaskStatus.notSubmitted:
-      if (_isExpired(deadline)) {
+    case TaskStatus.inProgress:
+      if (_isExpired(finishDate)) {
         return (label: '기한만료', color: ToyVillageColor.red);
       }
-      if (deadline != null) {
-        return (label: '${_deadlineDate(deadline)}까지', color: ToyVillageColor.gray60);
+      if (finishDate != null) {
+        return (
+          label: '${_finishDateLabel(finishDate)}까지',
+          color: ToyVillageColor.gray60,
+        );
       }
-      return (label: '미제출', color: ToyVillageColor.gray60);
+      return (label: '진행중', color: ToyVillageColor.gray60);
   }
 }
 
@@ -54,42 +54,35 @@ TagStyle taskPriorityTag(TaskPriority priority) {
   }
 }
 
-TagStyle? taskStatusTag(TaskStatus status, DateTime? deadline) {
+TagStyle? reportStatusTag(ReportStatus status) {
   switch (status) {
-    case TaskStatus.completed:
+    case ReportStatus.approved:
       return (
-        label: '완료됨',
+        label: '승인됨',
         text: ToyVillageColor.green,
         background: ToyVillageColor.greenBackground,
       );
-    case TaskStatus.rejected:
+    case ReportStatus.rejected:
       return (
         label: '반려됨',
         text: ToyVillageColor.yellow,
         background: ToyVillageColor.yellowBackground,
       );
-    case TaskStatus.submitted:
+    case ReportStatus.pending:
       return (
-        label: '제출됨',
+        label: '검토중',
         text: ToyVillageColor.gray60,
         background: ToyVillageColor.gray20,
       );
-    case TaskStatus.notSubmitted:
-      if (_isExpired(deadline)) {
-        return (
-          label: '누락됨',
-          text: ToyVillageColor.red,
-          background: ToyVillageColor.redBackground,
-        );
-      }
+    case ReportStatus.missing:
       return null;
   }
 }
 
-TagStyle? taskDeadlineTag(DateTime? deadline) {
-  if (deadline == null) return null;
+TagStyle? taskDeadlineTag(DateTime? finishDate) {
+  if (finishDate == null) return null;
   return (
-    label: '${_deadlineDate(deadline)} 전까지',
+    label: '${_finishDateLabel(finishDate)} 전까지',
     text: ToyVillageColor.gray60,
     background: ToyVillageColor.gray20,
   );

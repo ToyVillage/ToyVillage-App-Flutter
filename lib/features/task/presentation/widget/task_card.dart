@@ -1,31 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
-import 'package:toy_village_app/core/utils/time_util.dart';
 import 'package:toy_village_app/features/task/data/model/task_status.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_tag_style.dart';
 
 class TaskCard extends StatelessWidget {
   final String title;
-  final DateTime createdAt;
   final TaskStatus status;
-  final DateTime? deadline;
+  final DateTime? finishDate;
   final bool isNew;
   final VoidCallback onTap;
 
   const TaskCard({
     super.key,
     required this.title,
-    required this.createdAt,
     required this.status,
-    required this.deadline,
+    required this.finishDate,
     required this.isNew,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final statusInfo = taskCardStatus(status, deadline);
+    final statusInfo = taskCardStatus(status, finishDate);
 
     return GestureDetector(
       onTap: onTap,
@@ -52,22 +49,11 @@ class TaskCard extends StatelessWidget {
                       child: Text(title, style: ToyVillageTextStyle.heading3),
                     ),
                     const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Text(
-                          statusInfo.label,
-                          style: ToyVillageTextStyle.caption4.copyWith(
-                            color: statusInfo.color,
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          timeCheck(createdAt),
-                          style: ToyVillageTextStyle.caption4.copyWith(
-                            color: ToyVillageColor.gray60,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      statusInfo.label,
+                      style: ToyVillageTextStyle.caption4.copyWith(
+                        color: statusInfo.color,
+                      ),
                     ),
                   ],
                 ),
