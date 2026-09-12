@@ -32,6 +32,9 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   List<ReportAttachment> _files = [];
   Timer? _autoSaveTimer;
   bool _loaded = false;
+  bool _loading = true;
+  bool _loadFailed = false;
+  bool _isSubmitting = false;
   bool _isEdit = false;
   int? _workReportId;
 
@@ -57,12 +60,16 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   }
 
   Future<void> _load() async {
-    final report = await _repo.loadMyReport(widget.id);
-    if (!mounted) return;
-    if (report != null) {
-      _contentController.text = report.content;
-      _noteController.text = report.note ?? '';
-      setState(() {
+    setState(() {
+      _loading = true;
+      _loadFailed = false;
+    });
+    try {
+      final report = await _repo.loadMyReport(widget.id);
+      if (!mounted) return;
+      if (report != null) {
+        _contentController.text = report.content;
+        _noteController.text = report.note ?? '';
         _files = report.files
             .map(
               (f) => ReportAttachment(fileName: f.fileName, fileKey: f.fileKey),
@@ -70,17 +77,27 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
             .toList();
         _isEdit = true;
         _workReportId = report.id;
-      });
-    } else {
-      final draft = await _draftRepo.load(widget.id);
-      if (!mounted) return;
-      if (draft != null) {
-        _contentController.text = draft.content;
-        _noteController.text = draft.note;
-        setState(() => _files = draft.files);
+      } else {
+        final draft = await _draftRepo.load(widget.id);
+        if (!mounted) return;
+        if (draft != null) {
+          _contentController.text = draft.content;
+          _noteController.text = draft.note;
+          _files = draft.files;
+        }
       }
+      if (!mounted) return;
+      setState(() {
+        _loaded = true;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _loadFailed = true;
+      });
     }
-    _loaded = true;
   }
 
   TaskReportDraft _currentDraft() => TaskReportDraft(
@@ -131,12 +148,14 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   }
 
   Future<void> _complete() async {
+    if (_isSubmitting) return;
     final overlay = Overlay.of(context, rootOverlay: true);
     if (_contentController.text.trim().isEmpty) {
       showTopToast(overlay, '내용을 추가해야 합니다.', isError: true);
       return;
     }
     _autoSaveTimer?.cancel();
+    setState(() => _isSubmitting = true);
     try {
       final workReportId = _workReportId;
       if (_isEdit && workReportId != null) {
@@ -150,6 +169,7 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
       context.go('/task');
     } catch (_) {
       if (!mounted) return;
+      setState(() => _isSubmitting = false);
       showTopToast(overlay, '업무 보고 등록에 실패했습니다. 다시 시도해주세요.', isError: true);
     }
   }
@@ -162,85 +182,102 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         appBar: const ToyVillageAppBar(hasIcon: true),
-        body: SafeArea(
-          child: Stack(
+        body: SafeArea(child: _body(spacing)),
+      ),
+    );
+  }
+
+  Widget _body(Widget spacing) {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_loadFailed) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('보고서를 불러오지 못했어요.'),
+            const SizedBox(height: 12),
+            ToyVillageButton.outlined(label: '다시 시도', onTap: _load),
+          ],
+        ),
+      );
+    }
+
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 28),
-                      child: ToyVillageTitle(
-                        title: _isEdit ? '업무 보고서 수정' : '업무 보고서 작성',
-                      ),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.only(bottom: 80),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ToyVillageTextField(
-                              label: '내용',
-                              hintText: '내용 입력',
-                              minLines: 7,
-                              controller: _contentController,
-                            ),
-                            spacing,
-                            ToyVillageTextField(
-                              label: '특이사항',
-                              hintText: '내용 입력',
-                              minLines: 4,
-                              isOptional: true,
-                              controller: _noteController,
-                            ),
-                            spacing,
-                            const ToyVillageLabel(
-                              label: '첨부파일',
-                              isOptional: true,
-                            ),
-                            const SizedBox(height: 8),
-                            AttachmentEditor(
-                              files: _files,
-                              onAdd: _addAttachment,
-                              onDelete: _deleteAttachment,
-                            ),
-                            spacing,
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                padding: const EdgeInsets.only(bottom: 28),
+                child: ToyVillageTitle(
+                  title: _isEdit ? '업무 보고서 수정' : '업무 보고서 작성',
                 ),
               ),
-              Positioned(
-                left: 20,
-                right: 20,
-                bottom: 16,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ToyVillageButton.outlined(
-                        label: '임시저장',
-                        onTap: _saveDraft,
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ToyVillageTextField(
+                        label: '내용',
+                        hintText: '내용 입력',
+                        minLines: 7,
+                        controller: _contentController,
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ToyVillageButton(
-                        label: '작성 완료하기',
-                        onTap: _complete,
+                      spacing,
+                      ToyVillageTextField(
+                        label: '특이사항',
+                        hintText: '내용 입력',
+                        minLines: 4,
+                        isOptional: true,
+                        controller: _noteController,
                       ),
-                    ),
-                  ],
+                      spacing,
+                      const ToyVillageLabel(label: '첨부파일', isOptional: true),
+                      const SizedBox(height: 8),
+                      AttachmentEditor(
+                        files: _files,
+                        onAdd: _addAttachment,
+                        onDelete: _deleteAttachment,
+                      ),
+                      spacing,
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
         ),
-      ),
+        Positioned(
+          left: 20,
+          right: 20,
+          bottom: 16,
+          child: Row(
+            children: [
+              if (!_isEdit) ...[
+                Expanded(
+                  child: ToyVillageButton.outlined(
+                    label: '임시저장',
+                    onTap: _saveDraft,
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
+              Expanded(
+                child: ToyVillageButton(
+                  label: _isSubmitting ? '등록 중' : '작성 완료하기',
+                  onTap: _isSubmitting ? () {} : _complete,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
