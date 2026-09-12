@@ -26,8 +26,12 @@ class TaskDetailView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final report = ref.watch(workReportProvider(id)).value;
-    final reportStatus = report?.status ?? ReportStatus.missing;
+    final reportAsync = ref.watch(workReportProvider(id));
+    final reportData = reportAsync.asData;
+    final report = reportData?.value;
+    final reportStatus = reportData != null
+        ? (report?.status ?? ReportStatus.missing)
+        : null;
 
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true),
@@ -85,19 +89,24 @@ class TaskDetailView extends ConsumerWidget {
                   left: 20,
                   right: 20,
                   bottom: 16,
-                  child: ToyVillageButton(
-                    label: reportStatus == ReportStatus.missing
-                        ? '업무 보고서 작성하기'
-                        : '조회하기',
-                    onTap: () async {
-                      final route = reportStatus == ReportStatus.missing
-                          ? '/task/report/create'
-                          : '/task/report/detail';
-                      await context.push(route, extra: task.id);
-                      if (!context.mounted) return;
-                      ref.invalidate(workReportProvider(id));
-                    },
-                  ),
+                  child: switch (reportAsync) {
+                    AsyncData(:final value) => ToyVillageButton(
+                      label: value == null ? '업무 보고서 작성하기' : '조회하기',
+                      onTap: () async {
+                        final route = value == null
+                            ? '/task/report/create'
+                            : '/task/report/detail';
+                        await context.push(route, extra: task.id);
+                        if (!context.mounted) return;
+                        ref.invalidate(workReportProvider(id));
+                      },
+                    ),
+                    AsyncError() => ToyVillageButton(
+                      label: '다시 시도',
+                      onTap: () => ref.invalidate(workReportProvider(id)),
+                    ),
+                    _ => ToyVillageButton(label: '불러오는 중', onTap: () {}),
+                  },
                 ),
               ],
             );
@@ -110,14 +119,16 @@ class TaskDetailView extends ConsumerWidget {
 
 class _Header extends StatelessWidget {
   final TaskDetailModel task;
-  final ReportStatus reportStatus;
+  final ReportStatus? reportStatus;
 
   const _Header({required this.task, required this.reportStatus});
 
   @override
   Widget build(BuildContext context) {
     final tags = <TagStyle>[taskPriorityTag(task.priority)];
-    final statusTag = reportStatusTag(reportStatus);
+    final statusTag = reportStatus == null
+        ? null
+        : reportStatusTag(reportStatus!);
     if (statusTag != null) tags.add(statusTag);
     final deadlineTag = taskDeadlineTag(task.finishDate);
     if (deadlineTag != null) tags.add(deadlineTag);
