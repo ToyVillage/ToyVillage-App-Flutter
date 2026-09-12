@@ -1,7 +1,5 @@
 enum TaskStatus {
-  notSubmitted('NOT_SUBMITTED'),
-  submitted('SUBMITTED'),
-  rejected('REJECTED'),
+  inProgress('IN_PROGRESS'),
   completed('COMPLETED');
 
   final String code;
@@ -12,7 +10,7 @@ enum TaskStatus {
     for (final status in TaskStatus.values) {
       if (status.code == code) return status;
     }
-    return TaskStatus.notSubmitted;
+    return TaskStatus.inProgress;
   }
 }
 
@@ -31,5 +29,23 @@ enum TaskPriority {
       if (priority.code == code) return priority;
     }
     return TaskPriority.medium;
+  }
+}
+
+enum ReportStatus {
+  missing('MISSING'),
+  pending('PENDING'),
+  approved('APPROVED'),
+  rejected('REJECTED');
+
+  final String code;
+
+  const ReportStatus(this.code);
+
+  static ReportStatus fromCode(String code) {
+    for (final status in ReportStatus.values) {
+      if (status.code == code) return status;
+    }
+    return ReportStatus.pending;
   }
 }
