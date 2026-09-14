@@ -13,11 +13,15 @@ import 'package:toy_village_app/features/task/presentation/view_model/seen_task_
 import 'package:toy_village_app/features/task/presentation/view_model/task_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_card.dart';
 
-int _rank(TaskModel task, DateTime now) {
-  if (task.status == TaskStatus.completed) return 2;
-  final finishDate = task.finishDate;
-  final expired = finishDate != null && finishDate.isBefore(now);
-  return expired ? 0 : 1;
+int _rank(TaskModel task) {
+  switch (task.status) {
+    case TaskStatus.expired:
+      return 0;
+    case TaskStatus.inProgress:
+      return 1;
+    case TaskStatus.completed:
+      return 2;
+  }
 }
 
 class TaskView extends ConsumerWidget {
@@ -46,9 +50,8 @@ class TaskView extends ConsumerWidget {
                   loading: const TaskListSkeleton(),
                   onRetry: () => ref.invalidate(taskViewModelProvider),
                   data: (tasks) {
-                    final now = DateTime.now();
                     final sorted = [...tasks]
-                      ..sort((a, b) => _rank(a, now).compareTo(_rank(b, now)));
+                      ..sort((a, b) => _rank(a).compareTo(_rank(b)));
                     return CustomScrollView(
                       physics: const BouncingScrollPhysics(
                         parent: AlwaysScrollableScrollPhysics(),
