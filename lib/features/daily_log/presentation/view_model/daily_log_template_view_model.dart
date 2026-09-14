@@ -78,32 +78,6 @@ class DailyLogTemplateViewModel extends AsyncNotifier<DailyLogTemplate> {
           ],
         ),
         TemplateQuestion(
-          questionId: 12,
-          question: '급여 시간대를 선택해주세요.',
-          questionType: QuestionType.dropDown,
-          required: true,
-          options: [
-            QuestionOption(
-              choiceId: 300,
-              number: 0,
-              content: '오전',
-              etcOption: false,
-            ),
-            QuestionOption(
-              choiceId: 301,
-              number: 1,
-              content: '오후',
-              etcOption: false,
-            ),
-            QuestionOption(
-              choiceId: 302,
-              number: 2,
-              content: '저녁',
-              etcOption: false,
-            ),
-          ],
-        ),
-        TemplateQuestion(
           questionId: 13,
           question: '급여 담당자 이름',
           questionType: QuestionType.shortText,
