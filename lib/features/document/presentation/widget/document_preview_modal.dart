@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/features/document/presentation/widget/document_preview_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -45,6 +46,8 @@ class _DocumentPreviewModal extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
           child: CustomAsyncValue(
             value: ref.watch(documentDetailViewModelProvider(id)),
+            loading: const DocumentPreviewSkeleton(),
+            onRetry: () => ref.invalidate(documentDetailViewModelProvider(id)),
             data: (detail) {
               final file = detail.files.isNotEmpty ? detail.files.first : null;
               return Column(
@@ -58,10 +61,10 @@ class _DocumentPreviewModal extends ConsumerWidget {
                           icon: Symbols.download,
                           label: '다운로드',
                           onTap: () => downloadFile(
-                          context,
-                          fileName: file.fileName,
-                          fileKey: file.fileKey,
-                        ),
+                            context,
+                            fileName: file.fileName,
+                            fileKey: file.fileKey,
+                          ),
                         ),
                       const SizedBox(width: 8),
                       _iconButton(
