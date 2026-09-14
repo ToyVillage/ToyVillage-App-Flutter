@@ -36,9 +36,18 @@ class TaskDetailSkeleton extends StatelessWidget {
                   height: 24,
                   borderRadius: BorderRadius.circular(25),
                 ),
+                const Spacer(),
+                Bone(
+                  width: 80,
+                  height: 14,
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ],
             ),
-            const SizedBox(height: 32),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Bone(width: double.infinity, height: 1),
+            ),
             for (var i = 0; i < 4; i++) ...[
               Bone(
                 width: double.infinity,
