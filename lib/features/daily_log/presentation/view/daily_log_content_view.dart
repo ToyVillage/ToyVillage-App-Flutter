@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/features/daily_log/presentation/widget/daily_log_form_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
@@ -151,6 +152,10 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
         body: SafeArea(
           child: CustomAsyncValue(
             value: template,
+            loading: const DailyLogFormSkeleton(),
+            onRetry: () => ref.invalidate(
+              dailyLogTemplateViewModelProvider(widget.templateId),
+            ),
             data: (template) => Stack(
               children: [
                 Padding(
