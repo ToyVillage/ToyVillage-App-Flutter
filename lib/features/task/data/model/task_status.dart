@@ -1,6 +1,7 @@
 enum TaskStatus {
   inProgress('IN_PROGRESS'),
-  completed('COMPLETED');
+  completed('COMPLETED'),
+  expired('EXPIRED');
 
   final String code;
 

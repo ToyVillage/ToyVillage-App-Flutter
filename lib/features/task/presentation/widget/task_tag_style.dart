@@ -4,9 +4,6 @@ import 'package:toy_village_app/features/task/data/model/task_status.dart';
 
 typedef TagStyle = ({String label, Color text, Color background});
 
-bool _isExpired(DateTime? finishDate) =>
-    finishDate != null && DateTime.now().isAfter(finishDate);
-
 String _finishDateLabel(DateTime finishDate) =>
     '${finishDate.month}월 ${finishDate.day}일';
 
@@ -17,10 +14,9 @@ String _finishDateLabel(DateTime finishDate) =>
   switch (status) {
     case TaskStatus.completed:
       return (label: '완료됨', color: ToyVillageColor.green);
+    case TaskStatus.expired:
+      return (label: '기한만료', color: ToyVillageColor.red);
     case TaskStatus.inProgress:
-      if (_isExpired(finishDate)) {
-        return (label: '기한만료', color: ToyVillageColor.red);
-      }
       if (finishDate != null) {
         return (
           label: '${_finishDateLabel(finishDate)}까지',
