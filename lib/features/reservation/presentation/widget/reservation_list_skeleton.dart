@@ -39,7 +39,11 @@ class _SkeletonCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Bone(width: 140, height: 29, borderRadius: BorderRadius.circular(4)),
+              Bone(
+                width: 140,
+                height: 29,
+                borderRadius: BorderRadius.circular(4),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Bone(
@@ -48,7 +52,11 @@ class _SkeletonCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
-              Bone(width: 150, height: 20, borderRadius: BorderRadius.circular(4)),
+              Bone(
+                width: 150,
+                height: 20,
+                borderRadius: BorderRadius.circular(4),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Row(
