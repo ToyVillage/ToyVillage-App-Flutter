@@ -51,6 +51,7 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
               Expanded(
                 child: CustomAsyncValue(
                   value: ref.watch(documentViewModelProvider),
+                  onRetry: () => ref.invalidate(documentViewModelProvider),
                   loading: const DocumentListSkeleton(),
                   data: (documents) {
                     return CustomScrollView(

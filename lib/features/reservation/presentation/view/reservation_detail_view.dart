@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/features/reservation/presentation/widget/reservation_detail_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:toy_village_app/core/constants/color.dart';
@@ -31,6 +32,7 @@ class ReservationDetailView extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: CustomAsyncValue(
           value: ref.watch(reservationDetailViewModelProvider(id)),
+          loading: const ReservationDetailSkeleton(),
           onRetry: () => ref.invalidate(reservationDetailViewModelProvider(id)),
           data: (detail) => SingleChildScrollView(
             child: Column(

@@ -55,6 +55,7 @@ class _NoticeViewState extends ConsumerState<NoticeView> {
               Expanded(
                 child: CustomAsyncValue(
                   value: ref.watch(noticeViewModelProvider),
+                  onRetry: () => ref.invalidate(noticeViewModelProvider),
                   loading: const NoticeListSkeleton(),
                   data: (value) {
                     final readIds =

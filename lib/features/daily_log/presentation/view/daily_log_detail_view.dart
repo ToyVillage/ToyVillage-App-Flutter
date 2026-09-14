@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/features/daily_log/presentation/widget/daily_log_detail_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
@@ -30,6 +31,8 @@ class DailyLogDetailView extends ConsumerWidget {
       body: SafeArea(
         child: CustomAsyncValue(
           value: detail,
+          loading: const DailyLogDetailSkeleton(),
+          onRetry: () => ref.invalidate(dailyLogDetailViewModelProvider(id)),
           data: (detail) => Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: SingleChildScrollView(

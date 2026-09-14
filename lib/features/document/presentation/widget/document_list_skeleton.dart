@@ -35,7 +35,11 @@ class _SkeletonCard extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: Row(
             children: [
-              Bone(width: 36, height: 36, borderRadius: BorderRadius.circular(4)),
+              Bone(
+                width: 36,
+                height: 36,
+                borderRadius: BorderRadius.circular(4),
+              ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 20, right: 35),
@@ -49,7 +53,11 @@ class _SkeletonCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Bone(width: 64, height: 29, borderRadius: BorderRadius.circular(4)),
+              Bone(
+                width: 64,
+                height: 29,
+                borderRadius: BorderRadius.circular(4),
+              ),
             ],
           ),
         ),

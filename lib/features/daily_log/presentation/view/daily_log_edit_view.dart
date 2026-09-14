@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/features/daily_log/presentation/widget/daily_log_form_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
@@ -212,10 +213,18 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
         body: SafeArea(
           child: CustomAsyncValue(
             value: detail,
+            loading: const DailyLogFormSkeleton(),
+            onRetry: () => ref.invalidate(
+              dailyLogDetailViewModelProvider(widget.workLogId),
+            ),
             data: (detail) {
               if (!_initialized) _prefill(detail);
               return CustomAsyncValue(
                 value: template,
+                loading: const DailyLogFormSkeleton(),
+                onRetry: () => ref.invalidate(
+                  dailyLogTemplateViewModelProvider(widget.templateId),
+                ),
                 data: (template) => _form(template),
               );
             },
