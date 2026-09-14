@@ -67,10 +67,10 @@ class _FeedDateFieldState extends State<FeedDateField> {
             behavior: HitTestBehavior.opaque,
             onTap: _toggle,
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
               child: Row(
                 children: [
-                  SvgPicture.asset(SvgAssets.dateToday),
+                  SvgPicture.asset(SvgAssets.dateToday, width: 20, height: 20),
                   const SizedBox(width: 8),
                   Text(
                     hasValue ? _format(value) : '날짜 선택',

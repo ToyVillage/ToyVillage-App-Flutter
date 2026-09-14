@@ -214,10 +214,10 @@ class _FeedTimeFieldState extends State<FeedTimeField> {
           behavior: HitTestBehavior.opaque,
           onTap: _toggle,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+            padding: const EdgeInsets.symmetric(vertical: 17, horizontal: 14),
             child: Row(
               children: [
-                SvgPicture.asset(SvgAssets.clock),
+                SvgPicture.asset(SvgAssets.clock, width: 20, height: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: hasValue
@@ -225,12 +225,6 @@ class _FeedTimeFieldState extends State<FeedTimeField> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              widget.hintText,
-                              style: ToyVillageTextStyle.caption5.copyWith(
-                                color: ToyVillageColor.gray60,
-                              ),
-                            ),
                             Text(
                               _format(value),
                               style: ToyVillageTextStyle.body5.copyWith(

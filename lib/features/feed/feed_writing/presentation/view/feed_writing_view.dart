@@ -5,7 +5,6 @@ import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
-import 'package:toy_village_app/features/daily_log/presentation/widget/template_dropdown_field.dart';
 import 'package:toy_village_app/features/feed/feed_info/presentation/view_model/feed_detail_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_amount_field.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_date_field.dart';
@@ -14,12 +13,14 @@ import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/f
 class FeedWritingView extends ConsumerStatefulWidget {
   final String speciesName;
   final String category;
+  final String? entityName;
   final bool isEdit;
 
   const FeedWritingView({
     super.key,
     required this.speciesName,
     required this.category,
+    this.entityName,
     this.isEdit = false,
   });
 
@@ -33,20 +34,12 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
   static const _scrollBottomGap = 80.0;
 
   DateTime? _date;
-  FeedTime? _startTime;
-  FeedTime? _endTime;
-  String? _target;
+  FeedTime? _time;
   String _amountUnit = feedAmountUnits.first;
 
   final _feedTypeController = TextEditingController();
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
-
-  List<String> get _targets => [
-    '${widget.speciesName}1',
-    '${widget.speciesName}2',
-    '${widget.speciesName}3',
-  ];
 
   @override
   void initState() {
@@ -59,9 +52,7 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
       int.parse(parts[1]),
       int.parse(parts[2]),
     );
-    _startTime = detail.startTime;
-    _endTime = detail.endTime;
-    _target = detail.target;
+    _time = detail.startTime;
     _amountUnit = detail.unit;
     _feedTypeController.text = detail.feedType;
     _amountController.text = detail.amount;
@@ -97,6 +88,7 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
         appBar: const ToyVillageAppBar(hasIcon: true),
         body: SafeArea(
           child: Stack(
+            fit: StackFit.expand,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -119,51 +111,38 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
                           onChanged: (value) => setState(() => _date = value),
                         ),
                       ),
-                      _section(
-                        '급여 시간',
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: FeedTimeField(
-                                hintText: '시작 시각 선택',
-                                value: _startTime,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: _section(
+                              '급여 시간',
+                              FeedTimeField(
+                                hintText: '시각 선택',
+                                value: _time,
                                 onChanged: (value) =>
-                                    setState(() => _startTime = value),
+                                    setState(() => _time = value),
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: FeedTimeField(
-                                hintText: '종료 시각 선택',
-                                value: _endTime,
-                                onChanged: (value) =>
-                                    setState(() => _endTime = value),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _section(
+                              '먹이 급여량',
+                              FeedAmountField(
+                                controller: _amountController,
+                                unit: _amountUnit,
+                                onUnitChanged: (value) =>
+                                    setState(() => _amountUnit = value),
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      TemplateDropdownField(
-                        label: '대상 개체',
-                        hintText: '개체 선택',
-                        value: _target,
-                        items: _targets,
-                        onChanged: (value) => setState(() => _target = value),
+                          ),
+                        ],
                       ),
                       ToyVillageTextField(
                         label: '먹이 종류',
                         hintText: '먹이 종류 입력',
                         controller: _feedTypeController,
-                      ),
-                      _section(
-                        '먹이 급여량',
-                        FeedAmountField(
-                          controller: _amountController,
-                          unit: _amountUnit,
-                          onUnitChanged: (value) =>
-                              setState(() => _amountUnit = value),
-                        ),
                       ),
                       ToyVillageTextField(
                         label: '특이사항',

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 
-const feedAmountUnits = ['g / ml', 'kg / L'];
+const feedAmountUnits = ['g/ml', 'kg/L'];
 
 class FeedAmountField extends StatefulWidget {
   final TextEditingController controller;
@@ -118,7 +118,7 @@ class _FeedAmountFieldState extends State<FeedAmountField> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
           child: Row(
             children: [
               Expanded(
@@ -134,7 +134,7 @@ class _FeedAmountFieldState extends State<FeedAmountField> {
                   decoration: InputDecoration(
                     isDense: true,
                     isCollapsed: true,
-                    hintText: '먹이 급여량 입력',
+                    hintText: '급여량',
                     hintStyle: ToyVillageTextStyle.body5.copyWith(
                       color: ToyVillageColor.gray60,
                     ),
@@ -154,8 +154,11 @@ class _FeedAmountFieldState extends State<FeedAmountField> {
                         color: ToyVillageColor.gray60,
                       ),
                     ),
-                    const Icon(
-                      Icons.keyboard_arrow_down,
+                    const SizedBox(width: 4),
+                    Icon(
+                      _entry != null
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
                       size: 20,
                       color: ToyVillageColor.gray60,
                     ),
