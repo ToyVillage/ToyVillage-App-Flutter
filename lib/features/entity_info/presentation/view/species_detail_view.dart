@@ -45,12 +45,9 @@ class SpeciesDetailView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const InfoLabel(
-                  label: '학명',
-                  value: 'Hydrochoerus hydrochaeris',
-                ),
+                const InfoLabel(label: '학명', value: '-'),
                 InfoLabel(label: '분류군', value: category),
-                const InfoLabel(label: '법정지정분류', value: '일반종'),
+                const InfoLabel(label: '법정지정분류', value: '-'),
                 const SizedBox(height: 28),
                 Text(
                   '개체 리스트',

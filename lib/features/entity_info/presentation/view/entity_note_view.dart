@@ -27,7 +27,7 @@ class EntityNoteView extends StatelessWidget {
                 const SizedBox(height: 28),
                 const ToyVillageReadonlyField(
                   label: '제목',
-                  value: '9월 18일 특이사항 일지일지',
+                  value: '9월 18일 특이사항 일지',
                 ),
                 const SizedBox(height: 20),
                 ToyVillageReadonlyField(
