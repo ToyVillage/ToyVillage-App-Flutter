@@ -56,6 +56,7 @@ class FeedView extends ConsumerWidget {
                               extra: (
                                 speciesName: speciesName,
                                 category: category,
+                                entityName: null,
                                 isEdit: true,
                               ),
                             ),
@@ -66,24 +67,25 @@ class FeedView extends ConsumerWidget {
                   ),
                 ),
                 _section('급여 날짜', _dateBox(detail.date)),
-                _section(
-                  '급여 시간',
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: _timeBox('시작 시각', _formatTime(detail.startTime)),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _section(
+                        '급여 시간',
+                        _timeBox(_formatTime(detail.startTime)),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _timeBox('종료 시각', _formatTime(detail.endTime)),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _section(
+                        '먹이 급여량',
+                        _amountBox(detail.amount, detail.unit),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                ToyVillageReadonlyField(label: '대상 개체', value: detail.target),
                 ToyVillageReadonlyField(label: '먹이 종류', value: detail.feedType),
-                _section('먹이 급여량', _amountBox(detail.amount, detail.unit)),
                 ToyVillageReadonlyField(label: '특이사항', value: detail.note),
                 const SizedBox(height: 10),
               ],
@@ -133,29 +135,17 @@ class FeedView extends ConsumerWidget {
     );
   }
 
-  Widget _timeBox(String label, String value) {
+  Widget _timeBox(String value) {
     return _box(
       child: Row(
         children: [
           SvgPicture.asset(SvgAssets.clock),
           const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
-                style: ToyVillageTextStyle.caption5.copyWith(
-                  color: ToyVillageColor.gray60,
-                ),
-              ),
-              Text(
-                value,
-                style: ToyVillageTextStyle.body5.copyWith(
-                  color: ToyVillageColor.gray100,
-                ),
-              ),
-            ],
+          Text(
+            value,
+            style: ToyVillageTextStyle.body5.copyWith(
+              color: ToyVillageColor.gray100,
+            ),
           ),
         ],
       ),
