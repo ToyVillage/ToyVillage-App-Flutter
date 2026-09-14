@@ -41,7 +41,7 @@ class MenuView extends StatelessWidget {
               ),
               MenuCard(
                 icon: SvgAssets.pawPrint,
-                title: '개체 확인하기',
+                title: '동물 확인하기',
                 onTap: () {
                   context.push('/entity-info');
                 },
