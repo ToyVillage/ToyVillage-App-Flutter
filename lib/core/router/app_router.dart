@@ -19,6 +19,7 @@ import 'package:toy_village_app/features/entity_info/presentation/view/species_l
 import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_info_list_view.dart';
 import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_info_view.dart';
 import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_view.dart';
+import 'package:toy_village_app/features/feed/feed_writing/presentation/view/feed_entity_list_view.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/view/feed_writing_list_view.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/view/feed_writing_view.dart';
 import 'package:toy_village_app/features/menu/presentation/view/menu_view.dart';
@@ -266,16 +267,35 @@ final GoRouter appRouter = GoRouter(
       builder: (_, _) => const FeedWritingListView(),
       routes: [
         GoRoute(
+          path: 'entity',
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra is! ({String speciesName, String category})) {
+              return _invalidAccess;
+            }
+            return FeedEntityListView(
+              speciesName: extra.speciesName,
+              category: extra.category,
+            );
+          },
+        ),
+        GoRoute(
           path: 'write',
           builder: (context, state) {
             final extra = state.extra;
             if (extra
-                is! ({String speciesName, String category, bool isEdit})) {
+                is! ({
+                  String speciesName,
+                  String category,
+                  String? entityName,
+                  bool isEdit,
+                })) {
               return _invalidAccess;
             }
             return FeedWritingView(
               speciesName: extra.speciesName,
               category: extra.category,
+              entityName: extra.entityName,
               isEdit: extra.isEdit,
             );
           },

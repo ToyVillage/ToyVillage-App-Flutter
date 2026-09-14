@@ -51,11 +51,10 @@ class _FeedWritingListViewState extends ConsumerState<FeedWritingListView> {
                     speciesName: animal.speciesName,
                     category: animal.category,
                     onTap: () => context.push(
-                      '/feed-writing/write',
+                      '/feed-writing/entity',
                       extra: (
                         speciesName: animal.speciesName,
                         category: animal.category,
-                        isEdit: false,
                       ),
                     ),
                   );
