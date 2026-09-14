@@ -18,7 +18,6 @@ import 'package:toy_village_app/features/daily_log/presentation/view_model/daily
 import 'package:toy_village_app/features/daily_log/presentation/widget/checkbox_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/file_upload_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/radio_field.dart';
-import 'package:toy_village_app/features/daily_log/presentation/widget/template_dropdown_field.dart';
 import 'package:toy_village_app/features/task/data/model/report_attachment.dart';
 
 class DailyLogEditView extends ConsumerStatefulWidget {
@@ -46,7 +45,6 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
   final Map<int, TextEditingController> _textControllers = {};
   final Map<int, String?> _radioValues = {};
   final Map<int, List<String>> _checkboxValues = {};
-  final Map<int, String?> _dropdownValues = {};
   final Map<int, List<ReportAttachment>> _fileValues = {};
 
   @override
@@ -70,9 +68,7 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
               text: answer.answerText ?? '',
             );
           case QuestionType.multipleChoice:
-          case QuestionType.dropDown:
             _radioValues[answer.questionId] = answer.answerText;
-            _dropdownValues[answer.questionId] = answer.answerText;
           case QuestionType.checkBox:
             _checkboxValues[answer.questionId] = answer.answerText == null
                 ? []
@@ -186,15 +182,6 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
                   _checkboxValues[question.questionId] = value,
             ),
           ],
-        );
-      case QuestionType.dropDown:
-        return TemplateDropdownField(
-          label: question.question,
-          hintText: '선택',
-          items: choices,
-          value: _dropdownValues[question.questionId],
-          onChanged: (value) =>
-              setState(() => _dropdownValues[question.questionId] = value),
         );
       case QuestionType.fileUpload:
         return Column(

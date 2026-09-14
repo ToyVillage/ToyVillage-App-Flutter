@@ -14,7 +14,6 @@ import 'package:toy_village_app/features/daily_log/presentation/view_model/daily
 import 'package:toy_village_app/features/daily_log/presentation/widget/checkbox_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/file_upload_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/radio_field.dart';
-import 'package:toy_village_app/features/daily_log/presentation/widget/template_dropdown_field.dart';
 
 class DailyLogContentView extends ConsumerStatefulWidget {
   final int templateId;
@@ -34,7 +33,6 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
 
   int? _selectedSectionId;
   final Map<int, TextEditingController> _textControllers = {};
-  final Map<int, String?> _dropdownValues = {};
 
   @override
   void dispose() {
@@ -127,15 +125,6 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
             const SizedBox(height: _labelGap),
             CheckboxField(choices: choices, hasEtc: hasEtc),
           ],
-        );
-      case QuestionType.dropDown:
-        return TemplateDropdownField(
-          label: question.question,
-          hintText: '선택',
-          value: _dropdownValues[question.questionId],
-          items: choices,
-          onChanged: (value) =>
-              setState(() => _dropdownValues[question.questionId] = value),
         );
       case QuestionType.fileUpload:
         return Column(
