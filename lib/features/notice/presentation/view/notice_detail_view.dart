@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/features/notice/presentation/widget/notice_detail_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/word_util.dart';
@@ -20,6 +21,8 @@ class NoticeDetailView extends ConsumerWidget {
       appBar: const ToyVillageAppBar(hasIcon: true),
       body: CustomAsyncValue(
         value: ref.watch(noticeDetailViewModelProvider(id)),
+        loading: const NoticeDetailSkeleton(),
+        onRetry: () => ref.invalidate(noticeDetailViewModelProvider(id)),
         errorMessage: '공지사항을 불러오지 못했어요.',
         data: (value) => SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -32,7 +35,10 @@ class NoticeDetailView extends ConsumerWidget {
                 time: value.createdAt,
               ),
               const SectionDivider(),
-              Text(breakByWord(value.content), style: ToyVillageTextStyle.body5),
+              Text(
+                breakByWord(value.content),
+                style: ToyVillageTextStyle.body5,
+              ),
               if (value.files.isNotEmpty) ...[
                 const SectionDivider(),
                 AttachmentSection(
