@@ -3,7 +3,6 @@ enum QuestionType {
   longText('LONG_TEXT'),
   multipleChoice('MULTIPLE_CHOICE'),
   checkBox('CHECK_BOX'),
-  dropDown('DROP_DOWN'),
   fileUpload('FILE_UPLOAD');
 
   final String code;
