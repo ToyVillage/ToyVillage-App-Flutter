@@ -11,8 +11,11 @@ import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_e
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_view.dart';
 import 'package:toy_village_app/features/day_off/presentation/view/day_off_view.dart';
 import 'package:toy_village_app/features/document/presentation/view/document_view.dart';
-import 'package:toy_village_app/features/entity_info/presentation/view/entity_info_detail_view.dart';
-import 'package:toy_village_app/features/entity_info/presentation/view/entity_info_view.dart';
+import 'package:toy_village_app/features/entity_info/presentation/view/entity_detail_view.dart';
+import 'package:toy_village_app/features/entity_info/presentation/view/entity_note_view.dart';
+import 'package:toy_village_app/features/entity_info/presentation/view/entity_note_write_view.dart';
+import 'package:toy_village_app/features/entity_info/presentation/view/species_detail_view.dart';
+import 'package:toy_village_app/features/entity_info/presentation/view/species_list_view.dart';
 import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_info_list_view.dart';
 import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_info_view.dart';
 import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_view.dart';
@@ -208,14 +211,52 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/entity-info',
-      builder: (context, state) => const EntityInfoView(),
+      builder: (context, state) => const SpeciesListView(),
       routes: [
         GoRoute(
-          path: 'detail',
+          path: 'species',
           builder: (context, state) {
-            final id = state.extra;
-            if (id is! int) return _invalidAccess;
-            return EntityInfoDetailView(id: id);
+            final extra = state.extra;
+            if (extra is! ({String speciesName, String category})) {
+              return _invalidAccess;
+            }
+            return SpeciesDetailView(
+              speciesName: extra.speciesName,
+              category: extra.category,
+            );
+          },
+        ),
+        GoRoute(
+          path: 'entity',
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra is! ({String entityName, String category})) {
+              return _invalidAccess;
+            }
+            return EntityDetailView(entityName: extra.entityName);
+          },
+        ),
+        GoRoute(
+          path: 'note',
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra is! ({String entityName, String content})) {
+              return _invalidAccess;
+            }
+            return EntityNoteView(
+              entityName: extra.entityName,
+              content: extra.content,
+            );
+          },
+        ),
+        GoRoute(
+          path: 'note-write',
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra is! ({String entityName})) {
+              return _invalidAccess;
+            }
+            return EntityNoteWriteView(entityName: extra.entityName);
           },
         ),
       ],
