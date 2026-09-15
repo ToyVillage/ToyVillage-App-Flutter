@@ -1,6 +1,5 @@
 enum QuestionType {
-  shortText('SHORT_TEXT'),
-  longText('LONG_TEXT'),
+  text('TEXT'),
   multipleChoice('MULTIPLE_CHOICE'),
   checkBox('CHECK_BOX'),
   fileUpload('FILE_UPLOAD');
@@ -10,9 +9,19 @@ enum QuestionType {
   const QuestionType(this.code);
 
   static QuestionType fromCode(String code) {
-    for (final type in QuestionType.values) {
-      if (type.code == code) return type;
+    switch (code) {
+      case 'TEXT':
+      case 'SHORT_TEXT':
+      case 'LONG_TEXT':
+        return QuestionType.text;
+      case 'MULTIPLE_CHOICE':
+        return QuestionType.multipleChoice;
+      case 'CHECK_BOX':
+        return QuestionType.checkBox;
+      case 'FILE_UPLOAD':
+        return QuestionType.fileUpload;
+      default:
+        return QuestionType.text;
     }
-    return QuestionType.shortText;
   }
 }
