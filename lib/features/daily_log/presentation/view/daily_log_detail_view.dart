@@ -15,7 +15,10 @@ import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/readonly_field.dart';
 import 'package:toy_village_app/features/daily_log/data/model/daily_log_detail.dart';
 import 'package:toy_village_app/features/daily_log/data/model/question_type.dart';
+import 'package:toy_village_app/features/daily_log/data/repository/daily_log_detail_repository.dart';
+import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_detail_view_model.dart';
+import 'package:toy_village_app/features/daily_log/presentation/view_model/my_daily_log_view_model.dart';
 
 class DailyLogDetailView extends ConsumerWidget {
   final int id;
@@ -62,7 +65,7 @@ class DailyLogDetailView extends ConsumerWidget {
                             MenuDropdownItem(
                               label: '삭제',
                               color: ToyVillageColor.red,
-                              onTap: () => _delete(context),
+                              onTap: () => _delete(context, ref),
                             ),
                           ],
                         ),
@@ -153,18 +156,34 @@ class DailyLogDetailView extends ConsumerWidget {
       );
     }
 
+    if (answer.questionType == QuestionType.multipleChoice ||
+        answer.questionType == QuestionType.checkBox) {
+      final selected = answer.options
+          .map((o) => o.etcOption ? (o.etcText ?? '') : o.content)
+          .where((v) => v.isNotEmpty)
+          .join(', ');
+      return ToyVillageReadonlyField(label: answer.question, value: selected);
+    }
+
     return ToyVillageReadonlyField(
       label: answer.question,
       value: answer.answerText ?? '',
-      minLines: answer.questionType == QuestionType.longText ? 5 : 1,
+      minLines: 5,
     );
   }
 
-  Future<void> _delete(BuildContext context) async {
+  Future<void> _delete(BuildContext context, WidgetRef ref) async {
+    final overlay = Overlay.of(context, rootOverlay: true);
     final confirmed = await showDeleteConfirmDialog(context);
     if (!confirmed) return;
-    if (!context.mounted) return;
-    context.go('/daily-log');
+    try {
+      await ref.read(dailyLogDetailRepositoryProvider).deleteWorkLog(id);
+      ref.invalidate(myDailyLogViewModelProvider);
+      if (!context.mounted) return;
+      context.go('/daily-log');
+    } catch (_) {
+      showTopToast(overlay, '삭제에 실패했어요. 다시 시도해주세요.', isError: true);
+    }
   }
 }
 
