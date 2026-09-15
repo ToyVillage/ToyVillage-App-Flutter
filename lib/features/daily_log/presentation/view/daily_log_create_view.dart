@@ -76,11 +76,10 @@ class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
   }
 
   Widget _dropdown(List<DailyLogTemplateSummary> list) {
-    final titles = list.map((e) => e.templateTitle).toList();
-    String? selectedTitle;
-    for (final e in list) {
-      if (e.templateId == _templateId) {
-        selectedTitle = e.templateTitle;
+    var selectedIndex = -1;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].templateId == _templateId) {
+        selectedIndex = i;
         break;
       }
     }
@@ -88,18 +87,10 @@ class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
     return TemplateDropdownField(
       label: '양식 선택',
       hintText: '업무일지 양식을 선택해주세요',
-      value: selectedTitle,
-      items: titles,
-      onChanged: (value) {
-        int? id;
-        for (final e in list) {
-          if (e.templateTitle == value) {
-            id = e.templateId;
-            break;
-          }
-        }
-        setState(() => _templateId = id);
-      },
+      selectedIndex: selectedIndex,
+      items: list.map((e) => e.templateTitle).toList(),
+      onSelected: (index) =>
+          setState(() => _templateId = list[index].templateId),
     );
   }
 }
