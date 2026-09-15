@@ -44,12 +44,14 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
   static const _scrollBottomGap = 80.0;
 
   bool _initialized = false;
+  bool _choicesSeeded = false;
   bool _submitting = false;
+  DailyLogDetail? _detail;
 
   int? _selectedSectionId;
   final Map<int, TextEditingController> _textControllers = {};
-  final Map<int, String?> _radioValues = {};
-  final Map<int, List<String>> _checkboxValues = {};
+  final Map<int, RadioSelection> _radio = {};
+  final Map<int, CheckboxSelection> _check = {};
   final Map<int, List<ReportAttachment>> _fileValues = {};
 
   @override
@@ -61,6 +63,7 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
   }
 
   void _prefill(DailyLogDetail detail) {
+    _detail = detail;
     for (final section in detail.sections) {
       if (section.answers.isNotEmpty) {
         _selectedSectionId ??= section.sectionId;
@@ -71,26 +74,62 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
             _textControllers[answer.questionId] = TextEditingController(
               text: answer.answerText ?? '',
             );
-          case QuestionType.multipleChoice:
-            _radioValues[answer.questionId] = answer.options.isEmpty
-                ? null
-                : _optionValue(answer.options.first);
-          case QuestionType.checkBox:
-            _checkboxValues[answer.questionId] = answer.options
-                .map(_optionValue)
-                .toList();
           case QuestionType.fileUpload:
             _fileValues[answer.questionId] = answer.file == null
                 ? []
                 : [answer.file!];
+          case QuestionType.multipleChoice:
+          case QuestionType.checkBox:
+            break;
         }
       }
     }
     _initialized = true;
   }
 
-  String _optionValue(QuestionOption option) =>
-      option.etcOption ? (option.etcText ?? '') : option.content;
+  void _seedChoices(DailyLogTemplate template) {
+    if (_choicesSeeded) return;
+    _choicesSeeded = true;
+    final detail = _detail;
+    if (detail == null) return;
+    final questionsById = {
+      for (final question in template.questions) question.questionId: question,
+    };
+    for (final section in detail.sections) {
+      for (final answer in section.answers) {
+        final question = questionsById[answer.questionId];
+        if (question == null) continue;
+        if (answer.questionType == QuestionType.multipleChoice) {
+          if (answer.options.isNotEmpty) {
+            final option = answer.options.first;
+            _radio[answer.questionId] = (
+              index: _optionIndex(question, option),
+              etcText: option.etcText ?? '',
+            );
+          }
+        } else if (answer.questionType == QuestionType.checkBox) {
+          final indices = <int>{};
+          var etcText = '';
+          for (final option in answer.options) {
+            indices.add(_optionIndex(question, option));
+            if (option.etcOption) etcText = option.etcText ?? '';
+          }
+          _check[answer.questionId] = (indices: indices, etcText: etcText);
+        }
+      }
+    }
+  }
+
+  int _optionIndex(TemplateQuestion question, QuestionOption selected) {
+    final normal = [
+      for (final option in question.options)
+        if (!option.etcOption) option,
+    ];
+    for (var i = 0; i < normal.length; i++) {
+      if (normal[i].optionId == selected.optionId) return i;
+    }
+    return normal.length;
+  }
 
   TextEditingController _controllerFor(int questionId) {
     return _textControllers.putIfAbsent(questionId, TextEditingController.new);
@@ -116,8 +155,8 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
         for (final entry in _textControllers.entries)
           entry.key: entry.value.text,
       },
-      radioValues: _radioValues,
-      checkboxValues: _checkboxValues,
+      radioSelections: _radio,
+      checkboxSelections: _check,
       fileKeys: {
         for (final entry in _fileValues.entries)
           entry.key: entry.value.isEmpty ? null : entry.value.first.fileKey,
@@ -200,8 +239,12 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
             RadioField(
               choices: choices,
               hasEtc: hasEtc,
-              initialValue: _radioValues[question.questionId],
-              onChanged: (value) => _radioValues[question.questionId] = value,
+              initialIndex: _radio[question.questionId]?.index,
+              initialEtcText: _radio[question.questionId]?.etcText,
+              onSelected: (index, etcText) => _radio[question.questionId] = (
+                index: index,
+                etcText: etcText,
+              ),
             ),
           ],
         );
@@ -214,9 +257,12 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
             CheckboxField(
               choices: choices,
               hasEtc: hasEtc,
-              initialValues: _checkboxValues[question.questionId] ?? const [],
-              onChanged: (value) =>
-                  _checkboxValues[question.questionId] = value,
+              initialIndices: _check[question.questionId]?.indices ?? const {},
+              initialEtcText: _check[question.questionId]?.etcText,
+              onSelected: (indices, etcText) => _check[question.questionId] = (
+                indices: indices,
+                etcText: etcText,
+              ),
             ),
           ],
         );
@@ -271,6 +317,7 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
   }
 
   Widget _form(DailyLogTemplate template) {
+    _seedChoices(template);
     return Stack(
       children: [
         Padding(
