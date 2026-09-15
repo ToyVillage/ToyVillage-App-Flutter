@@ -20,6 +20,7 @@ import 'package:toy_village_app/features/daily_log/presentation/view_model/my_da
 import 'package:toy_village_app/features/daily_log/presentation/widget/checkbox_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/file_upload_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/radio_field.dart';
+import 'package:toy_village_app/features/task/data/model/report_attachment.dart';
 
 class DailyLogContentView extends ConsumerStatefulWidget {
   final int templateId;
@@ -42,6 +43,7 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
   final Map<int, TextEditingController> _textControllers = {};
   final Map<int, String?> _radioValues = {};
   final Map<int, List<String>> _checkboxValues = {};
+  final Map<int, List<ReportAttachment>> _fileValues = {};
 
   @override
   void dispose() {
@@ -79,6 +81,10 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
       },
       radioValues: _radioValues,
       checkboxValues: _checkboxValues,
+      fileKeys: {
+        for (final entry in _fileValues.entries)
+          entry.key: entry.value.isEmpty ? null : entry.value.first.fileKey,
+      },
     );
 
     setState(() => _submitting = true);
@@ -180,7 +186,9 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
           children: [
             label,
             const SizedBox(height: _labelGap),
-            const FileUploadField(),
+            FileUploadField(
+              onChanged: (value) => _fileValues[question.questionId] = value,
+            ),
           ],
         );
     }

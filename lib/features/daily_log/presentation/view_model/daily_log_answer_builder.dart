@@ -22,7 +22,7 @@ List<WorkLogAnswerRequest> buildWorkLogAnswers({
   required Map<int, String> textValues,
   required Map<int, String?> radioValues,
   required Map<int, List<String>> checkboxValues,
-  Map<int, int?> fileIds = const {},
+  Map<int, String?> fileKeys = const {},
 }) {
   final answers = <WorkLogAnswerRequest>[];
   for (final question in questions) {
@@ -66,7 +66,7 @@ List<WorkLogAnswerRequest> buildWorkLogAnswers({
           WorkLogAnswerRequest(
             sectionId: sectionId,
             questionId: id,
-            fileId: fileIds[id],
+            fileKey: fileKeys[id],
           ),
         );
     }

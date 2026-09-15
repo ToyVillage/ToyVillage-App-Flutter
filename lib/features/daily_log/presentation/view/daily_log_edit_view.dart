@@ -118,6 +118,10 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
       },
       radioValues: _radioValues,
       checkboxValues: _checkboxValues,
+      fileKeys: {
+        for (final entry in _fileValues.entries)
+          entry.key: entry.value.isEmpty ? null : entry.value.first.fileKey,
+      },
     );
 
     setState(() => _submitting = true);

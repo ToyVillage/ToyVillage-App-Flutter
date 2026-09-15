@@ -2,14 +2,14 @@ class WorkLogAnswerRequest {
   final int sectionId;
   final int questionId;
   final String? answerText;
-  final int? fileId;
+  final String? fileKey;
   final List<WorkLogAnswerOption> options;
 
   const WorkLogAnswerRequest({
     required this.sectionId,
     required this.questionId,
     this.answerText,
-    this.fileId,
+    this.fileKey,
     this.options = const [],
   });
 
@@ -17,7 +17,7 @@ class WorkLogAnswerRequest {
     'sectionId': sectionId,
     'questionId': questionId,
     'answerText': answerText,
-    'fileId': fileId,
+    'fileKey': fileKey,
     'options': options.map((e) => e.toJson()).toList(),
   };
 }
