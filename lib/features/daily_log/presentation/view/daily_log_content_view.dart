@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/daily_log_form_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
@@ -9,9 +10,13 @@ import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
+import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/daily_log/data/model/daily_log_template.dart';
 import 'package:toy_village_app/features/daily_log/data/model/question_type.dart';
+import 'package:toy_village_app/features/daily_log/data/repository/daily_log_detail_repository.dart';
+import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_answer_builder.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_template_view_model.dart';
+import 'package:toy_village_app/features/daily_log/presentation/view_model/my_daily_log_view_model.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/checkbox_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/file_upload_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/radio_field.dart';
@@ -33,7 +38,10 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
   static const _scrollBottomGap = 80.0;
 
   int? _selectedSectionId;
+  bool _submitting = false;
   final Map<int, TextEditingController> _textControllers = {};
+  final Map<int, String?> _radioValues = {};
+  final Map<int, List<String>> _checkboxValues = {};
 
   @override
   void dispose() {
@@ -49,7 +57,44 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
 
   void _saveDraft() {}
 
-  void _complete() {}
+  Future<void> _complete() async {
+    final overlay = Overlay.of(context, rootOverlay: true);
+    final sectionId = _selectedSectionId;
+    if (sectionId == null) {
+      showTopToast(overlay, '구역을 선택해주세요.', isError: true);
+      return;
+    }
+    if (_submitting) return;
+    final template = ref
+        .read(dailyLogTemplateViewModelProvider(widget.templateId))
+        .value;
+    if (template == null) return;
+
+    final answers = buildWorkLogAnswers(
+      sectionId: sectionId,
+      questions: template.questions,
+      textValues: {
+        for (final entry in _textControllers.entries)
+          entry.key: entry.value.text,
+      },
+      radioValues: _radioValues,
+      checkboxValues: _checkboxValues,
+    );
+
+    setState(() => _submitting = true);
+    try {
+      await ref
+          .read(dailyLogDetailRepositoryProvider)
+          .createWorkLog(widget.templateId, answers);
+      ref.invalidate(myDailyLogViewModelProvider);
+      if (!mounted) return;
+      context.go('/daily-log');
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _submitting = false);
+      showTopToast(overlay, '업무일지 작성에 실패했어요. 다시 시도해주세요.', isError: true);
+    }
+  }
 
   Widget _section(String label, Widget child) {
     return Column(
@@ -94,14 +139,7 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
     final hasEtc = question.options.any((option) => option.etcOption);
 
     switch (question.questionType) {
-      case QuestionType.shortText:
-        return ToyVillageTextField(
-          label: question.question,
-          hintText: '내용 입력',
-          controller: _controllerFor(question.questionId),
-          scrollPadding: const EdgeInsets.only(bottom: 100),
-        );
-      case QuestionType.longText:
+      case QuestionType.text:
         return ToyVillageTextField(
           label: question.question,
           hintText: '내용 입력',
@@ -115,7 +153,11 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
           children: [
             label,
             const SizedBox(height: _labelGap),
-            RadioField(choices: choices, hasEtc: hasEtc),
+            RadioField(
+              choices: choices,
+              hasEtc: hasEtc,
+              onChanged: (value) => _radioValues[question.questionId] = value,
+            ),
           ],
         );
       case QuestionType.checkBox:
@@ -124,7 +166,12 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
           children: [
             label,
             const SizedBox(height: _labelGap),
-            CheckboxField(choices: choices, hasEtc: hasEtc),
+            CheckboxField(
+              choices: choices,
+              hasEtc: hasEtc,
+              onChanged: (value) =>
+                  _checkboxValues[question.questionId] = value,
+            ),
           ],
         );
       case QuestionType.fileUpload:
@@ -194,8 +241,8 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ToyVillageButton(
-                          label: '작성 완료하기',
-                          onTap: _complete,
+                          label: _submitting ? '등록 중' : '작성 완료하기',
+                          onTap: _submitting ? () {} : _complete,
                         ),
                       ),
                     ],
