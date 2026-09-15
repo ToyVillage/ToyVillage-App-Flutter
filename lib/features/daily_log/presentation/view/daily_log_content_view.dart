@@ -41,8 +41,8 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
   int? _selectedSectionId;
   bool _submitting = false;
   final Map<int, TextEditingController> _textControllers = {};
-  final Map<int, String?> _radioValues = {};
-  final Map<int, List<String>> _checkboxValues = {};
+  final Map<int, RadioSelection> _radio = {};
+  final Map<int, CheckboxSelection> _check = {};
   final Map<int, List<ReportAttachment>> _fileValues = {};
 
   @override
@@ -56,8 +56,6 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
   TextEditingController _controllerFor(int questionId) {
     return _textControllers.putIfAbsent(questionId, TextEditingController.new);
   }
-
-  void _saveDraft() {}
 
   Future<void> _complete() async {
     final overlay = Overlay.of(context, rootOverlay: true);
@@ -79,8 +77,8 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
         for (final entry in _textControllers.entries)
           entry.key: entry.value.text,
       },
-      radioValues: _radioValues,
-      checkboxValues: _checkboxValues,
+      radioSelections: _radio,
+      checkboxSelections: _check,
       fileKeys: {
         for (final entry in _fileValues.entries)
           entry.key: entry.value.isEmpty ? null : entry.value.first.fileKey,
@@ -162,7 +160,10 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
             RadioField(
               choices: choices,
               hasEtc: hasEtc,
-              onChanged: (value) => _radioValues[question.questionId] = value,
+              onSelected: (index, etcText) => _radio[question.questionId] = (
+                index: index,
+                etcText: etcText,
+              ),
             ),
           ],
         );
@@ -175,8 +176,10 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
             CheckboxField(
               choices: choices,
               hasEtc: hasEtc,
-              onChanged: (value) =>
-                  _checkboxValues[question.questionId] = value,
+              onSelected: (indices, etcText) => _check[question.questionId] = (
+                indices: indices,
+                etcText: etcText,
+              ),
             ),
           ],
         );
@@ -238,22 +241,9 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
                   left: 20,
                   right: 20,
                   bottom: 16,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ToyVillageButton.outlined(
-                          label: '임시저장',
-                          onTap: _saveDraft,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ToyVillageButton(
-                          label: _submitting ? '등록 중' : '작성 완료하기',
-                          onTap: _submitting ? () {} : _complete,
-                        ),
-                      ),
-                    ],
+                  child: ToyVillageButton(
+                    label: _submitting ? '등록 중' : '작성 완료하기',
+                    onTap: _submitting ? () {} : _complete,
                   ),
                 ),
               ],
