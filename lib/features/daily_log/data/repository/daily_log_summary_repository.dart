@@ -16,7 +16,7 @@ class DailyLogSummaryRepository {
   Future<List<DailyLogSummary>> loadMyWorkLogs({
     int page = 0,
     int size = 10,
-    String sort = 'writeAt,desc',
+    String sort = 'id,desc',
   }) async {
     final response = await _dio.get(
       ApiEndpoints.workLogEmployee,
