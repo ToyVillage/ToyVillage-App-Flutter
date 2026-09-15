@@ -7,6 +7,7 @@ import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/empty_state.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view_model/my_daily_log_view_model.dart';
+import 'package:toy_village_app/features/daily_log/presentation/widget/daily_log_list_skeleton.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/log_card.dart';
 
 class DailyLogView extends ConsumerWidget {
@@ -34,6 +35,7 @@ class DailyLogView extends ConsumerWidget {
                   Expanded(
                     child: CustomAsyncValue(
                       value: ref.watch(myDailyLogViewModelProvider),
+                      loading: const DailyLogListSkeleton(),
                       onRetry: () =>
                           ref.invalidate(myDailyLogViewModelProvider),
                       errorMessage: '업무일지를 불러오지 못했어요.',
