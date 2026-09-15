@@ -7,15 +7,17 @@ import 'package:toy_village_app/core/constants/text_style.dart';
 class RadioField extends StatefulWidget {
   final List<String> choices;
   final bool hasEtc;
-  final String? initialValue;
-  final ValueChanged<String?>? onChanged;
+  final int? initialIndex;
+  final String? initialEtcText;
+  final void Function(int? index, String etcText)? onSelected;
 
   const RadioField({
     super.key,
     required this.choices,
     this.hasEtc = false,
-    this.initialValue,
-    this.onChanged,
+    this.initialIndex,
+    this.initialEtcText,
+    this.onSelected,
   });
 
   @override
@@ -32,15 +34,8 @@ class _RadioFieldState extends State<RadioField> {
   @override
   void initState() {
     super.initState();
-    final initial = widget.initialValue;
-    if (initial == null) return;
-    final index = widget.choices.indexOf(initial);
-    if (index >= 0) {
-      _selected = index;
-    } else if (widget.hasEtc) {
-      _selected = widget.choices.length;
-      _etcController.text = initial;
-    }
+    _selected = widget.initialIndex;
+    _etcController.text = widget.initialEtcText ?? '';
   }
 
   @override
@@ -55,15 +50,7 @@ class _RadioFieldState extends State<RadioField> {
   }
 
   void _notify() {
-    final onChanged = widget.onChanged;
-    if (onChanged == null) return;
-    if (_selected == null) {
-      onChanged(null);
-    } else if (_isEtcSelected) {
-      onChanged(_etcController.text);
-    } else {
-      onChanged(widget.choices[_selected!]);
-    }
+    widget.onSelected?.call(_selected, _etcController.text);
   }
 
   @override

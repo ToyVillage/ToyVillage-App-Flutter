@@ -2,15 +2,24 @@ import 'package:toy_village_app/features/daily_log/data/model/daily_log_template
 import 'package:toy_village_app/features/daily_log/data/model/question_type.dart';
 import 'package:toy_village_app/features/daily_log/data/model/work_log_answer_request.dart';
 
-WorkLogAnswerOption? _mapOption(TemplateQuestion question, String value) {
-  for (final option in question.options) {
-    if (!option.etcOption && option.content == value) {
-      return WorkLogAnswerOption(optionId: option.optionId);
-    }
+typedef RadioSelection = ({int? index, String etcText});
+typedef CheckboxSelection = ({Set<int> indices, String etcText});
+
+WorkLogAnswerOption? _optionAt(
+  TemplateQuestion question,
+  int index,
+  String etcText,
+) {
+  final normal = [
+    for (final option in question.options)
+      if (!option.etcOption) option,
+  ];
+  if (index >= 0 && index < normal.length) {
+    return WorkLogAnswerOption(optionId: normal[index].optionId);
   }
   for (final option in question.options) {
     if (option.etcOption) {
-      return WorkLogAnswerOption(optionId: option.optionId, etcText: value);
+      return WorkLogAnswerOption(optionId: option.optionId, etcText: etcText);
     }
   }
   return null;
@@ -20,8 +29,8 @@ List<WorkLogAnswerRequest> buildWorkLogAnswers({
   required int sectionId,
   required List<TemplateQuestion> questions,
   required Map<int, String> textValues,
-  required Map<int, String?> radioValues,
-  required Map<int, List<String>> checkboxValues,
+  required Map<int, RadioSelection> radioSelections,
+  required Map<int, CheckboxSelection> checkboxSelections,
   Map<int, String?> fileKeys = const {},
 }) {
   final answers = <WorkLogAnswerRequest>[];
@@ -38,8 +47,11 @@ List<WorkLogAnswerRequest> buildWorkLogAnswers({
           ),
         );
       case QuestionType.multipleChoice:
-        final value = radioValues[id];
-        final option = value == null ? null : _mapOption(question, value);
+        final selection = radioSelections[id];
+        final index = selection?.index;
+        final option = index == null
+            ? null
+            : _optionAt(question, index, selection!.etcText);
         answers.add(
           WorkLogAnswerRequest(
             sectionId: sectionId,
@@ -48,11 +60,13 @@ List<WorkLogAnswerRequest> buildWorkLogAnswers({
           ),
         );
       case QuestionType.checkBox:
-        final values = checkboxValues[id] ?? const [];
+        final selection = checkboxSelections[id];
         final options = <WorkLogAnswerOption>[];
-        for (final value in values) {
-          final option = _mapOption(question, value);
-          if (option != null) options.add(option);
+        if (selection != null) {
+          for (final index in selection.indices) {
+            final option = _optionAt(question, index, selection.etcText);
+            if (option != null) options.add(option);
+          }
         }
         answers.add(
           WorkLogAnswerRequest(
