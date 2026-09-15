@@ -14,8 +14,11 @@ import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/daily_log/data/model/daily_log_detail.dart';
 import 'package:toy_village_app/features/daily_log/data/model/daily_log_template.dart';
 import 'package:toy_village_app/features/daily_log/data/model/question_type.dart';
+import 'package:toy_village_app/features/daily_log/data/repository/daily_log_detail_repository.dart';
+import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_answer_builder.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_detail_view_model.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_template_view_model.dart';
+import 'package:toy_village_app/features/daily_log/presentation/view_model/my_daily_log_view_model.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/checkbox_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/file_upload_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/radio_field.dart';
@@ -41,11 +44,14 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
   static const _scrollBottomGap = 80.0;
 
   bool _initialized = false;
+  bool _choicesSeeded = false;
+  bool _submitting = false;
+  DailyLogDetail? _detail;
 
   int? _selectedSectionId;
   final Map<int, TextEditingController> _textControllers = {};
-  final Map<int, String?> _radioValues = {};
-  final Map<int, List<String>> _checkboxValues = {};
+  final Map<int, RadioSelection> _radio = {};
+  final Map<int, CheckboxSelection> _check = {};
   final Map<int, List<ReportAttachment>> _fileValues = {};
 
   @override
@@ -57,44 +63,120 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
   }
 
   void _prefill(DailyLogDetail detail) {
+    _detail = detail;
     for (final section in detail.sections) {
       if (section.answers.isNotEmpty) {
         _selectedSectionId ??= section.sectionId;
       }
       for (final answer in section.answers) {
         switch (answer.questionType) {
-          case QuestionType.shortText:
-          case QuestionType.longText:
+          case QuestionType.text:
             _textControllers[answer.questionId] = TextEditingController(
               text: answer.answerText ?? '',
             );
-          case QuestionType.multipleChoice:
-            _radioValues[answer.questionId] = answer.answerText;
-          case QuestionType.checkBox:
-            _checkboxValues[answer.questionId] = answer.answerText == null
-                ? []
-                : [answer.answerText!];
           case QuestionType.fileUpload:
             _fileValues[answer.questionId] = answer.file == null
                 ? []
                 : [answer.file!];
+          case QuestionType.multipleChoice:
+          case QuestionType.checkBox:
+            break;
         }
       }
     }
     _initialized = true;
   }
 
+  void _seedChoices(DailyLogTemplate template) {
+    if (_choicesSeeded) return;
+    _choicesSeeded = true;
+    final detail = _detail;
+    if (detail == null) return;
+    final questionsById = {
+      for (final question in template.questions) question.questionId: question,
+    };
+    for (final section in detail.sections) {
+      for (final answer in section.answers) {
+        final question = questionsById[answer.questionId];
+        if (question == null) continue;
+        if (answer.questionType == QuestionType.multipleChoice) {
+          if (answer.options.isNotEmpty) {
+            final option = answer.options.first;
+            _radio[answer.questionId] = (
+              index: _optionIndex(question, option),
+              etcText: option.etcText ?? '',
+            );
+          }
+        } else if (answer.questionType == QuestionType.checkBox) {
+          final indices = <int>{};
+          var etcText = '';
+          for (final option in answer.options) {
+            indices.add(_optionIndex(question, option));
+            if (option.etcOption) etcText = option.etcText ?? '';
+          }
+          _check[answer.questionId] = (indices: indices, etcText: etcText);
+        }
+      }
+    }
+  }
+
+  int _optionIndex(TemplateQuestion question, QuestionOption selected) {
+    final normal = [
+      for (final option in question.options)
+        if (!option.etcOption) option,
+    ];
+    for (var i = 0; i < normal.length; i++) {
+      if (normal[i].optionId == selected.optionId) return i;
+    }
+    return normal.length;
+  }
+
   TextEditingController _controllerFor(int questionId) {
     return _textControllers.putIfAbsent(questionId, TextEditingController.new);
   }
 
-  void _save() {
+  Future<void> _save() async {
     final overlay = Overlay.of(context, rootOverlay: true);
-    if (_selectedSectionId == null) {
+    final sectionId = _selectedSectionId;
+    if (sectionId == null) {
       showTopToast(overlay, '구역을 선택해주세요.', isError: true);
       return;
     }
-    context.pop();
+    if (_submitting) return;
+    final template = ref
+        .read(dailyLogTemplateViewModelProvider(widget.templateId))
+        .value;
+    if (template == null) return;
+
+    final answers = buildWorkLogAnswers(
+      sectionId: sectionId,
+      questions: template.questions,
+      textValues: {
+        for (final entry in _textControllers.entries)
+          entry.key: entry.value.text,
+      },
+      radioSelections: _radio,
+      checkboxSelections: _check,
+      fileKeys: {
+        for (final entry in _fileValues.entries)
+          entry.key: entry.value.isEmpty ? null : entry.value.first.fileKey,
+      },
+    );
+
+    setState(() => _submitting = true);
+    try {
+      await ref
+          .read(dailyLogDetailRepositoryProvider)
+          .updateWorkLog(widget.workLogId, answers);
+      ref.invalidate(dailyLogDetailViewModelProvider(widget.workLogId));
+      ref.invalidate(myDailyLogViewModelProvider);
+      if (!mounted) return;
+      context.pop();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _submitting = false);
+      showTopToast(overlay, '업무일지 수정에 실패했어요. 다시 시도해주세요.', isError: true);
+    }
   }
 
   Widget _section(String label, Widget child) {
@@ -140,14 +222,7 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
     final hasEtc = question.options.any((option) => option.etcOption);
 
     switch (question.questionType) {
-      case QuestionType.shortText:
-        return ToyVillageTextField(
-          label: question.question,
-          hintText: '내용 입력',
-          controller: _controllerFor(question.questionId),
-          scrollPadding: const EdgeInsets.only(bottom: 100),
-        );
-      case QuestionType.longText:
+      case QuestionType.text:
         return ToyVillageTextField(
           label: question.question,
           hintText: '내용 입력',
@@ -164,8 +239,12 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
             RadioField(
               choices: choices,
               hasEtc: hasEtc,
-              initialValue: _radioValues[question.questionId],
-              onChanged: (value) => _radioValues[question.questionId] = value,
+              initialIndex: _radio[question.questionId]?.index,
+              initialEtcText: _radio[question.questionId]?.etcText,
+              onSelected: (index, etcText) => _radio[question.questionId] = (
+                index: index,
+                etcText: etcText,
+              ),
             ),
           ],
         );
@@ -178,9 +257,12 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
             CheckboxField(
               choices: choices,
               hasEtc: hasEtc,
-              initialValues: _checkboxValues[question.questionId] ?? const [],
-              onChanged: (value) =>
-                  _checkboxValues[question.questionId] = value,
+              initialIndices: _check[question.questionId]?.indices ?? const {},
+              initialEtcText: _check[question.questionId]?.etcText,
+              onSelected: (indices, etcText) => _check[question.questionId] = (
+                indices: indices,
+                etcText: etcText,
+              ),
             ),
           ],
         );
@@ -235,6 +317,7 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
   }
 
   Widget _form(DailyLogTemplate template) {
+    _seedChoices(template);
     return Stack(
       children: [
         Padding(
@@ -259,7 +342,10 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
           left: 20,
           right: 20,
           bottom: 16,
-          child: ToyVillageButton(label: '수정 완료하기', onTap: _save),
+          child: ToyVillageButton(
+            label: _submitting ? '수정 중' : '수정 완료하기',
+            onTap: _submitting ? () {} : _save,
+          ),
         ),
       ],
     );

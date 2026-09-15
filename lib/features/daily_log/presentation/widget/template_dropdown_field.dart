@@ -6,17 +6,17 @@ import 'package:toy_village_app/core/widgets/text/label.dart';
 class TemplateDropdownField extends StatefulWidget {
   final String label;
   final String hintText;
-  final String? value;
+  final int? selectedIndex;
   final List<String> items;
-  final ValueChanged<String> onChanged;
+  final ValueChanged<int> onSelected;
 
   const TemplateDropdownField({
     super.key,
     required this.label,
     required this.items,
-    required this.onChanged,
+    required this.onSelected,
     this.hintText = '',
-    this.value,
+    this.selectedIndex,
   });
 
   @override
@@ -45,14 +45,14 @@ class _TemplateDropdownFieldState extends State<TemplateDropdownField> {
     });
   }
 
-  void _select(String item) {
-    widget.onChanged(item);
+  void _select(int index) {
+    widget.onSelected(index);
     setState(() => _open = false);
   }
 
-  Widget _item(String item) {
+  Widget _item(int index, String item) {
     return InkWell(
-      onTap: () => _select(item),
+      onTap: () => _select(index),
       child: Container(
         height: _itemHeight,
         alignment: Alignment.centerLeft,
@@ -64,7 +64,9 @@ class _TemplateDropdownFieldState extends State<TemplateDropdownField> {
 
   @override
   Widget build(BuildContext context) {
-    final hasValue = widget.value != null && widget.value!.isNotEmpty;
+    final index = widget.selectedIndex;
+    final hasValue = index != null && index >= 0 && index < widget.items.length;
+    final valueText = hasValue ? widget.items[index] : widget.hintText;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,7 +89,7 @@ class _TemplateDropdownFieldState extends State<TemplateDropdownField> {
                 children: [
                   Expanded(
                     child: Text(
-                      hasValue ? widget.value! : widget.hintText,
+                      valueText,
                       style: hasValue
                           ? ToyVillageTextStyle.body5
                           : ToyVillageTextStyle.caption4.copyWith(
@@ -117,7 +119,10 @@ class _TemplateDropdownFieldState extends State<TemplateDropdownField> {
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: [for (final item in widget.items) _item(item)],
+                children: [
+                  for (var i = 0; i < widget.items.length; i++)
+                    _item(i, widget.items[i]),
+                ],
               ),
             ),
           ),

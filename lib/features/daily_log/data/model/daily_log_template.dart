@@ -61,7 +61,7 @@ class TemplateQuestion {
       questionId: json['questionId'] as int,
       question: json['question'] as String,
       questionType: QuestionType.fromCode(json['questionType'] as String),
-      required: json['required'] as bool,
+      required: json['required'] as bool? ?? false,
       options: (json['options'] as List)
           .map((e) => QuestionOption.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -70,24 +70,27 @@ class TemplateQuestion {
 }
 
 class QuestionOption {
-  final int choiceId;
+  final int optionId;
   final int number;
   final String content;
   final bool etcOption;
+  final String? etcText;
 
   const QuestionOption({
-    required this.choiceId,
+    required this.optionId,
     required this.number,
     required this.content,
     required this.etcOption,
+    this.etcText,
   });
 
   factory QuestionOption.fromJson(Map<String, dynamic> json) {
     return QuestionOption(
-      choiceId: json['choiceId'] as int,
+      optionId: json['optionId'] as int,
       number: json['number'] as int,
       content: json['content'] as String,
       etcOption: json['etcOption'] as bool,
+      etcText: json['etcText'] as String?,
     );
   }
 }
