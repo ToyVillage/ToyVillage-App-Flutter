@@ -2,59 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
-import 'package:toy_village_app/features/daily_log/data/model/daily_log.dart';
-import 'package:toy_village_app/features/daily_log/data/repository/daily_log_draft_repository.dart';
+import 'package:toy_village_app/features/daily_log/data/model/daily_log_template_summary.dart';
+import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_template_list_view_model.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/template_dropdown_field.dart';
 
 class DailyLogCreateView extends ConsumerStatefulWidget {
-  final DailyLog? log;
-
-  const DailyLogCreateView({super.key, this.log});
+  const DailyLogCreateView({super.key});
 
   @override
   ConsumerState<DailyLogCreateView> createState() => _DailyLogCreateViewState();
 }
 
 class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
-  String? _template;
-
-  DailyLogDraftRepository get _repo =>
-      ref.read(dailyLogDraftRepositoryProvider);
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    final id = widget.log?.id;
-    final draft = await _repo.load(id);
-    if (!mounted) return;
-    if (draft?.templateName != null) {
-      setState(() => _template = draft!.templateName);
-      return;
-    }
-    final log = widget.log;
-    if (log != null) {
-      setState(() => _template = log.templateName);
-    }
-  }
-
-  String get _title {
-    final log = widget.log;
-    if (log != null) {
-      return '${log.createdAt.month}월 ${log.createdAt.day}일 업무일지';
-    }
-    return '업무일지 작성';
-  }
+  int? _templateId;
 
   void _next() {
-    final template = _template;
-    if (template == null) {
+    final templateId = _templateId;
+    if (templateId == null) {
       showTopToast(
         Overlay.of(context, rootOverlay: true),
         '양식을 선택해주세요.',
@@ -62,12 +30,13 @@ class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
       );
       return;
     }
-    final templateId = dailyLogTemplates.indexOf(template) + 1;
     context.push('/daily-log/create/content', extra: templateId);
   }
 
   @override
   Widget build(BuildContext context) {
+    final templates = ref.watch(dailyLogTemplateListViewModelProvider);
+
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true),
       body: SafeArea(
@@ -78,16 +47,18 @@ class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 28),
-                    child: ToyVillageTitle(title: _title),
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 28),
+                    child: ToyVillageTitle(title: '업무일지 작성'),
                   ),
-                  TemplateDropdownField(
-                    label: '양식 선택',
-                    hintText: '업무일지 양식을 선택해주세요',
-                    value: _template,
-                    items: dailyLogTemplates,
-                    onChanged: (value) => setState(() => _template = value),
+                  Expanded(
+                    child: CustomAsyncValue(
+                      value: templates,
+                      onRetry: () =>
+                          ref.invalidate(dailyLogTemplateListViewModelProvider),
+                      errorMessage: '양식을 불러오지 못했어요.',
+                      data: (list) => _dropdown(list),
+                    ),
                   ),
                 ],
               ),
@@ -101,6 +72,34 @@ class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _dropdown(List<DailyLogTemplateSummary> list) {
+    final titles = list.map((e) => e.templateTitle).toList();
+    String? selectedTitle;
+    for (final e in list) {
+      if (e.templateId == _templateId) {
+        selectedTitle = e.templateTitle;
+        break;
+      }
+    }
+
+    return TemplateDropdownField(
+      label: '양식 선택',
+      hintText: '업무일지 양식을 선택해주세요',
+      value: selectedTitle,
+      items: titles,
+      onChanged: (value) {
+        int? id;
+        for (final e in list) {
+          if (e.templateTitle == value) {
+            id = e.templateId;
+            break;
+          }
+        }
+        setState(() => _templateId = id);
+      },
     );
   }
 }

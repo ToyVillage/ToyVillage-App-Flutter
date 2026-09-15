@@ -3,10 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/time_util.dart';
-import 'package:toy_village_app/features/daily_log/data/model/daily_log.dart';
+import 'package:toy_village_app/features/daily_log/data/model/daily_log_summary.dart';
 
 class LogCard extends StatelessWidget {
-  final DailyLog log;
+  final DailyLogSummary log;
 
   const LogCard({super.key, required this.log});
 
@@ -15,7 +15,7 @@ class LogCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: GestureDetector(
-        onTap: () => context.push('/daily-log/detail', extra: log.id),
+        onTap: () => context.push('/daily-log/detail', extra: log.workLogId),
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
@@ -28,21 +28,21 @@ class LogCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${log.createdAt.month}월 ${log.createdAt.day}일 업무일지',
+                  '${log.writeAt.month}월 ${log.writeAt.day}일 업무일지',
                   style: ToyVillageTextStyle.heading3,
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
                     Text(
-                      log.templateName,
+                      log.templateTitle,
                       style: ToyVillageTextStyle.caption4.copyWith(
                         color: ToyVillageColor.gray60,
                       ),
                     ),
                     const Spacer(),
                     Text(
-                      timeCheck(log.createdAt),
+                      timeCheck(log.writeAt),
                       style: ToyVillageTextStyle.caption4.copyWith(
                         color: ToyVillageColor.gray60,
                       ),
