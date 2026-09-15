@@ -181,7 +181,9 @@ class DailyLogDetailView extends ConsumerWidget {
       ref.invalidate(myDailyLogViewModelProvider);
       if (!context.mounted) return;
       context.go('/daily-log');
-    } catch (_) {
+    } catch (e, stackTrace) {
+      debugPrint('[DailyLog Delete Error] id=$id: $e');
+      debugPrint('$stackTrace');
       showTopToast(overlay, '삭제에 실패했어요. 다시 시도해주세요.', isError: true);
     }
   }
