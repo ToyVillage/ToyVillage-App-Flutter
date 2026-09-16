@@ -24,20 +24,28 @@ import 'package:toy_village_app/features/daily_log/presentation/view_model/my_da
 import 'package:toy_village_app/features/daily_log/presentation/widget/checkbox_field.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/radio_field.dart';
 
-class DailyLogDetailView extends ConsumerWidget {
+class DailyLogDetailView extends ConsumerStatefulWidget {
   final int id;
 
   const DailyLogDetailView({super.key, required this.id});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DailyLogDetailView> createState() => _DailyLogDetailViewState();
+}
+
+class _DailyLogDetailViewState extends ConsumerState<DailyLogDetailView> {
+  int? _selectedSectionId;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true),
       body: SafeArea(
         child: CustomAsyncValue(
-          value: ref.watch(dailyLogDetailViewModelProvider(id)),
+          value: ref.watch(dailyLogDetailViewModelProvider(widget.id)),
           loading: const DailyLogDetailSkeleton(),
-          onRetry: () => ref.invalidate(dailyLogDetailViewModelProvider(id)),
+          onRetry: () =>
+              ref.invalidate(dailyLogDetailViewModelProvider(widget.id)),
           data: (detail) => CustomAsyncValue(
             value: ref.watch(
               dailyLogTemplateViewModelProvider(detail.templateId),
@@ -46,22 +54,28 @@ class DailyLogDetailView extends ConsumerWidget {
             onRetry: () => ref.invalidate(
               dailyLogTemplateViewModelProvider(detail.templateId),
             ),
-            data: (template) => _content(context, ref, detail, template),
+            data: (template) => _content(detail, template),
           ),
         ),
       ),
     );
   }
 
-  Widget _content(
-    BuildContext context,
-    WidgetRef ref,
-    DailyLogDetail detail,
-    DailyLogTemplate template,
-  ) {
+  AnswerSection? _sectionOf(DailyLogDetail detail, int? sectionId) {
+    for (final section in detail.sections) {
+      if (section.sectionId == sectionId) return section;
+    }
+    return null;
+  }
+
+  Widget _content(DailyLogDetail detail, DailyLogTemplate template) {
+    _selectedSectionId ??= detail.sections.isEmpty
+        ? null
+        : detail.sections.first.sectionId;
     final questionsById = {
       for (final question in template.questions) question.questionId: question,
     };
+    final current = _sectionOf(detail, _selectedSectionId);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -90,7 +104,7 @@ class DailyLogDetailView extends ConsumerWidget {
                       MenuDropdownItem(
                         label: '삭제',
                         color: ToyVillageColor.red,
-                        onTap: () => _delete(context, ref),
+                        onTap: _delete,
                       ),
                     ],
                   ),
@@ -102,16 +116,13 @@ class DailyLogDetailView extends ConsumerWidget {
               label: '양식 선택',
               value: detail.templateTitle,
             ),
-            for (final answer in _answers(detail.sections))
-              _answer(context, answer, questionsById[answer.questionId]),
+            if (current != null)
+              for (final answer in current.answers)
+                _answer(answer, questionsById[answer.questionId]),
           ],
         ),
       ),
     );
-  }
-
-  List<Answer> _answers(List<AnswerSection> sections) {
-    return [for (final section in sections) ...section.answers];
   }
 
   Widget _section(String label, Widget child) {
@@ -141,7 +152,8 @@ class DailyLogDetailView extends ConsumerWidget {
         final section = sections[index];
         return _SectionCard(
           label: section.sectionName,
-          selected: section.answers.isNotEmpty,
+          selected: section.sectionId == _selectedSectionId,
+          onTap: () => setState(() => _selectedSectionId = section.sectionId),
         );
       },
     );
@@ -169,11 +181,7 @@ class DailyLogDetailView extends ConsumerWidget {
     );
   }
 
-  Widget _answer(
-    BuildContext context,
-    Answer answer,
-    TemplateQuestion? question,
-  ) {
+  Widget _answer(Answer answer, TemplateQuestion? question) {
     if (answer.questionType == QuestionType.fileUpload) {
       final file = answer.file;
       return Column(
@@ -215,6 +223,7 @@ class DailyLogDetailView extends ConsumerWidget {
       return _labeled(
         answer.question,
         RadioField(
+          key: ValueKey('$_selectedSectionId-${answer.questionId}'),
           choices: choices,
           hasEtc: hasEtc,
           readOnly: true,
@@ -243,6 +252,7 @@ class DailyLogDetailView extends ConsumerWidget {
       return _labeled(
         answer.question,
         CheckboxField(
+          key: ValueKey('$_selectedSectionId-${answer.questionId}'),
           choices: choices,
           hasEtc: hasEtc,
           readOnly: true,
@@ -259,17 +269,17 @@ class DailyLogDetailView extends ConsumerWidget {
     );
   }
 
-  Future<void> _delete(BuildContext context, WidgetRef ref) async {
+  Future<void> _delete() async {
     final overlay = Overlay.of(context, rootOverlay: true);
     final confirmed = await showDeleteConfirmDialog(context);
     if (!confirmed) return;
     try {
-      await ref.read(dailyLogDetailRepositoryProvider).deleteWorkLog(id);
+      await ref.read(dailyLogDetailRepositoryProvider).deleteWorkLog(widget.id);
       ref.invalidate(myDailyLogViewModelProvider);
-      if (!context.mounted) return;
+      if (!mounted) return;
       context.go('/daily-log');
     } catch (e, stackTrace) {
-      debugPrint('[DailyLog Delete Error] id=$id: $e');
+      debugPrint('[DailyLog Delete Error] id=${widget.id}: $e');
       debugPrint('$stackTrace');
       showTopToast(overlay, '삭제에 실패했어요. 다시 시도해주세요.', isError: true);
     }
@@ -279,21 +289,30 @@ class DailyLogDetailView extends ConsumerWidget {
 class _SectionCard extends StatelessWidget {
   final String label;
   final bool selected;
+  final VoidCallback onTap;
 
-  const _SectionCard({required this.label, required this.selected});
+  const _SectionCard({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: selected ? ToyVillageColor.gray100 : ToyVillageColor.white,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        label,
-        style: ToyVillageTextStyle.button4.copyWith(
-          color: selected ? ToyVillageColor.white : ToyVillageColor.gray100,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? ToyVillageColor.gray100 : ToyVillageColor.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          label,
+          style: ToyVillageTextStyle.button4.copyWith(
+            color: selected ? ToyVillageColor.white : ToyVillageColor.gray100,
+          ),
         ),
       ),
     );

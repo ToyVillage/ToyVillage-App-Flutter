@@ -13,6 +13,7 @@ import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/daily_log/data/model/daily_log_template.dart';
 import 'package:toy_village_app/features/daily_log/data/model/question_type.dart';
+import 'package:toy_village_app/features/daily_log/data/model/work_log_answer_request.dart';
 import 'package:toy_village_app/features/daily_log/data/repository/daily_log_detail_repository.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_answer_builder.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_template_view_model.dart';
@@ -40,27 +41,29 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
 
   int? _selectedSectionId;
   bool _submitting = false;
-  final Map<int, TextEditingController> _textControllers = {};
-  final Map<int, RadioSelection> _radio = {};
-  final Map<int, CheckboxSelection> _check = {};
-  final Map<int, List<ReportAttachment>> _fileValues = {};
+  final Map<int, Map<int, TextEditingController>> _textControllers = {};
+  final Map<int, Map<int, RadioSelection>> _radio = {};
+  final Map<int, Map<int, CheckboxSelection>> _check = {};
+  final Map<int, Map<int, List<ReportAttachment>>> _fileValues = {};
 
   @override
   void dispose() {
-    for (final controller in _textControllers.values) {
-      controller.dispose();
+    for (final section in _textControllers.values) {
+      for (final controller in section.values) {
+        controller.dispose();
+      }
     }
     super.dispose();
   }
 
-  TextEditingController _controllerFor(int questionId) {
-    return _textControllers.putIfAbsent(questionId, TextEditingController.new);
+  TextEditingController _controllerFor(int sectionId, int questionId) {
+    final section = _textControllers.putIfAbsent(sectionId, () => {});
+    return section.putIfAbsent(questionId, TextEditingController.new);
   }
 
   Future<void> _complete() async {
     final overlay = Overlay.of(context, rootOverlay: true);
-    final sectionId = _selectedSectionId;
-    if (sectionId == null) {
+    if (_selectedSectionId == null) {
       showTopToast(overlay, '구역을 선택해주세요.', isError: true);
       return;
     }
@@ -70,20 +73,26 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
         .value;
     if (template == null) return;
 
-    final answers = buildWorkLogAnswers(
-      sectionId: sectionId,
-      questions: template.questions,
-      textValues: {
-        for (final entry in _textControllers.entries)
-          entry.key: entry.value.text,
-      },
-      radioSelections: _radio,
-      checkboxSelections: _check,
-      fileKeys: {
-        for (final entry in _fileValues.entries)
-          entry.key: entry.value.isEmpty ? null : entry.value.first.fileKey,
-      },
-    );
+    final answers = <WorkLogAnswerRequest>[];
+    for (final section in template.sections) {
+      final id = section.sectionId;
+      answers.addAll(
+        buildWorkLogAnswers(
+          sectionId: id,
+          questions: template.questions,
+          textValues: {
+            for (final entry in (_textControllers[id] ?? {}).entries)
+              entry.key: entry.value.text,
+          },
+          radioSelections: _radio[id] ?? const {},
+          checkboxSelections: _check[id] ?? const {},
+          fileKeys: {
+            for (final entry in (_fileValues[id] ?? {}).entries)
+              entry.key: entry.value.isEmpty ? null : entry.value.first.fileKey,
+          },
+        ),
+      );
+    }
 
     setState(() => _submitting = true);
     try {
@@ -134,21 +143,24 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
     );
   }
 
-  Widget _question(TemplateQuestion question) {
+  Widget _question(int sectionId, TemplateQuestion question) {
+    final qid = question.questionId;
     final label = ToyVillageLabel(label: question.question);
     final choices = question.options
         .where((option) => !option.etcOption)
         .map((option) => option.content)
         .toList();
     final hasEtc = question.options.any((option) => option.etcOption);
+    final key = ValueKey('$sectionId-$qid');
 
     switch (question.questionType) {
       case QuestionType.text:
         return ToyVillageTextField(
+          key: key,
           label: question.question,
           hintText: '내용 입력',
           minLines: 5,
-          controller: _controllerFor(question.questionId),
+          controller: _controllerFor(sectionId, qid),
           scrollPadding: const EdgeInsets.only(bottom: 100),
         );
       case QuestionType.multipleChoice:
@@ -158,12 +170,13 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
             label,
             const SizedBox(height: _labelGap),
             RadioField(
+              key: key,
               choices: choices,
               hasEtc: hasEtc,
-              onSelected: (index, etcText) => _radio[question.questionId] = (
-                index: index,
-                etcText: etcText,
-              ),
+              initialIndex: _radio[sectionId]?[qid]?.index,
+              initialEtcText: _radio[sectionId]?[qid]?.etcText,
+              onSelected: (index, etcText) => (_radio[sectionId] ??= {})[qid] =
+                  (index: index, etcText: etcText),
             ),
           ],
         );
@@ -174,12 +187,16 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
             label,
             const SizedBox(height: _labelGap),
             CheckboxField(
+              key: key,
               choices: choices,
               hasEtc: hasEtc,
-              onSelected: (indices, etcText) => _check[question.questionId] = (
-                indices: indices,
-                etcText: etcText,
-              ),
+              initialIndices: _check[sectionId]?[qid]?.indices ?? const {},
+              initialEtcText: _check[sectionId]?[qid]?.etcText,
+              onSelected: (indices, etcText) =>
+                  (_check[sectionId] ??= {})[qid] = (
+                    indices: indices,
+                    etcText: etcText,
+                  ),
             ),
           ],
         );
@@ -190,7 +207,10 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
             label,
             const SizedBox(height: _labelGap),
             FileUploadField(
-              onChanged: (value) => _fileValues[question.questionId] = value,
+              key: key,
+              initialFiles: _fileValues[sectionId]?[qid] ?? const [],
+              onChanged: (value) =>
+                  (_fileValues[sectionId] ??= {})[qid] = value,
             ),
           ],
         );
@@ -231,8 +251,9 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
                           child: ToyVillageTitle(title: '업무일지 작성'),
                         ),
                         _section('구역 선택', _sectionGrid(template.sections)),
-                        for (final question in template.questions)
-                          _question(question),
+                        if (_selectedSectionId != null)
+                          for (final question in template.questions)
+                            _question(_selectedSectionId!, question),
                       ],
                     ),
                   ),
