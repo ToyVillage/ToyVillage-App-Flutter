@@ -87,37 +87,43 @@ class _TopToastState extends State<_TopToast>
                 onDismissed: (_) => _dismiss(),
                 child: Material(
                   color: Colors.transparent,
-                  child: Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    color: ToyVillageColor.gray100,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          widget.isError ? Symbols.close : Symbols.check,
-                          color: widget.isError
-                              ? ToyVillageColor.red
-                              : ToyVillageColor.green,
-                        ),
-                        const SizedBox(width: 5),
-                        Flexible(
-                          child: Text(
-                            widget.message,
-                            style: ToyVillageTextStyle.body5.copyWith(
-                              color: ToyVillageColor.white,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.sizeOf(context).width - 40,
+                    ),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: ToyVillageColor.gray100,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            widget.isError ? Symbols.close : Symbols.check,
+                            color: widget.isError
+                                ? ToyVillageColor.red
+                                : ToyVillageColor.green,
+                          ),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              widget.message,
+                              textAlign: TextAlign.center,
+                              style: ToyVillageTextStyle.body5.copyWith(
+                                color: ToyVillageColor.white,
+                                height: 1.35,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
