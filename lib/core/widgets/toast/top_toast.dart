@@ -138,14 +138,14 @@ class _TopToastState extends State<_TopToast> with TickerProviderStateMixin {
                           bottom: 0,
                           child: AnimatedBuilder(
                             animation: _progressController,
-                            builder: (context, _) => SizedBox(
-                              height: 3,
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: FractionallySizedBox(
-                                  widthFactor: _progressController.value,
-                                  child: ColoredBox(color: accent),
-                                ),
+                            builder: (context, _) => Container(
+                              height: 4,
+                              alignment: Alignment.centerLeft,
+                              color: accent.withValues(alpha: 0.25),
+                              child: FractionallySizedBox(
+                                widthFactor: _progressController.value,
+                                heightFactor: 1,
+                                child: ColoredBox(color: accent),
                               ),
                             ),
                           ),
