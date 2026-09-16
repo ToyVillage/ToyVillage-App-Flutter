@@ -235,6 +235,7 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
               dailyLogTemplateViewModelProvider(widget.templateId),
             ),
             data: (template) => Stack(
+              fit: StackFit.expand,
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),

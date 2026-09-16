@@ -338,6 +338,7 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
   Widget _form(DailyLogTemplate template) {
     _seedChoices(template);
     return Stack(
+      fit: StackFit.expand,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
