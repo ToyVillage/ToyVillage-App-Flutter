@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/daily_log_form_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,6 +64,7 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
 
   Future<void> _complete() async {
     final overlay = Overlay.of(context, rootOverlay: true);
+    final router = GoRouter.of(context);
     if (_selectedSectionId == null) {
       showTopToast(overlay, '구역을 선택해주세요.', isError: true);
       return;
@@ -101,12 +103,25 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
           .createWorkLog(widget.templateId, answers);
       ref.invalidate(myDailyLogViewModelProvider);
       if (!mounted) return;
-      context.go('/daily-log');
+      router.pop();
+      router.pop();
+    } on DioException catch (e) {
+      if (!mounted) return;
+      setState(() => _submitting = false);
+      showTopToast(overlay, _errorMessage(e), isError: true);
     } catch (_) {
       if (!mounted) return;
       setState(() => _submitting = false);
       showTopToast(overlay, '업무일지 작성에 실패했어요. 다시 시도해주세요.', isError: true);
     }
+  }
+
+  String _errorMessage(DioException e) {
+    final data = e.response?.data;
+    if (data is Map && data['message'] is String) {
+      return data['message'] as String;
+    }
+    return '업무일지 작성에 실패했어요. 다시 시도해주세요.';
   }
 
   Widget _section(String label, Widget child) {

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/daily_log_form_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -185,6 +186,14 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
       ref.invalidate(myDailyLogViewModelProvider);
       if (!mounted) return;
       context.pop();
+    } on DioException catch (e) {
+      if (!mounted) return;
+      setState(() => _submitting = false);
+      final data = e.response?.data;
+      final message = data is Map && data['message'] is String
+          ? data['message'] as String
+          : '업무일지 수정에 실패했어요. 다시 시도해주세요.';
+      showTopToast(overlay, message, isError: true);
     } catch (_) {
       if (!mounted) return;
       setState(() => _submitting = false);
