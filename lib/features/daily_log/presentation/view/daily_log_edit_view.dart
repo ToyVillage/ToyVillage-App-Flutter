@@ -182,11 +182,13 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
       await ref
           .read(dailyLogDetailRepositoryProvider)
           .updateWorkLog(widget.workLogId, answers);
+      if (!mounted) return;
       ref.invalidate(dailyLogDetailViewModelProvider(widget.workLogId));
       ref.invalidate(myDailyLogViewModelProvider);
-      if (!mounted) return;
       context.pop();
-    } on DioException catch (e) {
+    } on DioException catch (e, stackTrace) {
+      debugPrint('[DailyLog Update Error] workLogId=${widget.workLogId}: $e');
+      debugPrint('$stackTrace');
       if (!mounted) return;
       setState(() => _submitting = false);
       final data = e.response?.data;
@@ -194,7 +196,9 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
           ? data['message'] as String
           : '업무일지 수정에 실패했어요. 다시 시도해주세요.';
       showTopToast(overlay, message, isError: true);
-    } catch (_) {
+    } catch (e, stackTrace) {
+      debugPrint('[DailyLog Update Error] workLogId=${widget.workLogId}: $e');
+      debugPrint('$stackTrace');
       if (!mounted) return;
       setState(() => _submitting = false);
       showTopToast(overlay, '업무일지 수정에 실패했어요. 다시 시도해주세요.', isError: true);
@@ -300,6 +304,7 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
             const SizedBox(height: _labelGap),
             FileUploadField(
               key: key,
+              maxCount: 1,
               initialFiles: _fileValues[sectionId]?[qid] ?? const [],
               onChanged: (value) =>
                   (_fileValues[sectionId] ??= {})[qid] = value,

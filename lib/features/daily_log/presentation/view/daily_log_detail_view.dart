@@ -272,15 +272,16 @@ class _DailyLogDetailViewState extends ConsumerState<DailyLogDetailView> {
   Future<void> _delete() async {
     final overlay = Overlay.of(context, rootOverlay: true);
     final confirmed = await showDeleteConfirmDialog(context);
-    if (!confirmed) return;
+    if (!mounted || !confirmed) return;
     try {
       await ref.read(dailyLogDetailRepositoryProvider).deleteWorkLog(widget.id);
-      ref.invalidate(myDailyLogViewModelProvider);
       if (!mounted) return;
+      ref.invalidate(myDailyLogViewModelProvider);
       context.go('/daily-log');
     } catch (e, stackTrace) {
       debugPrint('[DailyLog Delete Error] id=${widget.id}: $e');
       debugPrint('$stackTrace');
+      if (!mounted) return;
       showTopToast(overlay, '삭제에 실패했어요. 다시 시도해주세요.', isError: true);
     }
   }

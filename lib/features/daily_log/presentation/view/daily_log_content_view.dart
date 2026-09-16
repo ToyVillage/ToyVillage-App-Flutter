@@ -213,16 +213,20 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
           .read(dailyLogDetailRepositoryProvider)
           .createWorkLog(widget.templateId, answers);
       await _draftRepo.clear(widget.templateId);
+      if (!mounted) return;
       _autoSaveTimer?.cancel();
       ref.invalidate(myDailyLogViewModelProvider);
-      if (!mounted) return;
       router.pop();
       router.pop();
-    } on DioException catch (e) {
+    } on DioException catch (e, stackTrace) {
+      debugPrint('[DailyLog Create Error] templateId=${widget.templateId}: $e');
+      debugPrint('$stackTrace');
       if (!mounted) return;
       setState(() => _submitting = false);
       showTopToast(overlay, _errorMessage(e), isError: true);
-    } catch (_) {
+    } catch (e, stackTrace) {
+      debugPrint('[DailyLog Create Error] templateId=${widget.templateId}: $e');
+      debugPrint('$stackTrace');
       if (!mounted) return;
       setState(() => _submitting = false);
       showTopToast(overlay, '업무일지 작성에 실패했어요. 다시 시도해주세요.', isError: true);
@@ -336,6 +340,7 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
             const SizedBox(height: _labelGap),
             FileUploadField(
               key: key,
+              maxCount: 1,
               initialFiles: _fileValues[sectionId]?[qid] ?? const [],
               onChanged: (value) =>
                   (_fileValues[sectionId] ??= {})[qid] = value,
