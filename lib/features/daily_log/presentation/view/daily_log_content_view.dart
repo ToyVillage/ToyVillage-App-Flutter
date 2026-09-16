@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/daily_log_form_skeleton.dart';
@@ -16,6 +18,7 @@ import 'package:toy_village_app/features/daily_log/data/model/daily_log_template
 import 'package:toy_village_app/features/daily_log/data/model/question_type.dart';
 import 'package:toy_village_app/features/daily_log/data/model/work_log_answer_request.dart';
 import 'package:toy_village_app/features/daily_log/data/repository/daily_log_detail_repository.dart';
+import 'package:toy_village_app/features/daily_log/data/repository/daily_log_draft_repository.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_answer_builder.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_template_view_model.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view_model/my_daily_log_view_model.dart';
@@ -42,19 +45,127 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
 
   int? _selectedSectionId;
   bool _submitting = false;
+  Timer? _autoSaveTimer;
   final Map<int, Map<int, TextEditingController>> _textControllers = {};
   final Map<int, Map<int, RadioSelection>> _radio = {};
   final Map<int, Map<int, CheckboxSelection>> _check = {};
   final Map<int, Map<int, List<ReportAttachment>>> _fileValues = {};
 
   @override
+  void initState() {
+    super.initState();
+    _restoreDraft();
+    _autoSaveTimer = Timer.periodic(
+      const Duration(seconds: 5),
+      (_) => _saveDraft(auto: true),
+    );
+  }
+
+  @override
   void dispose() {
+    _autoSaveTimer?.cancel();
     for (final section in _textControllers.values) {
       for (final controller in section.values) {
         controller.dispose();
       }
     }
     super.dispose();
+  }
+
+  DailyLogDraftRepository get _draftRepo =>
+      ref.read(dailyLogDraftRepositoryProvider);
+
+  Map<String, dynamic> _draftJson() {
+    final sectionIds = <int>{
+      ..._textControllers.keys,
+      ..._radio.keys,
+      ..._check.keys,
+      ..._fileValues.keys,
+    };
+    final sections = <String, dynamic>{};
+    for (final sid in sectionIds) {
+      final questions = <String, dynamic>{};
+      final qids = <int>{
+        ...?_textControllers[sid]?.keys,
+        ...?_radio[sid]?.keys,
+        ...?_check[sid]?.keys,
+        ...?_fileValues[sid]?.keys,
+      };
+      for (final qid in qids) {
+        final entry = <String, dynamic>{};
+        final text = _textControllers[sid]?[qid]?.text ?? '';
+        if (text.isNotEmpty) entry['text'] = text;
+        final radio = _radio[sid]?[qid];
+        if (radio != null && radio.index != null) {
+          entry['radioIndex'] = radio.index;
+          entry['radioEtc'] = radio.etcText;
+        }
+        final check = _check[sid]?[qid];
+        if (check != null && check.indices.isNotEmpty) {
+          entry['checkIndices'] = check.indices.toList();
+          entry['checkEtc'] = check.etcText;
+        }
+        final files = _fileValues[sid]?[qid];
+        if (files != null && files.isNotEmpty) {
+          entry['files'] = [
+            for (final f in files)
+              {'fileName': f.fileName, 'fileKey': f.fileKey},
+          ];
+        }
+        if (entry.isNotEmpty) questions['$qid'] = entry;
+      }
+      if (questions.isNotEmpty) sections['$sid'] = questions;
+    }
+    return {'sections': sections};
+  }
+
+  Future<void> _restoreDraft() async {
+    final draft = await _draftRepo.load(widget.templateId);
+    if (!mounted || draft == null) return;
+    final sections = draft['sections'];
+    if (sections is! Map) return;
+    sections.forEach((sidKey, questions) {
+      final sid = int.tryParse(sidKey as String);
+      if (sid == null || questions is! Map) return;
+      questions.forEach((qidKey, entry) {
+        final qid = int.tryParse(qidKey as String);
+        if (qid == null || entry is! Map) return;
+        if (entry['text'] is String) {
+          _controllerFor(sid, qid).text = entry['text'] as String;
+        }
+        if (entry['radioIndex'] is int) {
+          (_radio[sid] ??= {})[qid] = (
+            index: entry['radioIndex'] as int,
+            etcText: (entry['radioEtc'] as String?) ?? '',
+          );
+        }
+        if (entry['checkIndices'] is List) {
+          (_check[sid] ??= {})[qid] = (
+            indices: {for (final i in entry['checkIndices'] as List) i as int},
+            etcText: (entry['checkEtc'] as String?) ?? '',
+          );
+        }
+        if (entry['files'] is List) {
+          (_fileValues[sid] ??= {})[qid] = [
+            for (final f in entry['files'] as List)
+              ReportAttachment(
+                fileName: f['fileName'] as String,
+                fileKey: f['fileKey'] as String,
+              ),
+          ];
+        }
+      });
+    });
+    setState(() {});
+  }
+
+  Future<void> _saveDraft({bool auto = false}) async {
+    final overlay = Overlay.of(context, rootOverlay: true);
+    final draft = _draftJson();
+    if ((draft['sections'] as Map).isEmpty) return;
+    await _draftRepo.save(widget.templateId, draft);
+    if (!mounted) return;
+    showTopToast(overlay, auto ? '자동 저장되었어요.' : '임시저장되었어요.');
   }
 
   TextEditingController _controllerFor(int sectionId, int questionId) {
@@ -101,6 +212,8 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
       await ref
           .read(dailyLogDetailRepositoryProvider)
           .createWorkLog(widget.templateId, answers);
+      await _draftRepo.clear(widget.templateId);
+      _autoSaveTimer?.cancel();
       ref.invalidate(myDailyLogViewModelProvider);
       if (!mounted) return;
       router.pop();
@@ -278,9 +391,22 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
                   left: 20,
                   right: 20,
                   bottom: 16,
-                  child: ToyVillageButton(
-                    label: _submitting ? '등록 중' : '작성 완료하기',
-                    onTap: _submitting ? () {} : _complete,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ToyVillageButton.outlined(
+                          label: '임시저장',
+                          onTap: _saveDraft,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ToyVillageButton(
+                          label: _submitting ? '등록 중' : '작성 완료하기',
+                          onTap: _submitting ? () {} : _complete,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
