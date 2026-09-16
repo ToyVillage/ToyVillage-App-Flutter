@@ -15,6 +15,43 @@ void showTopToast(OverlayState overlay, String message, {bool isError = false}) 
   overlay.insert(entry);
 }
 
+class _BalancedText extends StatelessWidget {
+  final String message;
+  final TextStyle style;
+
+  const _BalancedText({required this.message, required this.style});
+
+  String _balanced(double maxWidth) {
+    if (message.contains('\n')) return message;
+    final painter = TextPainter(
+      text: TextSpan(text: message, style: style),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    if (painter.width <= maxWidth) return message;
+
+    final mid = message.length / 2;
+    var best = -1;
+    for (var i = 0; i < message.length; i++) {
+      if (message[i] != ' ') continue;
+      if (best == -1 || (i - mid).abs() < (best - mid).abs()) best = i;
+    }
+    if (best == -1) return message;
+    return '${message.substring(0, best)}\n${message.substring(best + 1)}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) => Text(
+        _balanced(constraints.maxWidth),
+        textAlign: TextAlign.center,
+        style: style,
+      ),
+    );
+  }
+}
+
 class _TopToast extends StatefulWidget {
   final String message;
   final bool isError;
@@ -113,9 +150,8 @@ class _TopToastState extends State<_TopToast>
                           ),
                           const SizedBox(width: 6),
                           Flexible(
-                            child: Text(
-                              widget.message,
-                              textAlign: TextAlign.center,
+                            child: _BalancedText(
+                              message: widget.message,
                               style: ToyVillageTextStyle.body5.copyWith(
                                 color: ToyVillageColor.white,
                                 height: 1.35,
