@@ -14,11 +14,15 @@ import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/readonly_field.dart';
 import 'package:toy_village_app/features/daily_log/data/model/daily_log_detail.dart';
+import 'package:toy_village_app/features/daily_log/data/model/daily_log_template.dart';
 import 'package:toy_village_app/features/daily_log/data/model/question_type.dart';
 import 'package:toy_village_app/features/daily_log/data/repository/daily_log_detail_repository.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_detail_view_model.dart';
+import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_template_view_model.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view_model/my_daily_log_view_model.dart';
+import 'package:toy_village_app/features/daily_log/presentation/widget/checkbox_field.dart';
+import 'package:toy_village_app/features/daily_log/presentation/widget/radio_field.dart';
 
 class DailyLogDetailView extends ConsumerWidget {
   final int id;
@@ -27,62 +31,80 @@ class DailyLogDetailView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detail = ref.watch(dailyLogDetailViewModelProvider(id));
-
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true),
       body: SafeArea(
         child: CustomAsyncValue(
-          value: detail,
+          value: ref.watch(dailyLogDetailViewModelProvider(id)),
           loading: const DailyLogDetailSkeleton(),
           onRetry: () => ref.invalidate(dailyLogDetailViewModelProvider(id)),
-          data: (detail) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 16,
+          data: (detail) => CustomAsyncValue(
+            value: ref.watch(
+              dailyLogTemplateViewModelProvider(detail.templateId),
+            ),
+            loading: const DailyLogDetailSkeleton(),
+            onRetry: () => ref.invalidate(
+              dailyLogTemplateViewModelProvider(detail.templateId),
+            ),
+            data: (template) => _content(context, ref, detail, template),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _content(
+    BuildContext context,
+    WidgetRef ref,
+    DailyLogDetail detail,
+    DailyLogTemplate template,
+  ) {
+    final questionsById = {
+      for (final question in template.questions) question.questionId: question,
+    };
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 16,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: ToyVillageTitle(title: detail.templateTitle),
+                  Expanded(child: ToyVillageTitle(title: detail.templateTitle)),
+                  MenuDropdown(
+                    items: [
+                      MenuDropdownItem(
+                        label: '수정',
+                        onTap: () => context.push(
+                          '/daily-log/edit',
+                          extra: (
+                            workLogId: detail.workLogId,
+                            templateId: detail.templateId,
+                          ),
                         ),
-                        MenuDropdown(
-                          items: [
-                            MenuDropdownItem(
-                              label: '수정',
-                              onTap: () => context.push(
-                                '/daily-log/edit',
-                                extra: (
-                                  workLogId: detail.workLogId,
-                                  templateId: detail.templateId,
-                                ),
-                              ),
-                            ),
-                            MenuDropdownItem(
-                              label: '삭제',
-                              color: ToyVillageColor.red,
-                              onTap: () => _delete(context, ref),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                      ),
+                      MenuDropdownItem(
+                        label: '삭제',
+                        color: ToyVillageColor.red,
+                        onTap: () => _delete(context, ref),
+                      ),
+                    ],
                   ),
-                  _section('구역 선택', _sectionGrid(detail.sections)),
-                  ToyVillageReadonlyField(
-                    label: '양식 선택',
-                    value: detail.templateTitle,
-                  ),
-                  for (final answer in _answers(detail.sections))
-                    _answer(context, answer),
                 ],
               ),
             ),
-          ),
+            _section('구역 선택', _sectionGrid(detail.sections)),
+            ToyVillageReadonlyField(
+              label: '양식 선택',
+              value: detail.templateTitle,
+            ),
+            for (final answer in _answers(detail.sections))
+              _answer(context, answer, questionsById[answer.questionId]),
+          ],
         ),
       ),
     );
@@ -125,7 +147,33 @@ class DailyLogDetailView extends ConsumerWidget {
     );
   }
 
-  Widget _answer(BuildContext context, Answer answer) {
+  int _optionIndex(TemplateQuestion question, int optionId) {
+    final normal = [
+      for (final option in question.options)
+        if (!option.etcOption) option,
+    ];
+    for (var i = 0; i < normal.length; i++) {
+      if (normal[i].optionId == optionId) return i;
+    }
+    return normal.length;
+  }
+
+  Widget _labeled(String label, Widget child) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ToyVillageLabel(label: label),
+        const SizedBox(height: 12),
+        child,
+      ],
+    );
+  }
+
+  Widget _answer(
+    BuildContext context,
+    Answer answer,
+    TemplateQuestion? question,
+  ) {
     if (answer.questionType == QuestionType.fileUpload) {
       final file = answer.file;
       return Column(
@@ -156,13 +204,52 @@ class DailyLogDetailView extends ConsumerWidget {
       );
     }
 
-    if (answer.questionType == QuestionType.multipleChoice ||
-        answer.questionType == QuestionType.checkBox) {
-      final selected = answer.options
-          .map((o) => o.etcOption ? (o.etcText ?? '') : o.content)
-          .where((v) => v.isNotEmpty)
-          .join(', ');
-      return ToyVillageReadonlyField(label: answer.question, value: selected);
+    if (question != null &&
+        answer.questionType == QuestionType.multipleChoice) {
+      final choices = [
+        for (final option in question.options)
+          if (!option.etcOption) option.content,
+      ];
+      final hasEtc = question.options.any((option) => option.etcOption);
+      final selected = answer.options.isEmpty ? null : answer.options.first;
+      return _labeled(
+        answer.question,
+        RadioField(
+          choices: choices,
+          hasEtc: hasEtc,
+          readOnly: true,
+          initialIndex: selected == null
+              ? null
+              : _optionIndex(question, selected.optionId),
+          initialEtcText: selected?.etcText,
+        ),
+      );
+    }
+
+    if (question != null && answer.questionType == QuestionType.checkBox) {
+      final choices = [
+        for (final option in question.options)
+          if (!option.etcOption) option.content,
+      ];
+      final hasEtc = question.options.any((option) => option.etcOption);
+      final indices = {
+        for (final option in answer.options)
+          _optionIndex(question, option.optionId),
+      };
+      String? etcText;
+      for (final option in answer.options) {
+        if (option.etcOption) etcText = option.etcText;
+      }
+      return _labeled(
+        answer.question,
+        CheckboxField(
+          choices: choices,
+          hasEtc: hasEtc,
+          readOnly: true,
+          initialIndices: indices,
+          initialEtcText: etcText,
+        ),
+      );
     }
 
     return ToyVillageReadonlyField(

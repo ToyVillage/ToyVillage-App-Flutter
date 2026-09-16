@@ -9,6 +9,7 @@ class RadioField extends StatefulWidget {
   final bool hasEtc;
   final int? initialIndex;
   final String? initialEtcText;
+  final bool readOnly;
   final void Function(int? index, String etcText)? onSelected;
 
   const RadioField({
@@ -17,6 +18,7 @@ class RadioField extends StatefulWidget {
     this.hasEtc = false,
     this.initialIndex,
     this.initialEtcText,
+    this.readOnly = false,
     this.onSelected,
   });
 
@@ -45,6 +47,7 @@ class _RadioFieldState extends State<RadioField> {
   }
 
   void _select(int index) {
+    if (widget.readOnly) return;
     setState(() => _selected = index);
     _notify();
   }
@@ -89,6 +92,7 @@ class _RadioFieldState extends State<RadioField> {
                           child: TextField(
                             cursorHeight: 14,
                             controller: _etcController,
+                            readOnly: widget.readOnly,
                             textAlignVertical: TextAlignVertical.top,
                             scrollPadding: const EdgeInsets.only(bottom: 100),
                             onChanged: (_) => _notify(),

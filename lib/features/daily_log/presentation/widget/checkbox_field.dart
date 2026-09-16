@@ -8,6 +8,7 @@ class CheckboxField extends StatefulWidget {
   final bool hasEtc;
   final Set<int> initialIndices;
   final String? initialEtcText;
+  final bool readOnly;
   final void Function(Set<int> indices, String etcText)? onSelected;
 
   const CheckboxField({
@@ -16,6 +17,7 @@ class CheckboxField extends StatefulWidget {
     this.hasEtc = false,
     this.initialIndices = const {},
     this.initialEtcText,
+    this.readOnly = false,
     this.onSelected,
   });
 
@@ -44,6 +46,7 @@ class _CheckboxFieldState extends State<CheckboxField> {
   }
 
   void _toggle(int index) {
+    if (widget.readOnly) return;
     setState(() {
       if (_selected.contains(index)) {
         _selected.remove(index);
@@ -94,6 +97,7 @@ class _CheckboxFieldState extends State<CheckboxField> {
                           child: TextField(
                             cursorHeight: 14,
                             controller: _etcController,
+                            readOnly: widget.readOnly,
                             textAlignVertical: TextAlignVertical.top,
                             scrollPadding: const EdgeInsets.only(bottom: 100),
                             onChanged: (_) => _notify(),
