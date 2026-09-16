@@ -6,15 +6,19 @@ import 'package:toy_village_app/core/constants/text_style.dart';
 class CheckboxField extends StatefulWidget {
   final List<String> choices;
   final bool hasEtc;
-  final List<String> initialValues;
-  final ValueChanged<List<String>>? onChanged;
+  final Set<int> initialIndices;
+  final String? initialEtcText;
+  final bool readOnly;
+  final void Function(Set<int> indices, String etcText)? onSelected;
 
   const CheckboxField({
     super.key,
     required this.choices,
     this.hasEtc = false,
-    this.initialValues = const [],
-    this.onChanged,
+    this.initialIndices = const {},
+    this.initialEtcText,
+    this.readOnly = false,
+    this.onSelected,
   });
 
   @override
@@ -31,15 +35,8 @@ class _CheckboxFieldState extends State<CheckboxField> {
   @override
   void initState() {
     super.initState();
-    for (final value in widget.initialValues) {
-      final index = widget.choices.indexOf(value);
-      if (index >= 0) {
-        _selected.add(index);
-      } else if (widget.hasEtc) {
-        _selected.add(widget.choices.length);
-        _etcController.text = value;
-      }
-    }
+    _selected.addAll(widget.initialIndices);
+    _etcController.text = widget.initialEtcText ?? '';
   }
 
   @override
@@ -49,6 +46,7 @@ class _CheckboxFieldState extends State<CheckboxField> {
   }
 
   void _toggle(int index) {
+    if (widget.readOnly) return;
     setState(() {
       if (_selected.contains(index)) {
         _selected.remove(index);
@@ -60,17 +58,7 @@ class _CheckboxFieldState extends State<CheckboxField> {
   }
 
   void _notify() {
-    final onChanged = widget.onChanged;
-    if (onChanged == null) return;
-    final values = <String>[];
-    for (final index in _selected) {
-      if (widget.hasEtc && index == widget.choices.length) {
-        values.add(_etcController.text);
-      } else {
-        values.add(widget.choices[index]);
-      }
-    }
-    onChanged(values);
+    widget.onSelected?.call({..._selected}, _etcController.text);
   }
 
   @override
@@ -109,6 +97,7 @@ class _CheckboxFieldState extends State<CheckboxField> {
                           child: TextField(
                             cursorHeight: 14,
                             controller: _etcController,
+                            readOnly: widget.readOnly,
                             textAlignVertical: TextAlignVertical.top,
                             scrollPadding: const EdgeInsets.only(bottom: 100),
                             onChanged: (_) => _notify(),

@@ -14,19 +14,32 @@ class DailyLogDetailRepository {
 
   DailyLogDetailRepository(this._dio);
 
-  Future<DailyLogDetail> loadDetail(int id) async {
-    final response = await _dio.get('${ApiEndpoints.workLog}/$id');
+  Future<DailyLogDetail> loadDetail(int workLogId) async {
+    final response = await _dio.get('${ApiEndpoints.workLog}/$workLogId');
     return DailyLogDetail.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<void> updateWorkLog(int id, List<WorkLogAnswerRequest> answers) async {
-    await _dio.patch(
-      '${ApiEndpoints.workLogEmployee}/$id',
+  Future<void> createWorkLog(
+    int templateId,
+    List<WorkLogAnswerRequest> answers,
+  ) async {
+    await _dio.post(
+      '${ApiEndpoints.workLog}/$templateId',
       data: {'answers': answers.map((e) => e.toJson()).toList()},
     );
   }
 
-  Future<void> deleteWorkLog(int id) async {
-    await _dio.delete('${ApiEndpoints.workLogEmployee}/$id');
+  Future<void> updateWorkLog(
+    int workLogId,
+    List<WorkLogAnswerRequest> answers,
+  ) async {
+    await _dio.patch(
+      '${ApiEndpoints.workLog}/$workLogId',
+      data: {'answers': answers.map((e) => e.toJson()).toList()},
+    );
+  }
+
+  Future<void> deleteWorkLog(int workLogId) async {
+    await _dio.delete('${ApiEndpoints.workLog}/$workLogId');
   }
 }

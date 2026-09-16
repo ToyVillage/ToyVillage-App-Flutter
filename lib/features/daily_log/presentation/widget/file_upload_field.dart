@@ -6,11 +6,13 @@ import 'package:toy_village_app/features/task/presentation/widget/attachment_pic
 
 class FileUploadField extends ConsumerStatefulWidget {
   final List<ReportAttachment> initialFiles;
+  final int maxCount;
   final ValueChanged<List<ReportAttachment>>? onChanged;
 
   const FileUploadField({
     super.key,
     this.initialFiles = const [],
+    this.maxCount = 100,
     this.onChanged,
   });
 
@@ -24,7 +26,12 @@ class _FileUploadFieldState extends ConsumerState<FileUploadField> {
   Future<void> _add() async {
     final attachment = await pickAndUploadAttachment(context, ref);
     if (attachment == null || !mounted) return;
-    setState(() => _files.add(attachment));
+    setState(() {
+      _files.add(attachment);
+      while (_files.length > widget.maxCount) {
+        _files.removeAt(0);
+      }
+    });
     widget.onChanged?.call(List.unmodifiable(_files));
   }
 

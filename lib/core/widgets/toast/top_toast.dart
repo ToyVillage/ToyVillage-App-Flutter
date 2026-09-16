@@ -3,7 +3,11 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 
-void showTopToast(OverlayState overlay, String message, {bool isError = false}) {
+void showTopToast(
+  OverlayState overlay,
+  String message, {
+  bool isError = false,
+}) {
   late OverlayEntry entry;
   entry = OverlayEntry(
     builder: (context) => _TopToast(
@@ -30,9 +34,9 @@ class _TopToast extends StatefulWidget {
   State<_TopToast> createState() => _TopToastState();
 }
 
-class _TopToastState extends State<_TopToast>
-    with SingleTickerProviderStateMixin {
+class _TopToastState extends State<_TopToast> with TickerProviderStateMixin {
   late final AnimationController _controller;
+  late final AnimationController _progressController;
   late final Animation<double> _anim;
   final _dismissKey = UniqueKey();
   bool _removed = false;
@@ -45,8 +49,12 @@ class _TopToastState extends State<_TopToast>
       duration: const Duration(milliseconds: 250),
     );
     _anim = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _progressController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    );
     _controller.forward();
-    Future.delayed(const Duration(milliseconds: 2000), () async {
+    _progressController.forward().whenComplete(() async {
       if (!mounted || _removed) return;
       await _controller.reverse();
       _dismiss();
@@ -62,11 +70,14 @@ class _TopToastState extends State<_TopToast>
   @override
   void dispose() {
     _controller.dispose();
+    _progressController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final accent = widget.isError ? ToyVillageColor.red : ToyVillageColor.green;
+
     return Positioned(
       top: 0,
       left: 0,
@@ -88,32 +99,54 @@ class _TopToastState extends State<_TopToast>
                 child: Material(
                   color: Colors.transparent,
                   child: Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    color: ToyVillageColor.gray100,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                    child: Row(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(
+                      color: ToyVillageColor.gray100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Stack(
                       children: [
-                        Icon(
-                          widget.isError ? Symbols.close : Symbols.check,
-                          color: widget.isError
-                              ? ToyVillageColor.red
-                              : ToyVillageColor.green,
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 14, 16, 17),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                widget.isError ? Symbols.close : Symbols.check,
+                                color: accent,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  widget.message,
+                                  style: ToyVillageTextStyle.body5.copyWith(
+                                    color: ToyVillageColor.white,
+                                    height: 1.35,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(width: 5),
-                        Flexible(
-                          child: Text(
-                            widget.message,
-                            style: ToyVillageTextStyle.body5.copyWith(
-                              color: ToyVillageColor.white,
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: AnimatedBuilder(
+                            animation: _progressController,
+                            builder: (context, _) => Container(
+                              height: 4,
+                              alignment: Alignment.centerLeft,
+                              color: accent.withValues(alpha: 0.25),
+                              child: FractionallySizedBox(
+                                widthFactor: _progressController.value,
+                                heightFactor: 1,
+                                child: ColoredBox(color: accent),
+                              ),
                             ),
                           ),
                         ),

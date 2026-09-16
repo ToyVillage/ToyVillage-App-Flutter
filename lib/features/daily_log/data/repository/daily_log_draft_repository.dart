@@ -6,49 +6,23 @@ final dailyLogDraftRepositoryProvider = Provider(
   (ref) => DailyLogDraftRepository(),
 );
 
-class DailyLogDraft {
-  final String? templateName;
-  final String content;
-
-  DailyLogDraft({required this.templateName, required this.content});
-
-  Map<String, dynamic> toJson() => {
-    'templateName': templateName,
-    'content': content,
-  };
-
-  factory DailyLogDraft.fromJson(Map<String, dynamic> json) => DailyLogDraft(
-    templateName: json['templateName'] as String?,
-    content: json['content'] as String? ?? '',
-  );
-
-  bool get isEmpty =>
-      (templateName == null || templateName!.isEmpty) && content.isEmpty;
-}
-
 class DailyLogDraftRepository {
-  String _key(int? id) =>
-      id == null ? 'daily_log_draft' : 'daily_log_draft_$id';
+  String _key(int templateId) => 'daily_log_draft_$templateId';
 
-  Future<DailyLogDraft?> load(int? id) async {
+  Future<void> save(int templateId, Map<String, dynamic> draft) async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key(id));
+    await prefs.setString(_key(templateId), jsonEncode(draft));
+  }
+
+  Future<Map<String, dynamic>?> load(int templateId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_key(templateId));
     if (raw == null) return null;
-    try {
-      return DailyLogDraft.fromJson(jsonDecode(raw) as Map<String, dynamic>);
-    } catch (_) {
-      await prefs.remove(_key(id));
-      return null;
-    }
+    return jsonDecode(raw) as Map<String, dynamic>;
   }
 
-  Future<void> save(int? id, DailyLogDraft draft) async {
+  Future<void> clear(int templateId) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key(id), jsonEncode(draft.toJson()));
-  }
-
-  Future<void> clear(int? id) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_key(id));
+    await prefs.remove(_key(templateId));
   }
 }

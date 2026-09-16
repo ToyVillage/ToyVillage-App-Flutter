@@ -1,3 +1,4 @@
+import 'package:toy_village_app/features/daily_log/data/model/daily_log_template.dart';
 import 'package:toy_village_app/features/daily_log/data/model/question_type.dart';
 import 'package:toy_village_app/features/task/data/model/report_attachment.dart';
 
@@ -59,6 +60,7 @@ class Answer {
   final String question;
   final QuestionType questionType;
   final String? answerText;
+  final List<QuestionOption> options;
   final ReportAttachment? file;
 
   const Answer({
@@ -66,16 +68,21 @@ class Answer {
     required this.question,
     required this.questionType,
     this.answerText,
+    this.options = const [],
     this.file,
   });
 
   factory Answer.fromJson(Map<String, dynamic> json) {
     final file = json['file'];
+    final options = (json['options'] as List?) ?? const [];
     return Answer(
       questionId: json['questionId'] as int,
       question: json['question'] as String,
       questionType: QuestionType.fromCode(json['questionType'] as String),
       answerText: json['answerText'] as String?,
+      options: options
+          .map((e) => QuestionOption.fromJson(e as Map<String, dynamic>))
+          .toList(),
       file: file == null
           ? null
           : ReportAttachment.fromJson(file as Map<String, dynamic>),
