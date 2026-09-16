@@ -3,7 +3,11 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 
-void showTopToast(OverlayState overlay, String message, {bool isError = false}) {
+void showTopToast(
+  OverlayState overlay,
+  String message, {
+  bool isError = false,
+}) {
   late OverlayEntry entry;
   entry = OverlayEntry(
     builder: (context) => _TopToast(
@@ -13,43 +17,6 @@ void showTopToast(OverlayState overlay, String message, {bool isError = false}) 
     ),
   );
   overlay.insert(entry);
-}
-
-class _BalancedText extends StatelessWidget {
-  final String message;
-  final TextStyle style;
-
-  const _BalancedText({required this.message, required this.style});
-
-  String _balanced(double maxWidth) {
-    if (message.contains('\n')) return message;
-    final painter = TextPainter(
-      text: TextSpan(text: message, style: style),
-      textDirection: TextDirection.ltr,
-      maxLines: 1,
-    )..layout();
-    if (painter.width <= maxWidth) return message;
-
-    final mid = message.length / 2;
-    var best = -1;
-    for (var i = 0; i < message.length; i++) {
-      if (message[i] != ' ') continue;
-      if (best == -1 || (i - mid).abs() < (best - mid).abs()) best = i;
-    }
-    if (best == -1) return message;
-    return '${message.substring(0, best)}\n${message.substring(best + 1)}';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) => Text(
-        _balanced(constraints.maxWidth),
-        textAlign: TextAlign.center,
-        style: style,
-      ),
-    );
-  }
 }
 
 class _TopToast extends StatefulWidget {
@@ -67,9 +34,9 @@ class _TopToast extends StatefulWidget {
   State<_TopToast> createState() => _TopToastState();
 }
 
-class _TopToastState extends State<_TopToast>
-    with SingleTickerProviderStateMixin {
+class _TopToastState extends State<_TopToast> with TickerProviderStateMixin {
   late final AnimationController _controller;
+  late final AnimationController _progressController;
   late final Animation<double> _anim;
   final _dismissKey = UniqueKey();
   bool _removed = false;
@@ -82,8 +49,12 @@ class _TopToastState extends State<_TopToast>
       duration: const Duration(milliseconds: 250),
     );
     _anim = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _progressController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    );
     _controller.forward();
-    Future.delayed(const Duration(milliseconds: 2000), () async {
+    _progressController.forward().whenComplete(() async {
       if (!mounted || _removed) return;
       await _controller.reverse();
       _dismiss();
@@ -99,11 +70,14 @@ class _TopToastState extends State<_TopToast>
   @override
   void dispose() {
     _controller.dispose();
+    _progressController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final accent = widget.isError ? ToyVillageColor.red : ToyVillageColor.green;
+
     return Positioned(
       top: 0,
       left: 0,
@@ -124,42 +98,59 @@ class _TopToastState extends State<_TopToast>
                 onDismissed: (_) => _dismiss(),
                 child: Material(
                   color: Colors.transparent,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.sizeOf(context).width - 40,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
                     ),
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 12),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: ToyVillageColor.gray100,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(
-                            widget.isError ? Symbols.close : Symbols.check,
-                            color: widget.isError
-                                ? ToyVillageColor.red
-                                : ToyVillageColor.green,
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(
+                      color: ToyVillageColor.gray100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Stack(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 14, 16, 17),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                widget.isError ? Symbols.close : Symbols.check,
+                                color: accent,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  widget.message,
+                                  style: ToyVillageTextStyle.body5.copyWith(
+                                    color: ToyVillageColor.white,
+                                    height: 1.35,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: _BalancedText(
-                              message: widget.message,
-                              style: ToyVillageTextStyle.body5.copyWith(
-                                color: ToyVillageColor.white,
-                                height: 1.35,
+                        ),
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: AnimatedBuilder(
+                            animation: _progressController,
+                            builder: (context, _) => SizedBox(
+                              height: 3,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: FractionallySizedBox(
+                                  widthFactor: _progressController.value,
+                                  child: ColoredBox(color: accent),
+                                ),
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
