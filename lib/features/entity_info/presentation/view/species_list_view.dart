@@ -1,42 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/chip/category_filter.dart';
+import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/core/widgets/paged_list_view.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
+import 'package:toy_village_app/features/entity_info/data/model/animal_taxonomic.dart';
+import 'package:toy_village_app/features/entity_info/presentation/view_model/animal_kind_list_view_model.dart';
 import 'package:toy_village_app/features/entity_info/presentation/widget/species_card.dart';
 
-class _SpeciesDummy {
-  final String speciesName;
-  final String category;
-
-  const _SpeciesDummy({required this.speciesName, required this.category});
-}
-
-const _species = <_SpeciesDummy>[
-  _SpeciesDummy(speciesName: '카피바라', category: '포유류'),
-  _SpeciesDummy(speciesName: '원숭이', category: '포유류'),
-  _SpeciesDummy(speciesName: '사막여우', category: '포유류'),
-  _SpeciesDummy(speciesName: '흰동가리', category: '어류'),
-  _SpeciesDummy(speciesName: '금붕어', category: '어류'),
-  _SpeciesDummy(speciesName: '거북', category: '파충류'),
-  _SpeciesDummy(speciesName: '이구아나', category: '파충류'),
-  _SpeciesDummy(speciesName: '비둘기', category: '조류'),
-  _SpeciesDummy(speciesName: '앵무', category: '조류'),
-];
-
-class SpeciesListView extends StatefulWidget {
+class SpeciesListView extends ConsumerStatefulWidget {
   const SpeciesListView({super.key});
 
   @override
-  State<SpeciesListView> createState() => _SpeciesListViewState();
+  ConsumerState<SpeciesListView> createState() => _SpeciesListViewState();
 }
 
-class _SpeciesListViewState extends State<SpeciesListView> {
+class _SpeciesListViewState extends ConsumerState<SpeciesListView> {
   String _category = animalCategories.first;
 
   @override
   Widget build(BuildContext context) {
-    final species = _species.where((e) => e.category == _category).toList();
+    final filter = (
+      taxonomic: AnimalTaxonomic.fromLabel(_category),
+      keyword: '',
+    );
 
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true),
@@ -53,23 +42,29 @@ class _SpeciesListViewState extends State<SpeciesListView> {
             ),
             const SizedBox(height: 18),
             Expanded(
-              child: ListView.separated(
-                itemCount: species.length,
-                itemBuilder: (context, index) {
-                  final animal = species[index];
-                  return SpeciesCard(
-                    speciesName: animal.speciesName,
-                    category: animal.category,
+              child: CustomAsyncValue(
+                value: ref.watch(animalKindListViewModelProvider(filter)),
+                onRetry: () =>
+                    ref.invalidate(animalKindListViewModelProvider(filter)),
+                data: (page) => PagedListView(
+                  items: page.items,
+                  hasMore: page.hasMore,
+                  isLoadingMore: page.isLoadingMore,
+                  onLoadMore: () => ref
+                      .read(animalKindListViewModelProvider(filter).notifier)
+                      .loadMore(),
+                  itemBuilder: (context, kind) => SpeciesCard(
+                    speciesName: kind.kindName,
+                    category: kind.animalTaxonomic.label,
                     onTap: () => context.push(
                       '/entity-info/species',
                       extra: (
-                        speciesName: animal.speciesName,
-                        category: animal.category,
+                        animalKindId: kind.animalKindId,
+                        kindName: kind.kindName,
                       ),
                     ),
-                  );
-                },
-                separatorBuilder: (context, index) => const SizedBox(height: 8),
+                  ),
+                ),
               ),
             ),
           ],

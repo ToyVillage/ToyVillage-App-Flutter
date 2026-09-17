@@ -28,4 +28,8 @@ class ApiEndpoints {
   static const workLog = '/work-log';
   static const workLogEmployee = '/work-log/employee';
   static const workLogTemplate = '/work-log/template';
+
+  /// AnimalManage
+  static const animalManage = '/animal-manage';
+  static const animalManageKind = '/animal-manage/kind';
 }
