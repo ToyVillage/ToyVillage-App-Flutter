@@ -11,7 +11,7 @@ class FeedLogSummary {
 
   factory FeedLogSummary.fromJson(Map<String, dynamic> json) {
     return FeedLogSummary(
-      feedLogId: json['feedId'] as int,
+      feedLogId: (json['feedLogId'] ?? json['feedId']) as int,
       animalKind: json['animalKind'] as String,
       animalName: json['animalName'] as String,
     );

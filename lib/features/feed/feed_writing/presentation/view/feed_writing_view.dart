@@ -97,10 +97,11 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
       hour,
       time.minute,
     );
+    final baseAmount = _amountUnit == 'kg/L' ? amount * 1000 : amount;
     final request = FeedLogRequest(
       feedDateTime: feedDateTime,
       feedType: feedType,
-      feedAmount: amount,
+      feedAmount: baseAmount,
       significant: _noteController.text.trim(),
     );
 
