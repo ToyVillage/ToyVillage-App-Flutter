@@ -148,7 +148,10 @@ class _FilePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final url = documentFileUrl(file.fileKey);
-    if (isPdfFileName(file.fileName)) return _PdfPreview(url: url);
+    if (isPdfFileName(file.fileName)) return _WebDocPreview(url: url);
+    if (isPptFileName(file.fileName)) {
+      return _WebDocPreview(url: url, alwaysGView: true);
+    }
     if (!isImageFileName(file.fileName)) return const _EmptyPreview();
 
     return InteractiveViewer(
@@ -165,16 +168,17 @@ class _FilePreview extends StatelessWidget {
   }
 }
 
-class _PdfPreview extends StatefulWidget {
+class _WebDocPreview extends StatefulWidget {
   final String url;
+  final bool alwaysGView;
 
-  const _PdfPreview({required this.url});
+  const _WebDocPreview({required this.url, this.alwaysGView = false});
 
   @override
-  State<_PdfPreview> createState() => _PdfPreviewState();
+  State<_WebDocPreview> createState() => _WebDocPreviewState();
 }
 
-class _PdfPreviewState extends State<_PdfPreview> {
+class _WebDocPreviewState extends State<_WebDocPreview> {
   late final WebViewController _controller;
   bool _loading = true;
   bool _error = false;
@@ -182,7 +186,8 @@ class _PdfPreviewState extends State<_PdfPreview> {
   @override
   void initState() {
     super.initState();
-    final target = Platform.isAndroid
+    final useGView = widget.alwaysGView || Platform.isAndroid;
+    final target = useGView
         ? 'https://docs.google.com/gview?embedded=true&url=${Uri.encodeComponent(widget.url)}'
         : widget.url;
     _controller = WebViewController()
