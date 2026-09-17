@@ -5,14 +5,17 @@ import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
+import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
+import 'package:toy_village_app/features/entity_info/data/model/observation.dart';
+import 'package:toy_village_app/features/entity_info/presentation/view_model/observation_create_view_model.dart';
 import 'package:toy_village_app/features/task/data/model/report_attachment.dart';
 import 'package:toy_village_app/features/task/presentation/widget/attachment_editor.dart';
 import 'package:toy_village_app/features/task/presentation/widget/attachment_picker.dart';
 
 class EntityNoteWriteView extends ConsumerStatefulWidget {
-  final String entityName;
+  final int animalManageId;
 
-  const EntityNoteWriteView({super.key, required this.entityName});
+  const EntityNoteWriteView({super.key, required this.animalManageId});
 
   @override
   ConsumerState<EntityNoteWriteView> createState() =>
@@ -41,13 +44,39 @@ class _EntityNoteWriteViewState extends ConsumerState<EntityNoteWriteView> {
     setState(() => _files = [..._files]..removeAt(index));
   }
 
-  void _save() {
-    context.pop();
+  Future<void> _save() async {
+    if (ref.read(observationCreateViewModelProvider).isLoading) return;
+    final overlay = Overlay.of(context, rootOverlay: true);
+    final title = _titleController.text.trim();
+    final content = _contentController.text.trim();
+
+    if (title.isEmpty || content.isEmpty) {
+      showTopToast(overlay, '제목과 내용을 입력해주세요.', isError: true);
+      return;
+    }
+
+    final request = ObservationRequest(
+      title: title,
+      content: content,
+      fileKeys: [for (final file in _files) file.fileKey],
+    );
+
+    final success = await ref
+        .read(observationCreateViewModelProvider.notifier)
+        .create(widget.animalManageId, request);
+    if (!mounted) return;
+
+    if (success) {
+      context.pop();
+    } else {
+      showTopToast(overlay, '저장에 실패했어요. 다시 시도해주세요.', isError: true);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     const spacing = SizedBox(height: 20);
+    final isSaving = ref.watch(observationCreateViewModelProvider).isLoading;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -105,7 +134,10 @@ class _EntityNoteWriteViewState extends ConsumerState<EntityNoteWriteView> {
                 left: 20,
                 right: 20,
                 bottom: 16,
-                child: ToyVillageButton(label: '저장하기', onTap: _save),
+                child: ToyVillageButton(
+                  label: isSaving ? '저장 중...' : '저장하기',
+                  onTap: _save,
+                ),
               ),
             ],
           ),

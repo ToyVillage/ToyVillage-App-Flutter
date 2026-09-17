@@ -1,49 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/file/attachment_section.dart';
 import 'package:toy_village_app/core/widgets/text_field/readonly_field.dart';
+import 'package:toy_village_app/features/entity_info/presentation/view_model/observation_detail_view_model.dart';
 
-class EntityNoteView extends StatelessWidget {
-  final String entityName;
-  final String content;
+class EntityNoteView extends ConsumerWidget {
+  final int animalManageId;
+  final int observationId;
 
   const EntityNoteView({
     super.key,
-    required this.entityName,
-    required this.content,
+    required this.animalManageId,
+    required this.observationId,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final key = (
+      animalManageId: animalManageId,
+      observationId: observationId,
+    );
+
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 28),
-                const ToyVillageReadonlyField(
-                  label: '제목',
-                  value: '9월 18일 특이사항 일지',
-                ),
-                const SizedBox(height: 20),
-                ToyVillageReadonlyField(
-                  label: '내용',
-                  value: content,
-                  minLines: 8,
-                ),
-                const SizedBox(height: 20),
-                const AttachmentSection(
-                  files: [
-                    (fileName: '특이사항_사진.jpg', fileKey: 'dummy-1'),
-                    (fileName: '진료기록.pdf', fileKey: 'dummy-2'),
-                  ],
-                ),
-                const SizedBox(height: 20),
-              ],
+        child: CustomAsyncValue(
+          value: ref.watch(observationDetailViewModelProvider(key)),
+          onRetry: () =>
+              ref.invalidate(observationDetailViewModelProvider(key)),
+          data: (detail) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 28),
+                  ToyVillageReadonlyField(label: '제목', value: detail.title),
+                  const SizedBox(height: 20),
+                  ToyVillageReadonlyField(
+                    label: '내용',
+                    value: detail.content,
+                    minLines: 8,
+                  ),
+                  const SizedBox(height: 20),
+                  AttachmentSection(
+                    files: [
+                      for (final file in detail.files)
+                        (fileName: file.fileName, fileKey: file.fileKey),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),

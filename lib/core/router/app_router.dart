@@ -214,12 +214,12 @@ final GoRouter appRouter = GoRouter(
           path: 'species',
           builder: (context, state) {
             final extra = state.extra;
-            if (extra is! ({String speciesName, String category})) {
+            if (extra is! ({int animalKindId, String kindName})) {
               return _invalidAccess;
             }
             return SpeciesDetailView(
-              speciesName: extra.speciesName,
-              category: extra.category,
+              animalKindId: extra.animalKindId,
+              kindName: extra.kindName,
             );
           },
         ),
@@ -227,22 +227,22 @@ final GoRouter appRouter = GoRouter(
           path: 'entity',
           builder: (context, state) {
             final extra = state.extra;
-            if (extra is! ({String entityName, String category})) {
+            if (extra is! ({int animalManageId})) {
               return _invalidAccess;
             }
-            return EntityDetailView(entityName: extra.entityName);
+            return EntityDetailView(animalManageId: extra.animalManageId);
           },
         ),
         GoRoute(
           path: 'note',
           builder: (context, state) {
             final extra = state.extra;
-            if (extra is! ({String entityName, String content})) {
+            if (extra is! ({int animalManageId, int observationId})) {
               return _invalidAccess;
             }
             return EntityNoteView(
-              entityName: extra.entityName,
-              content: extra.content,
+              animalManageId: extra.animalManageId,
+              observationId: extra.observationId,
             );
           },
         ),
@@ -250,10 +250,10 @@ final GoRouter appRouter = GoRouter(
           path: 'note-write',
           builder: (context, state) {
             final extra = state.extra;
-            if (extra is! ({String entityName})) {
+            if (extra is! ({int animalManageId})) {
               return _invalidAccess;
             }
-            return EntityNoteWriteView(entityName: extra.entityName);
+            return EntityNoteWriteView(animalManageId: extra.animalManageId);
           },
         ),
       ],
