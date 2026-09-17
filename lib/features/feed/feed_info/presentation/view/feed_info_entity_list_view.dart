@@ -9,11 +9,11 @@ import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/entity_info/presentation/view_model/animal_list_view_model.dart';
 import 'package:toy_village_app/features/entity_info/presentation/widget/entity_name_card.dart';
 
-class FeedEntityListView extends ConsumerWidget {
+class FeedInfoEntityListView extends ConsumerWidget {
   final int animalKindId;
   final String kindName;
 
-  const FeedEntityListView({
+  const FeedInfoEntityListView({
     super.key,
     required this.animalKindId,
     required this.kindName,
@@ -52,12 +52,10 @@ class FeedEntityListView extends ConsumerWidget {
                       itemBuilder: (context, animal) => EntityNameCard(
                         name: animal.animalName,
                         onTap: () => context.push(
-                          '/feed-writing/write',
+                          '/feed-info/animal',
                           extra: (
                             animalManageId: animal.animalManageId,
-                            feedLogId: null,
                             animalName: animal.animalName,
-                            initial: null,
                           ),
                         ),
                       ),

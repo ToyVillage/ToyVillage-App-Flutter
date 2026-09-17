@@ -15,7 +15,9 @@ import 'package:toy_village_app/features/entity_info/presentation/view/entity_no
 import 'package:toy_village_app/features/entity_info/presentation/view/entity_note_write_view.dart';
 import 'package:toy_village_app/features/entity_info/presentation/view/species_detail_view.dart';
 import 'package:toy_village_app/features/entity_info/presentation/view/species_list_view.dart';
+import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_info_entity_list_view.dart';
 import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_info_list_view.dart';
+import 'package:toy_village_app/features/feed/feed_log/data/model/feed_log.dart';
 import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_info_view.dart';
 import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_view.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/view/feed_entity_list_view.dart';
@@ -266,12 +268,12 @@ final GoRouter appRouter = GoRouter(
           path: 'entity',
           builder: (context, state) {
             final extra = state.extra;
-            if (extra is! ({String speciesName, String category})) {
+            if (extra is! ({int animalKindId, String kindName})) {
               return _invalidAccess;
             }
             return FeedEntityListView(
-              speciesName: extra.speciesName,
-              category: extra.category,
+              animalKindId: extra.animalKindId,
+              kindName: extra.kindName,
             );
           },
         ),
@@ -281,18 +283,18 @@ final GoRouter appRouter = GoRouter(
             final extra = state.extra;
             if (extra
                 is! ({
-                  String speciesName,
-                  String category,
-                  String? entityName,
-                  bool isEdit,
+                  int? animalManageId,
+                  int? feedLogId,
+                  String? animalName,
+                  FeedLogDetail? initial,
                 })) {
               return _invalidAccess;
             }
             return FeedWritingView(
-              speciesName: extra.speciesName,
-              category: extra.category,
-              entityName: extra.entityName,
-              isEdit: extra.isEdit,
+              animalManageId: extra.animalManageId,
+              feedLogId: extra.feedLogId,
+              animalName: extra.animalName,
+              initial: extra.initial,
             );
           },
         ),
@@ -302,18 +304,38 @@ final GoRouter appRouter = GoRouter(
       path: '/feed-info',
       builder: (_, _) => const FeedInfoView(),
       routes: [
-        GoRoute(path: 'list', builder: (_, _) => const FeedInfoListView()),
+        GoRoute(
+          path: 'entity',
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra is! ({int animalKindId, String kindName})) {
+              return _invalidAccess;
+            }
+            return FeedInfoEntityListView(
+              animalKindId: extra.animalKindId,
+              kindName: extra.kindName,
+            );
+          },
+        ),
+        GoRoute(
+          path: 'animal',
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra is! ({int animalManageId, String animalName})) {
+              return _invalidAccess;
+            }
+            return FeedInfoListView(
+              animalManageId: extra.animalManageId,
+              animalName: extra.animalName,
+            );
+          },
+        ),
         GoRoute(
           path: 'detail',
           builder: (context, state) {
             final extra = state.extra;
-            if (extra is! ({String speciesName, String category})) {
-              return _invalidAccess;
-            }
-            return FeedView(
-              speciesName: extra.speciesName,
-              category: extra.category,
-            );
+            if (extra is! int) return _invalidAccess;
+            return FeedView(feedLogId: extra);
           },
         ),
       ],

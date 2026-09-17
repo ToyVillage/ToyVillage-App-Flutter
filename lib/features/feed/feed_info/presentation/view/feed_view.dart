@@ -6,91 +6,104 @@ import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/svg_assets.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/dropdown/menu_dropdown.dart';
 import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/readonly_field.dart';
-import 'package:toy_village_app/features/feed/feed_info/presentation/view_model/feed_detail_view_model.dart';
-import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_time_field.dart';
+import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_info_list_view.dart';
+import 'package:toy_village_app/features/feed/feed_log/data/model/feed_log.dart';
+import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/feed_log_detail_view_model.dart';
 
 class FeedView extends ConsumerWidget {
-  final String speciesName;
-  final String category;
+  final int feedLogId;
 
-  const FeedView({
-    super.key,
-    required this.speciesName,
-    required this.category,
-  });
+  const FeedView({super.key, required this.feedLogId});
 
-  String _formatTime(FeedTime time) {
-    final hour = time.hour.toString().padLeft(2, '0');
-    final minute = time.minute.toString().padLeft(2, '0');
-    return '$hour : $minute ${time.isPm ? 'PM' : 'AM'}';
+  String _dateText(DateTime dateTime) =>
+      '${dateTime.year}.${_two(dateTime.month)}.${_two(dateTime.day)}';
+
+  String _timeText(DateTime dateTime) {
+    final isPm = dateTime.hour >= 12;
+    var hour = dateTime.hour % 12;
+    if (hour == 0) hour = 12;
+    return '${_two(hour)} : ${_two(dateTime.minute)} ${isPm ? 'PM' : 'AM'}';
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detail = ref.watch(feedDetailViewModelProvider(speciesName));
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 16,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    children: [
-                      const Expanded(child: ToyVillageTitle(title: '먹이 급여 정보')),
-                      MenuDropdown(
-                        items: [
-                          MenuDropdownItem(
-                            label: '수정',
-                            onTap: () => context.push(
-                              '/feed-writing/write',
-                              extra: (
-                                speciesName: speciesName,
-                                category: category,
-                                entityName: null,
-                                isEdit: true,
-                              ),
-                            ),
+        child: CustomAsyncValue(
+          value: ref.watch(feedLogDetailViewModelProvider(feedLogId)),
+          onRetry: () =>
+              ref.invalidate(feedLogDetailViewModelProvider(feedLogId)),
+          data: (detail) => _content(context, detail),
+        ),
+      ),
+    );
+  }
+
+  Widget _content(BuildContext context, FeedLogDetail detail) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 16,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  const Expanded(child: ToyVillageTitle(title: '먹이 급여 정보')),
+                  MenuDropdown(
+                    items: [
+                      MenuDropdownItem(
+                        label: '수정',
+                        onTap: () => context.push(
+                          '/feed-writing/write',
+                          extra: (
+                            animalManageId: null,
+                            feedLogId: detail.feedLogId,
+                            animalName: null,
+                            initial: detail,
                           ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
+                ],
+              ),
+            ),
+            _section('급여 날짜', _dateBox(_dateText(detail.feedDateTime))),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _section(
+                    '급여 시간',
+                    _timeBox(_timeText(detail.feedDateTime)),
+                  ),
                 ),
-                _section('급여 날짜', _dateBox(detail.date)),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: _section(
-                        '급여 시간',
-                        _timeBox(_formatTime(detail.startTime)),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _section(
-                        '먹이 급여량',
-                        _amountBox(detail.amount, detail.unit),
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _section(
+                    '먹이 급여량',
+                    _amountBox(formatFeedAmount(detail.feedAmount)),
+                  ),
                 ),
-                ToyVillageReadonlyField(label: '먹이 종류', value: detail.feedType),
-                ToyVillageReadonlyField(label: '특이사항', value: detail.note),
-                const SizedBox(height: 10),
               ],
             ),
-          ),
+            ToyVillageReadonlyField(label: '먹이 종류', value: detail.feedType),
+            ToyVillageReadonlyField(
+              label: '특이사항',
+              value: detail.significant,
+              minLines: 3,
+            ),
+            const SizedBox(height: 10),
+          ],
         ),
       ),
     );
@@ -152,26 +165,16 @@ class FeedView extends ConsumerWidget {
     );
   }
 
-  Widget _amountBox(String amount, String unit) {
+  Widget _amountBox(String amount) {
     return _box(
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              amount,
-              style: ToyVillageTextStyle.body5.copyWith(
-                color: ToyVillageColor.gray100,
-              ),
-            ),
-          ),
-          Text(
-            unit,
-            style: ToyVillageTextStyle.body5.copyWith(
-              color: ToyVillageColor.gray60,
-            ),
-          ),
-        ],
+      child: Text(
+        amount,
+        style: ToyVillageTextStyle.body5.copyWith(
+          color: ToyVillageColor.gray100,
+        ),
       ),
     );
   }
 }
+
+String _two(int value) => value.toString().padLeft(2, '0');
