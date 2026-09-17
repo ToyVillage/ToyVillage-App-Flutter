@@ -35,7 +35,7 @@ class PagedListView<T> extends StatelessWidget {
       },
       child: ListView.separated(
         padding: padding,
-        itemCount: items.length + (hasMore ? 1 : 0),
+        itemCount: items.length + (hasMore && isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index >= items.length) {
             return const Padding(
