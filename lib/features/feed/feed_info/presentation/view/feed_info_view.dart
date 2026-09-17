@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/chip/category_filter.dart';
+import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/core/widgets/paged_list_view.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
-import 'package:toy_village_app/features/feed/feed_info/presentation/view_model/feed_species_view_model.dart';
+import 'package:toy_village_app/features/entity_info/data/model/animal_taxonomic.dart';
+import 'package:toy_village_app/features/entity_info/presentation/view_model/animal_kind_list_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_animal_card.dart';
 
 class FeedInfoView extends ConsumerStatefulWidget {
@@ -19,10 +22,10 @@ class _FeedInfoViewState extends ConsumerState<FeedInfoView> {
 
   @override
   Widget build(BuildContext context) {
-    final species = ref
-        .watch(feedSpeciesViewModelProvider)
-        .where((e) => e.category == _category)
-        .toList();
+    final filter = (
+      taxonomic: AnimalTaxonomic.fromLabel(_category),
+      keyword: '',
+    );
 
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true),
@@ -33,7 +36,7 @@ class _FeedInfoViewState extends ConsumerState<FeedInfoView> {
           children: [
             const ToyVillageTitle(
               title: '먹이 급여 정보',
-              subTitle: '동물 종을 선택해 급여 기록을 확인합니다',
+              subTitle: '작성한 먹이 급여 정보를 확인합니다',
             ),
             const SizedBox(height: 28),
             CategoryFilter(
@@ -42,23 +45,29 @@ class _FeedInfoViewState extends ConsumerState<FeedInfoView> {
             ),
             const SizedBox(height: 18),
             Expanded(
-              child: ListView.separated(
-                itemCount: species.length,
-                itemBuilder: (context, index) {
-                  final animal = species[index];
-                  return FeedAnimalCard(
-                    speciesName: animal.speciesName,
-                    category: animal.category,
+              child: CustomAsyncValue(
+                value: ref.watch(animalKindListViewModelProvider(filter)),
+                onRetry: () =>
+                    ref.invalidate(animalKindListViewModelProvider(filter)),
+                data: (page) => PagedListView(
+                  items: page.items,
+                  hasMore: page.hasMore,
+                  isLoadingMore: page.isLoadingMore,
+                  onLoadMore: () => ref
+                      .read(animalKindListViewModelProvider(filter).notifier)
+                      .loadMore(),
+                  itemBuilder: (context, kind) => FeedAnimalCard(
+                    speciesName: kind.kindName,
+                    category: kind.animalTaxonomic.label,
                     onTap: () => context.push(
-                      '/feed-info/detail',
+                      '/feed-info/entity',
                       extra: (
-                        speciesName: animal.speciesName,
-                        category: animal.category,
+                        animalKindId: kind.animalKindId,
+                        kindName: kind.kindName,
                       ),
                     ),
-                  );
-                },
-                separatorBuilder: (context, index) => const SizedBox(height: 8),
+                  ),
+                ),
               ),
             ),
           ],

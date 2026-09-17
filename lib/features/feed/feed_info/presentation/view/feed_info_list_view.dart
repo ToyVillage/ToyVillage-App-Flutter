@@ -4,44 +4,50 @@ import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
-import 'package:toy_village_app/features/feed/feed_info/data/model/feed_record.dart';
-import 'package:toy_village_app/features/feed/feed_info/presentation/view_model/feed_record_view_model.dart';
+import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/core/widgets/empty_view.dart';
+import 'package:toy_village_app/features/feed/feed_log/data/model/feed_log.dart';
+import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/animal_feed_logs_view_model.dart';
 
 class FeedInfoListView extends ConsumerWidget {
-  const FeedInfoListView({super.key});
+  final int animalManageId;
+  final String animalName;
+
+  const FeedInfoListView({
+    super.key,
+    required this.animalManageId,
+    required this.animalName,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final records = ref.watch(feedRecordViewModelProvider);
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true, title: '최근 먹이 급여'),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              const SizedBox(height: 32),
-              Expanded(
-                child: ListView.separated(
-                  itemCount: records.length,
-                  itemBuilder: (context, index) {
-                    final record = records[index];
-                    return _FeedRecordCard(
-                      record: record,
-                      onTap: () => context.push(
-                        '/feed-info/detail',
-                        extra: (
-                          speciesName: record.speciesName,
-                          category: record.category,
-                        ),
-                      ),
-                    );
-                  },
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 8),
-                ),
-              ),
-            ],
+          child: CustomAsyncValue(
+            value: ref.watch(animalFeedLogsViewModelProvider(animalManageId)),
+            onRetry: () =>
+                ref.invalidate(animalFeedLogsViewModelProvider(animalManageId)),
+            data: (logs) {
+              if (logs.isEmpty) {
+                return const EmptyView(message: '급여 기록이 없어요.');
+              }
+              return ListView.separated(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                itemCount: logs.length,
+                itemBuilder: (context, index) {
+                  final log = logs[index];
+                  return _FeedLogCard(
+                    log: log,
+                    onTap: () =>
+                        context.push('/feed-info/detail', extra: log.feedLogId),
+                  );
+                },
+                separatorBuilder: (context, index) => const SizedBox(height: 8),
+              );
+            },
           ),
         ),
       ),
@@ -49,11 +55,22 @@ class FeedInfoListView extends ConsumerWidget {
   }
 }
 
-class _FeedRecordCard extends StatelessWidget {
-  final FeedRecord record;
-  final VoidCallback onTap;
+String formatFeedAmount(double amount) {
+  if (amount == amount.roundToDouble()) return amount.toInt().toString();
+  return amount.toString();
+}
 
-  const _FeedRecordCard({required this.record, required this.onTap});
+String formatFeedTime(DateTime dateTime) {
+  return '${_two(dateTime.hour)}:${_two(dateTime.minute)}';
+}
+
+String _two(int value) => value.toString().padLeft(2, '0');
+
+class _FeedLogCard extends StatelessWidget {
+  final FeedLog log;
+  final VoidCallback? onTap;
+
+  const _FeedLogCard({required this.log, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -73,12 +90,22 @@ class _FeedRecordCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(record.feedType, style: ToyVillageTextStyle.subTitle3),
+                  Flexible(
+                    child: Text(
+                      log.feedType,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: ToyVillageTextStyle.subTitle3,
+                    ),
+                  ),
                   const SizedBox(width: 7),
-                  Text(record.amount, style: ToyVillageTextStyle.body5),
+                  Text(
+                    formatFeedAmount(log.feedAmount),
+                    style: ToyVillageTextStyle.body5,
+                  ),
                   const Spacer(),
                   Text(
-                    record.timeRange,
+                    formatFeedTime(log.feedDateTime),
                     style: ToyVillageTextStyle.caption4.copyWith(
                       color: ToyVillageColor.gray60,
                     ),
@@ -89,7 +116,10 @@ class _FeedRecordCard extends StatelessWidget {
                 padding: EdgeInsets.symmetric(vertical: 12),
                 child: Divider(color: ToyVillageColor.gray60),
               ),
-              Text(record.note, style: ToyVillageTextStyle.caption3),
+              Text(
+                log.significant.isEmpty ? '특이사항이 없습니다.' : log.significant,
+                style: ToyVillageTextStyle.caption3,
+              ),
             ],
           ),
         ),

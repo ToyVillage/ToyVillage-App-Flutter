@@ -32,4 +32,7 @@ class ApiEndpoints {
   /// AnimalManage
   static const animalManage = '/animal-manage';
   static const animalManageKind = '/animal-manage/kind';
+
+  /// FeedLog
+  static const feedLog = '/feed-log';
 }
