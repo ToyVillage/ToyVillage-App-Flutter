@@ -61,15 +61,15 @@ class _EntityNoteWriteViewState extends ConsumerState<EntityNoteWriteView> {
       fileKeys: [for (final file in _files) file.fileKey],
     );
 
-    final success = await ref
+    final errorMessage = await ref
         .read(observationCreateViewModelProvider.notifier)
         .create(widget.animalManageId, request);
     if (!mounted) return;
 
-    if (success) {
+    if (errorMessage == null) {
       context.pop();
     } else {
-      showTopToast(overlay, '저장에 실패했어요. 다시 시도해주세요.', isError: true);
+      showTopToast(overlay, errorMessage, isError: true);
     }
   }
 

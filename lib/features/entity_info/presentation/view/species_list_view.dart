@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/chip/category_filter.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/core/widgets/paged_list_view.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/entity_info/data/model/animal_taxonomic.dart';
 import 'package:toy_village_app/features/entity_info/presentation/view_model/animal_kind_list_view_model.dart';
@@ -45,24 +46,24 @@ class _SpeciesListViewState extends ConsumerState<SpeciesListView> {
                 value: ref.watch(animalKindListViewModelProvider(filter)),
                 onRetry: () =>
                     ref.invalidate(animalKindListViewModelProvider(filter)),
-                data: (page) => ListView.separated(
-                  itemCount: page.animalKinds.length,
-                  itemBuilder: (context, index) {
-                    final kind = page.animalKinds[index];
-                    return SpeciesCard(
-                      speciesName: kind.kindName,
-                      category: kind.animalTaxonomic.label,
-                      onTap: () => context.push(
-                        '/entity-info/species',
-                        extra: (
-                          animalKindId: kind.animalKindId,
-                          kindName: kind.kindName,
-                        ),
+                data: (page) => PagedListView(
+                  items: page.items,
+                  hasMore: page.hasMore,
+                  isLoadingMore: page.isLoadingMore,
+                  onLoadMore: () => ref
+                      .read(animalKindListViewModelProvider(filter).notifier)
+                      .loadMore(),
+                  itemBuilder: (context, kind) => SpeciesCard(
+                    speciesName: kind.kindName,
+                    category: kind.animalTaxonomic.label,
+                    onTap: () => context.push(
+                      '/entity-info/species',
+                      extra: (
+                        animalKindId: kind.animalKindId,
+                        kindName: kind.kindName,
                       ),
-                    );
-                  },
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 8),
+                    ),
+                  ),
                 ),
               ),
             ),

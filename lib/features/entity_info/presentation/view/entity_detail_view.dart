@@ -10,6 +10,7 @@ import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/entity_info/data/model/animal_detail.dart';
 import 'package:toy_village_app/features/entity_info/data/model/observation.dart';
+import 'package:toy_village_app/features/entity_info/data/model/paged_list.dart';
 import 'package:toy_village_app/features/entity_info/presentation/view_model/animal_detail_view_model.dart';
 import 'package:toy_village_app/features/entity_info/presentation/view_model/observation_list_view_model.dart';
 import 'package:toy_village_app/features/entity_info/presentation/widget/info_label.dart';
@@ -44,11 +45,21 @@ class EntityDetailView extends ConsumerWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 80),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              if (notification.metrics.pixels >=
+                  notification.metrics.maxScrollExtent - 200) {
+                ref
+                    .read(observationListViewModelProvider(animalManageId).notifier)
+                    .loadMore();
+              }
+              return false;
+            },
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 80),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                 ToyVillageTitle(title: detail.animalName),
                 const SizedBox(height: 28),
                 _AnimalImage(fileKey: detail.animalImage?.fileKey),
@@ -74,10 +85,11 @@ class EntityDetailView extends ConsumerWidget {
                   onRetry: () => ref.invalidate(
                     observationListViewModelProvider(animalManageId),
                   ),
-                  data: (page) => _observations(context, page.content),
+                  data: (page) => _observations(context, page),
                 ),
                 const SizedBox(height: 20),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -100,7 +112,8 @@ class EntityDetailView extends ConsumerWidget {
     );
   }
 
-  Widget _observations(BuildContext context, List<Observation> observations) {
+  Widget _observations(BuildContext context, PagedList<Observation> page) {
+    final observations = page.items;
     if (observations.isEmpty) {
       return Text(
         '등록된 관찰 및 특이사항이 없어요.',
@@ -122,6 +135,18 @@ class EntityDetailView extends ConsumerWidget {
             ),
           ),
         ],
+        if (page.isLoadingMore)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: ToyVillageColor.gray60,
+              ),
+            ),
+          ),
       ],
     );
   }
