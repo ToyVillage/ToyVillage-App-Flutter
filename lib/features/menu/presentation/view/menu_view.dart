@@ -14,8 +14,9 @@ class MenuView extends ConsumerWidget {
 
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
     final confirmed = await showLogoutConfirmSheet(context);
-    if (!confirmed || !context.mounted) return;
-    ref.read(tokenStoreProvider).accessToken = null;
+    if (!confirmed) return;
+    await ref.read(tokenStoreProvider).clear();
+    if (!context.mounted) return;
     context.go('/login');
   }
 
