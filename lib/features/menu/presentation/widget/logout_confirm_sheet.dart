@@ -5,6 +5,7 @@ import 'package:toy_village_app/core/constants/text_style.dart';
 Future<bool> showLogoutConfirmSheet(BuildContext context) async {
   final confirmed = await showModalBottomSheet<bool>(
     context: context,
+    useRootNavigator: true,
     backgroundColor: ToyVillageColor.white,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
