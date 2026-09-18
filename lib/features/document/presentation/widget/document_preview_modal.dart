@@ -152,7 +152,9 @@ class _FilePreview extends StatelessWidget {
     if (isPptFileName(file.fileName)) {
       return _WebDocPreview(url: url, alwaysGView: true);
     }
-    if (!isImageFileName(file.fileName)) return const _EmptyPreview();
+    if (!isImageFileName(file.fileName)) {
+      return _UnsupportedPreview(fileName: file.fileName);
+    }
 
     return InteractiveViewer(
       child: Image.network(
@@ -226,6 +228,56 @@ class _PreviewLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Center(
       child: CircularProgressIndicator(color: ToyVillageColor.gray60),
+    );
+  }
+}
+
+class _UnsupportedPreview extends StatelessWidget {
+  final String fileName;
+
+  const _UnsupportedPreview({required this.fileName});
+
+  String get _extension {
+    final dot = fileName.lastIndexOf('.');
+    if (dot == -1 || dot == fileName.length - 1) return 'FILE';
+    return fileName.substring(dot + 1).toUpperCase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: ToyVillageColor.gray10,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              _extension,
+              style: ToyVillageTextStyle.subTitle3.copyWith(
+                color: ToyVillageColor.gray100,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '미리보기를 지원하지 않는 형식이에요.',
+            style: ToyVillageTextStyle.body5.copyWith(
+              color: ToyVillageColor.gray60,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '다운로드 후 확인해주세요.',
+            style: ToyVillageTextStyle.caption3.copyWith(
+              color: ToyVillageColor.gray40,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
