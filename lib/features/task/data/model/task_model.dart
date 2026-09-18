@@ -7,6 +7,7 @@ class TaskModel {
   final List<Assignee> assignees;
   final int assigneeCount;
   final TaskStatus status;
+  final ReportStatus myReportStatus;
   final TaskPriority priority;
   final DateTime? finishDate;
 
@@ -16,6 +17,7 @@ class TaskModel {
     required this.assignees,
     required this.assigneeCount,
     required this.status,
+    required this.myReportStatus,
     required this.priority,
     required this.finishDate,
   });
@@ -31,6 +33,9 @@ class TaskModel {
           .toList(),
       assigneeCount: json['assigneeCount'] as int? ?? assignees.length,
       status: TaskStatus.fromCode(json['status'] as String),
+      myReportStatus: ReportStatus.fromCode(
+        json['myReportStatus'] as String? ?? 'MISSING',
+      ),
       priority: TaskPriority.fromCode(json['priority'] as String),
       finishDate: finishDate != null ? DateTime.parse(finishDate) : null,
     );

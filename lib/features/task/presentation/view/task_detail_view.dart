@@ -91,7 +91,7 @@ class TaskDetailView extends ConsumerWidget {
                   bottom: 16,
                   child: switch (reportAsync) {
                     AsyncData(:final value) => ToyVillageButton(
-                      label: value == null ? '업무 보고서 작성하기' : '조회하기',
+                      label: value == null ? '업무 보고서 작성하기' : '내가 쓴 글 조회하기',
                       onTap: () async {
                         final route = value == null
                             ? '/task/report/create'

@@ -97,6 +97,7 @@ class _TaskListItem extends ConsumerWidget {
     return TaskCard(
       title: task.title,
       status: task.status,
+      reportStatus: task.myReportStatus,
       finishDate: task.finishDate,
       isNew: !seenIds.contains(task.id),
       onTap: () {

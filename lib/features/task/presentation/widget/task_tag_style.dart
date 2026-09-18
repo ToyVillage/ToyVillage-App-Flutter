@@ -10,7 +10,19 @@ String _finishDateLabel(DateTime finishDate) =>
 ({String label, Color color}) taskCardStatus(
   TaskStatus status,
   DateTime? finishDate,
+  ReportStatus reportStatus,
 ) {
+  switch (reportStatus) {
+    case ReportStatus.approved:
+      return (label: '승인됨', color: ToyVillageColor.green);
+    case ReportStatus.rejected:
+      return (label: '반려됨', color: ToyVillageColor.red);
+    case ReportStatus.pending:
+      return (label: '제출됨', color: ToyVillageColor.gray60);
+    case ReportStatus.missing:
+      break;
+  }
+
   switch (status) {
     case TaskStatus.completed:
       return (label: '완료됨', color: ToyVillageColor.green);
@@ -66,7 +78,7 @@ TagStyle? reportStatusTag(ReportStatus status) {
       );
     case ReportStatus.pending:
       return (
-        label: '검토중',
+        label: '제출됨',
         text: ToyVillageColor.gray60,
         background: ToyVillageColor.gray20,
       );

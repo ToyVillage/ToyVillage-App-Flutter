@@ -7,6 +7,7 @@ import 'package:toy_village_app/features/task/presentation/widget/task_tag_style
 class TaskCard extends StatelessWidget {
   final String title;
   final TaskStatus status;
+  final ReportStatus reportStatus;
   final DateTime? finishDate;
   final bool isNew;
   final VoidCallback onTap;
@@ -15,6 +16,7 @@ class TaskCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.status,
+    required this.reportStatus,
     required this.finishDate,
     required this.isNew,
     required this.onTap,
@@ -22,7 +24,7 @@ class TaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusInfo = taskCardStatus(status, finishDate);
+    final statusInfo = taskCardStatus(status, finishDate, reportStatus);
 
     return GestureDetector(
       onTap: onTap,
