@@ -3,18 +3,21 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/file_util.dart';
+import 'package:toy_village_app/core/utils/time_util.dart';
 import 'package:toy_village_app/features/document/presentation/widget/document_preview_modal.dart';
 
 class DocumentCard extends StatelessWidget {
   final int id;
   final String title;
   final String type;
+  final DateTime createdAt;
 
   const DocumentCard({
     super.key,
     required this.id,
     required this.title,
-    required this.type
+    required this.type,
+    required this.createdAt,
   });
 
   @override
@@ -46,7 +49,19 @@ class DocumentCard extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 20, right: 35),
-                  child: Text(title, style: ToyVillageTextStyle.heading5),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        timeCheck(createdAt),
+                        style: ToyVillageTextStyle.caption4.copyWith(
+                          color: ToyVillageColor.gray60,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(title, style: ToyVillageTextStyle.heading5),
+                    ],
+                  ),
                 ),
               ),
               Material(
