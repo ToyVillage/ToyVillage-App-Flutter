@@ -52,15 +52,17 @@ class _LoginViewState extends ConsumerState<LoginView> {
   @override
   Widget build(BuildContext context) {
     final loading = ref.watch(loginViewModelProvider).isLoading;
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: const ToyVillageAppBar(),
         body: SafeArea(
           child: Stack(
             children: [
               SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 90),
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 90 + bottomInset),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
