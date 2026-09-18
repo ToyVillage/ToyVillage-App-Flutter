@@ -14,7 +14,7 @@ String _finishDateLabel(DateTime finishDate) =>
 ) {
   switch (reportStatus) {
     case ReportStatus.approved:
-      return (label: '승인됨', color: ToyVillageColor.green);
+      return (label: '완료됨', color: ToyVillageColor.green);
     case ReportStatus.rejected:
       return (label: '반려됨', color: ToyVillageColor.red);
     case ReportStatus.pending:
@@ -66,7 +66,7 @@ TagStyle? reportStatusTag(ReportStatus status) {
   switch (status) {
     case ReportStatus.approved:
       return (
-        label: '승인됨',
+        label: '완료됨',
         text: ToyVillageColor.green,
         background: ToyVillageColor.greenBackground,
       );
