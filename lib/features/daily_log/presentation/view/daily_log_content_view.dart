@@ -445,10 +445,18 @@ class _SectionCard extends StatelessWidget {
           color: selected ? ToyVillageColor.gray100 : ToyVillageColor.white,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Text(
-          label,
-          style: ToyVillageTextStyle.button4.copyWith(
-            color: selected ? ToyVillageColor.white : ToyVillageColor.gray100,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              style: ToyVillageTextStyle.button4.copyWith(
+                color: selected
+                    ? ToyVillageColor.white
+                    : ToyVillageColor.gray100,
+              ),
+            ),
           ),
         ),
       ),
