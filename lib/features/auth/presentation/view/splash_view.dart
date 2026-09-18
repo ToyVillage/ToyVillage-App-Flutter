@@ -19,28 +19,34 @@ class _SplashViewState extends ConsumerState<SplashView> {
   }
 
   Future<void> _bootstrap() async {
+    final minimumDisplay = Future<void>.delayed(
+      const Duration(milliseconds: 1500),
+    );
+    final destination = await _resolveDestination();
+    await minimumDisplay;
+    if (!mounted) return;
+    context.go(destination);
+  }
+
+  Future<String> _resolveDestination() async {
     final store = ref.read(tokenStoreProvider);
     await store.load();
 
     final refreshToken = store.refreshToken;
-    if (refreshToken == null) {
-      if (!mounted) return;
-      context.go('/login');
-      return;
-    }
+    if (refreshToken == null) return '/login';
 
     try {
-      final tokens = await ref.read(authRepositoryProvider).reissue(refreshToken);
+      final tokens = await ref
+          .read(authRepositoryProvider)
+          .reissue(refreshToken);
       await store.setTokens(
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
       );
-      if (!mounted) return;
-      context.go('/notice');
+      return '/notice';
     } catch (_) {
       await store.clear();
-      if (!mounted) return;
-      context.go('/login');
+      return '/login';
     }
   }
 
