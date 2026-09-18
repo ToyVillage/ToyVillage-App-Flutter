@@ -21,14 +21,20 @@ class CustomAsyncValue<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loadingWidget =
+        loading ??
+        const Align(
+          alignment: Alignment(0, -0.1),
+          child: CircularProgressIndicator(color: ToyVillageColor.gray60),
+        );
+
+    if (value.isLoading && !value.hasValue) {
+      return loadingWidget;
+    }
+
     return switch (value) {
       AsyncData(:final value) => data(value),
-      AsyncLoading() =>
-        loading ??
-            const Align(
-              alignment: Alignment(0, -0.1),
-              child: CircularProgressIndicator(color: ToyVillageColor.gray60),
-            ),
+      AsyncLoading() => loadingWidget,
       AsyncError() => Align(
         alignment: const Alignment(0, -0.1),
         child: Column(
