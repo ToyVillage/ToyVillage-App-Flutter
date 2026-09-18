@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/svg_assets.dart';
 import 'package:toy_village_app/core/network/dio_provider.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
@@ -73,6 +74,7 @@ class MenuView extends ConsumerWidget {
                       MenuCard(
                         icon: SvgAssets.signOut,
                         title: '로그아웃',
+                        titleColor: ToyVillageColor.red,
                         onTap: () => _logout(context, ref),
                       ),
                     ],
