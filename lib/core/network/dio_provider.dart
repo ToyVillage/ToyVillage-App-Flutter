@@ -27,8 +27,37 @@ final dioProvider = Provider<Dio>((ref) {
         }
         handler.next(options);
       },
-      onError: (error, handler) {
+      onError: (error, handler) async {
         final status = error.response?.statusCode;
+        final path = error.requestOptions.path;
+        final isAuthCall = path.contains('/app/auth/');
+        final alreadyRetried = error.requestOptions.extra['__retried'] == true;
+
+        if (status == 401 &&
+            !isAuthCall &&
+            !alreadyRetried &&
+            store.refreshToken != null) {
+          try {
+            final res = await dio.post(
+              '/app/auth/reissue',
+              data: {'refresh_token': store.refreshToken},
+            );
+            final data = res.data as Map<String, dynamic>;
+            await store.setTokens(
+              accessToken: data['access_token'] as String,
+              refreshToken: data['refresh_token'] as String,
+            );
+            final options = error.requestOptions
+              ..headers['Authorization'] = 'Bearer ${store.accessToken}'
+              ..extra['__retried'] = true;
+            final response = await dio.fetch(options);
+            return handler.resolve(response);
+          } catch (_) {
+            await store.clear();
+            return handler.next(error);
+          }
+        }
+
         if (status == 401 || status == 403) {
           store.accessToken = null;
         }

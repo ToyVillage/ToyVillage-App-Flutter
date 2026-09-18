@@ -17,10 +17,15 @@ class LoginViewModel extends AsyncNotifier<void> {
   }) async {
     state = const AsyncLoading();
     try {
-      final token = await ref
+      final tokens = await ref
           .read(authRepositoryProvider)
           .login(username: username, password: password);
-      ref.read(tokenStoreProvider).accessToken = token;
+      await ref
+          .read(tokenStoreProvider)
+          .setTokens(
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+          );
       state = const AsyncData(null);
       return true;
     } catch (e, stackTrace) {
