@@ -52,53 +52,51 @@ class _LoginViewState extends ConsumerState<LoginView> {
   @override
   Widget build(BuildContext context) {
     final loading = ref.watch(loginViewModelProvider).isLoading;
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
         appBar: const ToyVillageAppBar(),
         body: SafeArea(
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(20, 0, 20, 90 + bottomInset),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const ToyVillageTitle(title: '로그인'),
-                    const SizedBox(height: 28),
-                    ToyVillageTextField(
-                      label: '아이디',
-                      labelStyle: ToyVillageTextStyle.heading6,
-                      hintText: '아이디를 입력해주세요',
-                      controller: _idController,
-                      maxLines: 1,
-                    ),
-                    const SizedBox(height: 20),
-                    ToyVillageTextField(
-                      label: '비밀번호',
-                      labelStyle: ToyVillageTextStyle.heading6,
-                      hintText: '비밀번호를 입력해주세요',
-                      hasEyesIcon: true,
-                      controller: _pwController,
-                    ),
-                  ],
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight - 16),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const ToyVillageTitle(title: '로그인'),
+                      const SizedBox(height: 28),
+                      ToyVillageTextField(
+                        label: '아이디',
+                        labelStyle: ToyVillageTextStyle.heading6,
+                        hintText: '아이디를 입력해주세요',
+                        controller: _idController,
+                        maxLines: 1,
+                      ),
+                      const SizedBox(height: 20),
+                      ToyVillageTextField(
+                        label: '비밀번호',
+                        labelStyle: ToyVillageTextStyle.heading6,
+                        hintText: '비밀번호를 입력해주세요',
+                        hasEyesIcon: true,
+                        controller: _pwController,
+                      ),
+                      const SizedBox(height: 40),
+                      const Spacer(),
+                      ToyVillageButton(
+                        label: loading ? '로그인 중...' : '로그인',
+                        background: loading
+                            ? ToyVillageColor.gray60
+                            : ToyVillageColor.gray100,
+                        onTap: loading ? () {} : _login,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              Positioned(
-                left: 20,
-                right: 20,
-                bottom: 16,
-                child: ToyVillageButton(
-                  label: loading ? '로그인 중...' : '로그인',
-                  background: loading
-                      ? ToyVillageColor.gray60
-                      : ToyVillageColor.gray100,
-                  onTap: loading ? () {} : _login,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
