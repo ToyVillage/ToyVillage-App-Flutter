@@ -57,6 +57,7 @@ class _SplashViewState extends ConsumerState<SplashView> {
         child: Text(
           'TOY VILLAGE',
           style: TextStyle(
+            fontFamily: 'WantedSans',
             fontSize: 32,
             fontWeight: FontWeight.w900,
             color: Colors.black,
