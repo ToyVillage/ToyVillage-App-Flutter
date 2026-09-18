@@ -120,7 +120,7 @@ class _DayCell extends StatelessWidget {
         ),
         if (isDayOff)
           const Padding(
-            padding: EdgeInsets.only(top: 35),
+            padding: EdgeInsets.only(top: 40),
             child: _Dot(),
           ),
       ],
