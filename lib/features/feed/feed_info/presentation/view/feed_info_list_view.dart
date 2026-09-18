@@ -90,20 +90,27 @@ class _FeedLogCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Flexible(
-                    child: Text(
-                      log.feedType,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: ToyVillageTextStyle.subTitle3,
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            log.feedType,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: ToyVillageTextStyle.subTitle3,
+                          ),
+                        ),
+                        const SizedBox(width: 7),
+                        Text(
+                          formatFeedAmount(log.feedAmount),
+                          style: ToyVillageTextStyle.body5,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 7),
-                  Text(
-                    formatFeedAmount(log.feedAmount),
-                    style: ToyVillageTextStyle.body5,
-                  ),
-                  const Spacer(),
+                  const SizedBox(width: 8),
                   Text(
                     formatFeedTime(log.feedDateTime),
                     style: ToyVillageTextStyle.caption4.copyWith(
@@ -118,7 +125,7 @@ class _FeedLogCard extends StatelessWidget {
               ),
               Text(
                 log.significant.isEmpty ? '특이사항이 없습니다.' : log.significant,
-                style: ToyVillageTextStyle.caption3,
+                style: log.significant.isEmpty ? ToyVillageTextStyle.caption4.copyWith(color: ToyVillageColor.gray60) : ToyVillageTextStyle.caption3,
               ),
             ],
           ),
