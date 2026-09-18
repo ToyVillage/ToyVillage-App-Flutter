@@ -59,8 +59,8 @@ class _LoginViewState extends ConsumerState<LoginView> {
         body: SafeArea(
           child: Stack(
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+              SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 90),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
