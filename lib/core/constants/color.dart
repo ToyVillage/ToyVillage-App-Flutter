@@ -2,6 +2,7 @@ import 'dart:ui';
 
 class ToyVillageColor {
   static const red = Color(0xFFFF3131);
+  static const lightRed = Color(0xFFFF5F5F);
   static const redBackground = Color(0xFFFFCECE);
   static const yellow = Color(0xFFFDB542);
   static const yellowBackground = Color(0xFFFFE8C3);

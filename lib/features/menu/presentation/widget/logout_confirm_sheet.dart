@@ -28,18 +28,16 @@ Future<bool> showLogoutConfirmSheet(BuildContext context) async {
             const SizedBox(height: 40),
             Text(
               '정말 로그아웃하시겠습니까?',
-              style: ToyVillageTextStyle.heading6,
+              style: ToyVillageTextStyle.heading5,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             Text(
               '로그아웃하게 되면 다시 로그인 하기 전까지\n토이빌리지를 이용할 수 없어요',
-              style: ToyVillageTextStyle.body5.copyWith(
-                color: ToyVillageColor.gray60,
-              ),
+              style: ToyVillageTextStyle.body5,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 60),
             Row(
               children: [
                 Expanded(
@@ -53,7 +51,7 @@ Future<bool> showLogoutConfirmSheet(BuildContext context) async {
                 Expanded(
                   child: _button(
                     label: '로그아웃',
-                    background: ToyVillageColor.red,
+                    background: ToyVillageColor.lightRed,
                     onTap: () => Navigator.pop(ctx, true),
                   ),
                 ),
