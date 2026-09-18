@@ -46,6 +46,17 @@ class _SplashViewState extends ConsumerState<SplashView> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    return const Scaffold(
+      body: Center(
+        child: Text(
+          'TOY VILLAGE',
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.w900,
+            color: Colors.black,
+          ),
+        ),
+      ),
+    );
   }
 }
