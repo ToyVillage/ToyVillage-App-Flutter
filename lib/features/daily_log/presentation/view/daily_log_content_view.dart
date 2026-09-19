@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/daily_log_form_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -45,6 +46,8 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
 
   int? _selectedSectionId;
   bool _submitting = false;
+  bool _dirty = false;
+  bool _autoSaveShown = false;
   Timer? _autoSaveTimer;
   final Map<int, Map<int, TextEditingController>> _textControllers = {};
   final Map<int, Map<int, RadioSelection>> _radio = {};
@@ -55,11 +58,23 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
   void initState() {
     super.initState();
     _restoreDraft();
-    _autoSaveTimer = Timer.periodic(
-      const Duration(seconds: 5),
-      (_) => _saveDraft(auto: true),
+  }
+
+  void _onAnswerChanged() {
+    setState(() => _dirty = true);
+    _scheduleAutoSave();
+  }
+
+  void _scheduleAutoSave() {
+    _autoSaveTimer?.cancel();
+    _autoSaveTimer = Timer(
+      const Duration(seconds: 30),
+      () => _saveDraft(auto: true),
     );
   }
+
+  Color get _autoSaveColor =>
+      _dirty ? ToyVillageColor.gray60 : ToyVillageColor.gray100;
 
   @override
   void dispose() {
@@ -165,12 +180,23 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
     if ((draft['sections'] as Map).isEmpty) return;
     await _draftRepo.save(widget.templateId, draft);
     if (!mounted) return;
-    showTopToast(overlay, auto ? '자동 저장되었어요.' : '임시저장되었어요.');
+    if (auto) {
+      setState(() {
+        _autoSaveShown = true;
+        _dirty = false;
+      });
+    } else {
+      showTopToast(overlay, '임시저장되었어요.');
+    }
   }
 
   TextEditingController _controllerFor(int sectionId, int questionId) {
     final section = _textControllers.putIfAbsent(sectionId, () => {});
-    return section.putIfAbsent(questionId, TextEditingController.new);
+    return section.putIfAbsent(questionId, () {
+      final controller = TextEditingController();
+      controller.addListener(_onAnswerChanged);
+      return controller;
+    });
   }
 
   Future<void> _complete() async {
@@ -307,8 +333,13 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
               hasEtc: hasEtc,
               initialIndex: _radio[sectionId]?[qid]?.index,
               initialEtcText: _radio[sectionId]?[qid]?.etcText,
-              onSelected: (index, etcText) => (_radio[sectionId] ??= {})[qid] =
-                  (index: index, etcText: etcText),
+              onSelected: (index, etcText) {
+                (_radio[sectionId] ??= {})[qid] = (
+                  index: index,
+                  etcText: etcText,
+                );
+                _onAnswerChanged();
+              },
             ),
           ],
         );
@@ -324,11 +355,13 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
               hasEtc: hasEtc,
               initialIndices: _check[sectionId]?[qid]?.indices ?? const {},
               initialEtcText: _check[sectionId]?[qid]?.etcText,
-              onSelected: (indices, etcText) =>
-                  (_check[sectionId] ??= {})[qid] = (
-                    indices: indices,
-                    etcText: etcText,
-                  ),
+              onSelected: (indices, etcText) {
+                (_check[sectionId] ??= {})[qid] = (
+                  indices: indices,
+                  etcText: etcText,
+                );
+                _onAnswerChanged();
+              },
             ),
           ],
         );
@@ -342,8 +375,10 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
               key: key,
               maxCount: 1,
               initialFiles: _fileValues[sectionId]?[qid] ?? const [],
-              onChanged: (value) =>
-                  (_fileValues[sectionId] ??= {})[qid] = value,
+              onChanged: (value) {
+                (_fileValues[sectionId] ??= {})[qid] = value;
+                _onAnswerChanged();
+              },
             ),
           ],
         );
@@ -378,11 +413,31 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: _sectionGap,
                       children: [
-                        const Padding(
-                          padding: EdgeInsets.only(
+                        Padding(
+                          padding: const EdgeInsets.only(
                             bottom: _titleGap - _sectionGap,
                           ),
-                          child: ToyVillageTitle(title: '업무일지 작성'),
+                          child: Row(
+                            children: [
+                              const Expanded(
+                                child: ToyVillageTitle(title: '업무일지 작성'),
+                              ),
+                              if (_autoSaveShown) ...[
+                                Icon(
+                                  Symbols.check,
+                                  size: 18,
+                                  color: _autoSaveColor,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '자동 저장됨',
+                                  style: ToyVillageTextStyle.caption2.copyWith(
+                                    color: _autoSaveColor,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
                         _section('구역 선택', _sectionGrid(template.sections)),
                         if (_selectedSectionId != null)
