@@ -6,6 +6,7 @@ import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/features/feed/feed_info/presentation/widget/feed_log_list_skeleton.dart';
 import 'package:toy_village_app/core/widgets/empty_view.dart';
 import 'package:toy_village_app/features/feed/feed_log/data/model/feed_log.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/animal_feed_logs_view_model.dart';
@@ -29,6 +30,7 @@ class FeedInfoListView extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: CustomAsyncValue(
             value: ref.watch(animalFeedLogsViewModelProvider(animalManageId)),
+            loading: const FeedLogListSkeleton(),
             onRetry: () =>
                 ref.invalidate(animalFeedLogsViewModelProvider(animalManageId)),
             data: (logs) => PullToRefresh(

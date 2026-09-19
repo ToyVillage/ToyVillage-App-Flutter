@@ -7,6 +7,7 @@ import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/file_url.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
+import 'package:toy_village_app/features/entity_info/presentation/widget/species_detail_skeleton.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
@@ -29,6 +30,7 @@ class EntityDetailView extends ConsumerWidget {
       body: SafeArea(
         child: CustomAsyncValue(
           value: ref.watch(animalDetailViewModelProvider(animalManageId)),
+          loading: const SpeciesDetailSkeleton(),
           onRetry: () =>
               ref.invalidate(animalDetailViewModelProvider(animalManageId)),
           data: (detail) => _content(context, ref, detail),

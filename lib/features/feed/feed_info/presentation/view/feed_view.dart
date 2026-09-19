@@ -8,6 +8,7 @@ import 'package:toy_village_app/core/constants/svg_assets.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/features/feed/feed_info/presentation/widget/feed_detail_skeleton.dart';
 import 'package:toy_village_app/core/widgets/dropdown/menu_dropdown.dart';
 import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
@@ -38,6 +39,7 @@ class FeedView extends ConsumerWidget {
       body: SafeArea(
         child: CustomAsyncValue(
           value: ref.watch(feedLogDetailViewModelProvider(feedLogId)),
+          loading: const FeedDetailSkeleton(),
           onRetry: () =>
               ref.invalidate(feedLogDetailViewModelProvider(feedLogId)),
           data: (detail) => PullToRefresh.child(
