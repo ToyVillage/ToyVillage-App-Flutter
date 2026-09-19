@@ -6,6 +6,7 @@ import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/file_url.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/entity_info/data/model/animal_kind_detail.dart';
@@ -125,14 +126,7 @@ class SpeciesDetailView extends ConsumerWidget {
         if (page.isLoadingMore)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
-            child: SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: ToyVillageColor.gray60,
-              ),
-            ),
+            child: Center(child: AppLoadingIndicator(radius: 10)),
           ),
       ],
     );

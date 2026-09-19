@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
@@ -189,7 +190,7 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
 
   Widget _body(Widget spacing) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: AppLoadingIndicator());
     }
     if (_loadFailed) {
       return Center(

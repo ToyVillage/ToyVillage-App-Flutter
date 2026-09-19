@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toy_village_app/core/constants/color.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/features/day_off/data/model/close_day_model.dart';
@@ -98,16 +99,13 @@ class _DayOffViewState extends ConsumerState<DayOffView> {
     final closeDays = async.value ?? const <CloseDayModel>[];
     final infoDay = _selectedDay ?? DateTime.now();
 
-    return RefreshIndicator(
-      color: ToyVillageColor.gray100,
+    return PullToRefresh.child(
       onRefresh: () async {
         ref.invalidate(openTimeViewModelProvider);
         ref.invalidate(closeDayViewModelProvider);
         await ref.read(closeDayViewModelProvider.future);
       },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Column(
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(child: CalendarHeader(focusedDay: _focusedDay)),
@@ -147,7 +145,6 @@ class _DayOffViewState extends ConsumerState<DayOffView> {
             },
           ),
         ],
-      ),
       ),
     );
   }

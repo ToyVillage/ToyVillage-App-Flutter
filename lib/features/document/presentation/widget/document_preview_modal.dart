@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -82,6 +83,7 @@ class _DocumentPreviewModal extends ConsumerWidget {
                   ),
                   child: CustomAsyncValue(
                     value: async,
+                    loading: const _PreviewLoading(),
                     onRetry: () =>
                         ref.invalidate(documentDetailViewModelProvider(id)),
                     data: (detail) {
@@ -233,9 +235,7 @@ class _PreviewLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: CircularProgressIndicator(color: ToyVillageColor.gray60),
-    );
+    return const Center(child: AppLoadingIndicator());
   }
 }
 

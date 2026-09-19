@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toy_village_app/core/constants/color.dart';
+import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 
 class CustomAsyncValue<T> extends StatelessWidget {
@@ -25,7 +26,7 @@ class CustomAsyncValue<T> extends StatelessWidget {
         loading ??
         const Align(
           alignment: Alignment(0, -0.1),
-          child: CircularProgressIndicator(color: ToyVillageColor.gray60),
+          child: AppLoadingIndicator(),
         );
 
     if (value.isLoading && !value.hasValue) {

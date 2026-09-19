@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:toy_village_app/core/constants/color.dart';
+import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
 
 class PagedListView<T> extends StatelessWidget {
   final List<T> items;
@@ -27,16 +26,7 @@ class PagedListView<T> extends StatelessWidget {
   Widget _loader() {
     return const Padding(
       padding: EdgeInsets.symmetric(vertical: 16),
-      child: Center(
-        child: SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: ToyVillageColor.gray60,
-          ),
-        ),
-      ),
+      child: Center(child: AppLoadingIndicator(radius: 10)),
     );
   }
 
