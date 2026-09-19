@@ -56,11 +56,20 @@ class _LoadingCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: ToyVillageColor.gray60),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: SizedBox(
+        width: 120,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: ToyVillageColor.gray60),
+          ),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: Center(child: _LoadingContent()),
+          ),
+        ),
       ),
-      child: const Center(child: _LoadingContent()),
     );
   }
 }
