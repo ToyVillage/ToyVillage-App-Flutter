@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/file_url.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
+import 'package:toy_village_app/features/entity_info/presentation/widget/species_detail_skeleton.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/features/entity_info/presentation/widget/entity_name_list_skeleton.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/entity_info/data/model/animal_kind_detail.dart';
 import 'package:toy_village_app/features/entity_info/data/model/animal_summary.dart';
@@ -32,6 +36,7 @@ class SpeciesDetailView extends ConsumerWidget {
       body: SafeArea(
         child: CustomAsyncValue(
           value: ref.watch(animalKindDetailViewModelProvider(animalKindId)),
+          loading: const SpeciesDetailSkeleton(),
           onRetry: () =>
               ref.invalidate(animalKindDetailViewModelProvider(animalKindId)),
           data: (detail) => _content(context, ref, detail),
@@ -50,18 +55,24 @@ class SpeciesDetailView extends ConsumerWidget {
         : detail.legalStatuses.map((e) => e.kind).join(', ');
     final filter = (animalKindId: animalKindId, keyword: '');
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: NotificationListener<ScrollNotification>(
-        onNotification: (notification) {
-          if (notification.metrics.pixels >=
-              notification.metrics.maxScrollExtent - 200) {
-            ref.read(animalListViewModelProvider(filter).notifier).loadMore();
-          }
-          return false;
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification.metrics.pixels >=
+            notification.metrics.maxScrollExtent - 200) {
+          ref.read(animalListViewModelProvider(filter).notifier).loadMore();
+        }
+        return false;
+      },
+      child: PullToRefresh.child(
+        onRefresh: () async {
+          ref.invalidate(animalListViewModelProvider(filter));
+          ref.invalidate(animalKindDetailViewModelProvider(animalKindId));
+          await ref.read(
+            animalKindDetailViewModelProvider(animalKindId).future,
+          );
         },
-        child: SingleChildScrollView(
-          child: Column(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ToyVillageTitle(title: detail.kindName),
@@ -84,6 +95,7 @@ class SpeciesDetailView extends ConsumerWidget {
               const SizedBox(height: 12),
               CustomAsyncValue(
                 value: ref.watch(animalListViewModelProvider(filter)),
+                loading: const EntityNameListSkeleton(count: 3),
                 onRetry: () =>
                     ref.invalidate(animalListViewModelProvider(filter)),
                 data: (page) => _entityList(context, page),
@@ -92,7 +104,6 @@ class SpeciesDetailView extends ConsumerWidget {
             ],
           ),
         ),
-      ),
     );
   }
 
@@ -119,14 +130,7 @@ class SpeciesDetailView extends ConsumerWidget {
         if (page.isLoadingMore)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
-            child: SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: ToyVillageColor.gray60,
-              ),
-            ),
+            child: Center(child: AppLoadingIndicator(radius: 10)),
           ),
       ],
     );

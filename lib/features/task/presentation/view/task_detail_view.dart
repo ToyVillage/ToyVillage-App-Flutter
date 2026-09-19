@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_detail_skeleton.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,7 +46,11 @@ class TaskDetailView extends ConsumerWidget {
             return Stack(
               fit: StackFit.expand,
               children: [
-                SingleChildScrollView(
+                PullToRefresh.child(
+                  onRefresh: () async {
+                    ref.invalidate(taskDetailViewModelProvider(id));
+                    await ref.read(taskDetailViewModelProvider(id).future);
+                  },
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,7 +96,7 @@ class TaskDetailView extends ConsumerWidget {
                   bottom: 16,
                   child: switch (reportAsync) {
                     AsyncData(:final value) => ToyVillageButton(
-                      label: value == null ? '업무 보고서 작성하기' : '조회하기',
+                      label: value == null ? '업무 보고서 작성하기' : '내가 쓴 글 조회하기',
                       onTap: () async {
                         final route = value == null
                             ? '/task/report/create'
@@ -126,10 +131,11 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tags = <TagStyle>[taskPriorityTag(task.priority)];
-    final statusTag = reportStatus == null
-        ? null
-        : reportStatusTag(reportStatus!);
-    if (statusTag != null) tags.add(statusTag);
+    final showStatus =
+        reportStatus != null &&
+        (reportStatus != ReportStatus.missing ||
+            task.status == TaskStatus.expired);
+    if (showStatus) tags.add(reportStatusTag(reportStatus!));
     final deadlineTag = taskDeadlineTag(task.finishDate);
     if (deadlineTag != null) tags.add(deadlineTag);
 

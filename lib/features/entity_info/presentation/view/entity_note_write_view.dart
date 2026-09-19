@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/constants/color.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
@@ -26,6 +27,21 @@ class _EntityNoteWriteViewState extends ConsumerState<EntityNoteWriteView> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   List<ReportAttachment> _files = [];
+  bool _uploading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController.addListener(_refresh);
+    _contentController.addListener(_refresh);
+  }
+
+  void _refresh() => setState(() {});
+
+  bool get _canSubmit =>
+      _titleController.text.trim().isNotEmpty &&
+      _contentController.text.trim().isNotEmpty &&
+      !_uploading;
 
   @override
   void dispose() {
@@ -35,9 +51,16 @@ class _EntityNoteWriteViewState extends ConsumerState<EntityNoteWriteView> {
   }
 
   Future<void> _addAttachment() async {
-    final attachment = await pickAndUploadAttachment(context, ref);
-    if (attachment == null || !mounted) return;
-    setState(() => _files = [..._files, attachment]);
+    setState(() => _uploading = true);
+    try {
+      final attachment = await pickAndUploadAttachment(context, ref);
+      if (!mounted) return;
+      setState(() {
+        if (attachment != null) _files = [..._files, attachment];
+      });
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
   }
 
   void _deleteAttachment(int index) {
@@ -120,6 +143,7 @@ class _EntityNoteWriteViewState extends ConsumerState<EntityNoteWriteView> {
                                 files: _files,
                                 onAdd: _addAttachment,
                                 onDelete: _deleteAttachment,
+                                uploading: _uploading,
                               ),
                               spacing,
                             ],
@@ -136,7 +160,10 @@ class _EntityNoteWriteViewState extends ConsumerState<EntityNoteWriteView> {
                 bottom: 16,
                 child: ToyVillageButton(
                   label: isSaving ? '저장 중...' : '저장하기',
-                  onTap: _save,
+                  background: (_canSubmit && !isSaving)
+                      ? ToyVillageColor.gray100
+                      : ToyVillageColor.gray60,
+                  onTap: (_canSubmit && !isSaving) ? _save : () {},
                 ),
               ),
             ],

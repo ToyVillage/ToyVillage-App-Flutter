@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
+import 'package:toy_village_app/core/utils/time_util.dart';
 import 'package:toy_village_app/features/task/data/model/task_status.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_tag_style.dart';
 
 class TaskCard extends StatelessWidget {
   final String title;
   final TaskStatus status;
+  final ReportStatus reportStatus;
   final DateTime? finishDate;
+  final DateTime? createdAt;
   final bool isNew;
   final VoidCallback onTap;
 
@@ -15,14 +18,16 @@ class TaskCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.status,
+    required this.reportStatus,
     required this.finishDate,
+    required this.createdAt,
     required this.isNew,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final statusInfo = taskCardStatus(status, finishDate);
+    final statusInfo = taskCardStatus(status, finishDate, reportStatus);
 
     return GestureDetector(
       onTap: onTap,
@@ -49,11 +54,23 @@ class TaskCard extends StatelessWidget {
                       child: Text(title, style: ToyVillageTextStyle.heading3),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      statusInfo.label,
-                      style: ToyVillageTextStyle.caption4.copyWith(
-                        color: statusInfo.color,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          statusInfo.label,
+                          style: ToyVillageTextStyle.caption4.copyWith(
+                            color: statusInfo.color,
+                          ),
+                        ),
+                        const Spacer(),
+                        if (createdAt != null)
+                          Text(
+                            timeCheck(createdAt!),
+                            style: ToyVillageTextStyle.caption4.copyWith(
+                              color: ToyVillageColor.gray60,
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),

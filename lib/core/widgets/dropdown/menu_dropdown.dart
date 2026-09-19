@@ -18,12 +18,14 @@ class MenuDropdown extends StatefulWidget {
   final List<MenuDropdownItem> items;
   final double iconSize;
   final Color iconColor;
+  final double width;
 
   const MenuDropdown({
     super.key,
     required this.items,
     this.iconSize = 24,
     this.iconColor = ToyVillageColor.gray100,
+    this.width = 80,
   });
 
   @override
@@ -53,7 +55,7 @@ class _MenuDropdownState extends State<MenuDropdown> {
             followerAnchor: Alignment.topRight,
             offset: const Offset(0, 8),
             child: Container(
-              width: 80,
+              width: widget.width,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
                 color: ToyVillageColor.white,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +8,7 @@ import 'package:toy_village_app/core/constants/svg_assets.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/features/feed/feed_info/presentation/widget/feed_detail_skeleton.dart';
 import 'package:toy_village_app/core/widgets/dropdown/menu_dropdown.dart';
 import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
@@ -37,19 +39,22 @@ class FeedView extends ConsumerWidget {
       body: SafeArea(
         child: CustomAsyncValue(
           value: ref.watch(feedLogDetailViewModelProvider(feedLogId)),
+          loading: const FeedDetailSkeleton(),
           onRetry: () =>
               ref.invalidate(feedLogDetailViewModelProvider(feedLogId)),
-          data: (detail) => _content(context, detail),
+          data: (detail) => PullToRefresh.child(
+            onRefresh: () async =>
+                ref.refresh(feedLogDetailViewModelProvider(feedLogId).future),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: _content(context, detail),
+          ),
         ),
       ),
     );
   }
 
   Widget _content(BuildContext context, FeedLogDetail detail) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SingleChildScrollView(
-        child: Column(
+    return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 16,
           children: [
@@ -104,9 +109,7 @@ class FeedView extends ConsumerWidget {
             ),
             const SizedBox(height: 10),
           ],
-        ),
-      ),
-    );
+        );
   }
 
   Widget _section(String label, Widget child) {

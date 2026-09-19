@@ -8,6 +8,7 @@ import 'package:toy_village_app/core/widgets/paged_list_view.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/entity_info/data/model/animal_taxonomic.dart';
 import 'package:toy_village_app/features/entity_info/presentation/view_model/animal_kind_list_view_model.dart';
+import 'package:toy_village_app/features/entity_info/presentation/widget/species_list_skeleton.dart';
 import 'package:toy_village_app/features/entity_info/presentation/widget/species_card.dart';
 
 class SpeciesListView extends ConsumerStatefulWidget {
@@ -44,12 +45,16 @@ class _SpeciesListViewState extends ConsumerState<SpeciesListView> {
             Expanded(
               child: CustomAsyncValue(
                 value: ref.watch(animalKindListViewModelProvider(filter)),
+                loading: const SpeciesListSkeleton(),
                 onRetry: () =>
                     ref.invalidate(animalKindListViewModelProvider(filter)),
                 data: (page) => PagedListView(
                   items: page.items,
                   hasMore: page.hasMore,
                   isLoadingMore: page.isLoadingMore,
+                  onRefresh: () async => ref.refresh(
+                    animalKindListViewModelProvider(filter).future,
+                  ),
                   onLoadMore: () => ref
                       .read(animalKindListViewModelProvider(filter).notifier)
                       .loadMore(),

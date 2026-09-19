@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/chip/category_filter.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/features/entity_info/presentation/widget/species_list_skeleton.dart';
 import 'package:toy_village_app/core/widgets/paged_list_view.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/entity_info/data/model/animal_taxonomic.dart';
@@ -48,12 +49,16 @@ class _FeedWritingListViewState extends ConsumerState<FeedWritingListView> {
             Expanded(
               child: CustomAsyncValue(
                 value: ref.watch(animalKindListViewModelProvider(filter)),
+                loading: const SpeciesListSkeleton(),
                 onRetry: () =>
                     ref.invalidate(animalKindListViewModelProvider(filter)),
                 data: (page) => PagedListView(
                   items: page.items,
                   hasMore: page.hasMore,
                   isLoadingMore: page.isLoadingMore,
+                  onRefresh: () async => ref.refresh(
+                    animalKindListViewModelProvider(filter).future,
+                  ),
                   onLoadMore: () => ref
                       .read(animalKindListViewModelProvider(filter).notifier)
                       .loadMore(),

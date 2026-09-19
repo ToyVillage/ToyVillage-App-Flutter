@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/file_url.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
+import 'package:toy_village_app/features/entity_info/presentation/widget/species_detail_skeleton.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/features/entity_info/presentation/widget/entity_name_list_skeleton.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/entity_info/data/model/animal_detail.dart';
 import 'package:toy_village_app/features/entity_info/data/model/observation.dart';
@@ -27,6 +31,7 @@ class EntityDetailView extends ConsumerWidget {
       body: SafeArea(
         child: CustomAsyncValue(
           value: ref.watch(animalDetailViewModelProvider(animalManageId)),
+          loading: const SpeciesDetailSkeleton(),
           onRetry: () =>
               ref.invalidate(animalDetailViewModelProvider(animalManageId)),
           data: (detail) => _content(context, ref, detail),
@@ -43,21 +48,28 @@ class EntityDetailView extends ConsumerWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (notification) {
-              if (notification.metrics.pixels >=
-                  notification.metrics.maxScrollExtent - 200) {
-                ref
-                    .read(observationListViewModelProvider(animalManageId).notifier)
-                    .loadMore();
-              }
-              return false;
+        NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.pixels >=
+                notification.metrics.maxScrollExtent - 200) {
+              ref
+                  .read(
+                    observationListViewModelProvider(animalManageId).notifier,
+                  )
+                  .loadMore();
+            }
+            return false;
+          },
+          child: PullToRefresh.child(
+            onRefresh: () async {
+              ref.invalidate(observationListViewModelProvider(animalManageId));
+              ref.invalidate(animalDetailViewModelProvider(animalManageId));
+              await ref.read(
+                animalDetailViewModelProvider(animalManageId).future,
+              );
             },
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 80),
-              child: Column(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                 ToyVillageTitle(title: detail.animalName),
@@ -82,6 +94,7 @@ class EntityDetailView extends ConsumerWidget {
                   value: ref.watch(
                     observationListViewModelProvider(animalManageId),
                   ),
+                  loading: const ObservationListSkeleton(),
                   onRetry: () => ref.invalidate(
                     observationListViewModelProvider(animalManageId),
                   ),
@@ -92,7 +105,6 @@ class EntityDetailView extends ConsumerWidget {
               ),
             ),
           ),
-        ),
         Positioned(
           left: 20,
           right: 20,
@@ -138,14 +150,7 @@ class EntityDetailView extends ConsumerWidget {
         if (page.isLoadingMore)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
-            child: SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: ToyVillageColor.gray60,
-              ),
-            ),
+            child: Center(child: AppLoadingIndicator(radius: 10)),
           ),
       ],
     );

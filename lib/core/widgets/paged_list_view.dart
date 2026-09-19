@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:toy_village_app/core/constants/color.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
 
 class PagedListView<T> extends StatelessWidget {
   final List<T> items;
@@ -9,6 +9,7 @@ class PagedListView<T> extends StatelessWidget {
   final Widget Function(BuildContext, T) itemBuilder;
   final EdgeInsetsGeometry padding;
   final double separatorHeight;
+  final Future<void> Function()? onRefresh;
 
   const PagedListView({
     super.key,
@@ -19,42 +20,55 @@ class PagedListView<T> extends StatelessWidget {
     required this.itemBuilder,
     this.padding = EdgeInsets.zero,
     this.separatorHeight = 8,
+    this.onRefresh,
   });
+
+  Widget _loader() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 16),
+      child: Center(child: AppLoadingIndicator(radius: 10)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final itemCount = items.length + (hasMore && isLoadingMore ? 1 : 0);
+
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
+        if (notification.depth != 0) return false;
+        if (notification is! ScrollUpdateNotification) return false;
+        final delta = notification.scrollDelta ?? 0;
+        final metrics = notification.metrics;
         if (hasMore &&
             !isLoadingMore &&
-            notification.metrics.pixels >=
-                notification.metrics.maxScrollExtent - 200) {
+            delta > 0 &&
+            metrics.maxScrollExtent > 0 &&
+            metrics.pixels >= metrics.maxScrollExtent - 200) {
           onLoadMore();
         }
         return false;
       },
-      child: ListView.separated(
-        padding: padding,
-        itemCount: items.length + (hasMore && isLoadingMore ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index >= items.length) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: ToyVillageColor.gray60,
-                  ),
-                ),
-              ),
-            );
-          }
-          return itemBuilder(context, items[index]);
-        },
-        separatorBuilder: (context, index) => SizedBox(height: separatorHeight),
+      child: CustomScrollView(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
+        slivers: [
+          if (onRefresh != null)
+            CupertinoSliverRefreshControl(onRefresh: onRefresh),
+          SliverPadding(
+            padding: padding,
+            sliver: SliverList.separated(
+              itemCount: itemCount,
+              itemBuilder: (context, index) {
+                if (index >= items.length) return _loader();
+                return itemBuilder(context, items[index]);
+              },
+              separatorBuilder: (context, index) =>
+                  SizedBox(height: separatorHeight),
+            ),
+          ),
+        ],
       ),
     );
   }

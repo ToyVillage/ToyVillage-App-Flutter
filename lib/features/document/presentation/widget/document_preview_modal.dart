@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:toy_village_app/features/document/presentation/widget/document_preview_skeleton.dart';
+import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -39,56 +39,65 @@ class _DocumentPreviewModal extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(documentDetailViewModelProvider(id));
+    final detail = async.asData?.value;
+    final file = (detail != null && detail.files.isNotEmpty)
+        ? detail.files.first
+        : null;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-          child: CustomAsyncValue(
-            value: ref.watch(documentDetailViewModelProvider(id)),
-            loading: const DocumentPreviewSkeleton(),
-            onRetry: () => ref.invalidate(documentDetailViewModelProvider(id)),
-            data: (detail) {
-              final file = detail.files.isNotEmpty ? detail.files.first : null;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      if (file != null)
-                        _pillButton(
-                          icon: Symbols.download,
-                          label: '다운로드',
-                          onTap: () => downloadFile(
-                            context,
-                            fileName: file.fileName,
-                            fileKey: file.fileKey,
-                          ),
-                        ),
-                      const SizedBox(width: 8),
-                      _iconButton(
-                        icon: Icons.close_rounded,
-                        onTap: () => Navigator.of(context).pop(),
+                  if (file != null)
+                    _pillButton(
+                      icon: Symbols.download,
+                      label: '다운로드',
+                      onTap: () => downloadFile(
+                        context,
+                        fileName: file.fileName,
+                        fileKey: file.fileKey,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: Container(
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                        color: ToyVillageColor.white,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: file == null
-                          ? const _EmptyPreview()
-                          : _FilePreview(file: file),
                     ),
+                  const SizedBox(width: 8),
+                  _iconButton(
+                    icon: Icons.close_rounded,
+                    onTap: () => Navigator.of(context).pop(),
                   ),
                 ],
-              );
-            },
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: Container(
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    color: ToyVillageColor.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: CustomAsyncValue(
+                    value: async,
+                    loading: const _PreviewLoading(),
+                    onRetry: () =>
+                        ref.invalidate(documentDetailViewModelProvider(id)),
+                    data: (detail) {
+                      final file = detail.files.isNotEmpty
+                          ? detail.files.first
+                          : null;
+                      return file == null
+                          ? const _EmptyPreview()
+                          : _FilePreview(file: file);
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -148,8 +157,13 @@ class _FilePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final url = documentFileUrl(file.fileKey);
-    if (isPdfFileName(file.fileName)) return _PdfPreview(url: url);
-    if (!isImageFileName(file.fileName)) return const _EmptyPreview();
+    if (isPdfFileName(file.fileName)) return _WebDocPreview(url: url);
+    if (isPptFileName(file.fileName)) {
+      return _WebDocPreview(url: url, alwaysGView: true);
+    }
+    if (!isImageFileName(file.fileName)) {
+      return _UnsupportedPreview(fileName: file.fileName);
+    }
 
     return InteractiveViewer(
       child: Image.network(
@@ -165,16 +179,17 @@ class _FilePreview extends StatelessWidget {
   }
 }
 
-class _PdfPreview extends StatefulWidget {
+class _WebDocPreview extends StatefulWidget {
   final String url;
+  final bool alwaysGView;
 
-  const _PdfPreview({required this.url});
+  const _WebDocPreview({required this.url, this.alwaysGView = false});
 
   @override
-  State<_PdfPreview> createState() => _PdfPreviewState();
+  State<_WebDocPreview> createState() => _WebDocPreviewState();
 }
 
-class _PdfPreviewState extends State<_PdfPreview> {
+class _WebDocPreviewState extends State<_WebDocPreview> {
   late final WebViewController _controller;
   bool _loading = true;
   bool _error = false;
@@ -182,7 +197,8 @@ class _PdfPreviewState extends State<_PdfPreview> {
   @override
   void initState() {
     super.initState();
-    final target = Platform.isAndroid
+    final useGView = widget.alwaysGView || Platform.isAndroid;
+    final target = useGView
         ? 'https://docs.google.com/gview?embedded=true&url=${Uri.encodeComponent(widget.url)}'
         : widget.url;
     _controller = WebViewController()
@@ -219,8 +235,56 @@ class _PreviewLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: CircularProgressIndicator(color: ToyVillageColor.gray60),
+    return const Center(child: AppLoadingIndicator());
+  }
+}
+
+class _UnsupportedPreview extends StatelessWidget {
+  final String fileName;
+
+  const _UnsupportedPreview({required this.fileName});
+
+  String get _extension {
+    final dot = fileName.lastIndexOf('.');
+    if (dot == -1 || dot == fileName.length - 1) return 'FILE';
+    return fileName.substring(dot + 1).toUpperCase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: ToyVillageColor.gray10,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              _extension,
+              style: ToyVillageTextStyle.subTitle3.copyWith(
+                color: ToyVillageColor.gray100,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '미리보기를 지원하지 않는 형식이에요.',
+            style: ToyVillageTextStyle.body5.copyWith(
+              color: ToyVillageColor.gray60,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '다운로드 후 확인해주세요.',
+            style: ToyVillageTextStyle.caption3.copyWith(
+              color: ToyVillageColor.gray40,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

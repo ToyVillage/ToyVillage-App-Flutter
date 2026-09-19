@@ -113,7 +113,7 @@ class _TopToastState extends State<_TopToast> with TickerProviderStateMixin {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 14, 16, 17),
                           child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Icon(
                                 widget.isError ? Symbols.close : Symbols.check,

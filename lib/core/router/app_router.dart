@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/bottom_bar/main_scaffold.dart';
 import 'package:toy_village_app/features/auth/presentation/view/login_view.dart';
+import 'package:toy_village_app/features/auth/presentation/view/splash_view.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_content_view.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_create_view.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view/daily_log_detail_view.dart';
@@ -43,8 +44,9 @@ const _invalidAccess = Scaffold(
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/login',
+  initialLocation: '/',
   routes: [
+    GoRoute(path: '/', builder: (_, _) => const SplashView()),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
           MainScaffold(navigationShell: navigationShell),

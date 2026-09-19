@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toy_village_app/core/constants/color.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/features/day_off/data/model/close_day_model.dart';
@@ -79,11 +80,12 @@ class _DayOffViewState extends ConsumerState<DayOffView> {
   Widget _content(AsyncValue<List<CloseDayModel>> async) {
     final openAsync = ref.watch(openTimeViewModelProvider);
 
-    if (async.isLoading || openAsync.isLoading) {
+    if ((async.isLoading && !async.hasValue) ||
+        (openAsync.isLoading && !openAsync.hasValue)) {
       return const SingleChildScrollView(child: DayOffSkeleton());
     }
 
-    if (async.hasError) {
+    if (async.hasError && !async.hasValue) {
       return Align(
         alignment: const Alignment(0, -0.1),
         child: Text(
@@ -98,11 +100,19 @@ class _DayOffViewState extends ConsumerState<DayOffView> {
     final closeDays = async.value ?? const <CloseDayModel>[];
     final infoDay = _selectedDay ?? DateTime.now();
 
-    return SingleChildScrollView(
+    return PullToRefresh.child(
+      onRefresh: () async {
+        ref.invalidate(openTimeViewModelProvider);
+        ref.invalidate(closeDayViewModelProvider);
+        await Future.wait([
+          ref.read(openTimeViewModelProvider.future),
+          ref.read(closeDayViewModelProvider.future),
+        ]);
+      },
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(child: CalendarHeader(focusedDay: _focusedDay)),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(child: CalendarHeader(focusedDay: _focusedDay)),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: DayOffCalendar(

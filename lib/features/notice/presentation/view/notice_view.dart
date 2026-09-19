@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/dialog/password_change_dialog.dart';
@@ -85,9 +85,7 @@ class _NoticeViewState extends ConsumerState<NoticeView> {
                                 return const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 16),
                                   child: Center(
-                                    child: CircularProgressIndicator(
-                                      color: ToyVillageColor.gray60,
-                                    ),
+                                    child: AppLoadingIndicator(radius: 10),
                                   ),
                                 );
                               }
@@ -98,7 +96,7 @@ class _NoticeViewState extends ConsumerState<NoticeView> {
                               }
                               final notice = value[index];
                               return NoticeCard(
-                                kind: notice.kind,
+                                teams: notice.teams,
                                 title: notice.title,
                                 time: notice.createdAt,
                                 isRead: readIds.contains(notice.id),
