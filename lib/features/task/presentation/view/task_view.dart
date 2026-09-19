@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_list_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/dropdown/menu_dropdown.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/empty_state.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
@@ -13,7 +15,6 @@ import 'package:toy_village_app/features/task/data/model/task_status.dart';
 import 'package:toy_village_app/features/task/presentation/view_model/seen_task_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/view_model/task_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_card.dart';
-import 'package:toy_village_app/features/task/presentation/widget/task_filter_menu.dart';
 
 int _rank(TaskModel task) {
   switch (task.status) {
@@ -49,7 +50,7 @@ class _TaskViewState extends ConsumerState<TaskView> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 22),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     const Expanded(
                       child: ToyVillageTitle(
@@ -57,9 +58,17 @@ class _TaskViewState extends ConsumerState<TaskView> {
                         subTitle: '오늘 자신의 업무를 조회합니다',
                       ),
                     ),
-                    TaskFilterMenu(
-                      selected: _filter,
-                      onSelected: (filter) => setState(() => _filter = filter),
+                    MenuDropdown(
+                      items: [
+                        for (final filter in TaskFilter.values)
+                          MenuDropdownItem(
+                            label: filter.label,
+                            color: filter == _filter
+                                ? ToyVillageColor.gray100
+                                : ToyVillageColor.gray60,
+                            onTap: () => setState(() => _filter = filter),
+                          ),
+                      ],
                     ),
                   ],
                 ),
