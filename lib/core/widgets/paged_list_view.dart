@@ -36,10 +36,15 @@ class PagedListView<T> extends StatelessWidget {
 
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
+        if (notification.depth != 0) return false;
+        if (notification is! ScrollUpdateNotification) return false;
+        final delta = notification.scrollDelta ?? 0;
+        final metrics = notification.metrics;
         if (hasMore &&
             !isLoadingMore &&
-            notification.metrics.pixels >=
-                notification.metrics.maxScrollExtent - 200) {
+            delta > 0 &&
+            metrics.maxScrollExtent > 0 &&
+            metrics.pixels >= metrics.maxScrollExtent - 200) {
           onLoadMore();
         }
         return false;
