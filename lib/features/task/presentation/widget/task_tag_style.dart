@@ -16,7 +16,7 @@ String _finishDateLabel(DateTime finishDate) =>
     case ReportStatus.approved:
       return (label: '완료됨', color: ToyVillageColor.green);
     case ReportStatus.rejected:
-      return (label: '반려됨', color: ToyVillageColor.red);
+      return (label: '반려됨', color: ToyVillageColor.yellow);
     case ReportStatus.pending:
       return (label: '제출됨', color: ToyVillageColor.gray60);
     case ReportStatus.missing:
