@@ -62,11 +62,11 @@ TagStyle taskPriorityTag(TaskPriority priority) {
   }
 }
 
-TagStyle? reportStatusTag(ReportStatus status) {
+TagStyle reportStatusTag(ReportStatus status) {
   switch (status) {
     case ReportStatus.approved:
       return (
-        label: '완료됨',
+        label: '승인됨',
         text: ToyVillageColor.green,
         background: ToyVillageColor.greenBackground,
       );
@@ -83,7 +83,11 @@ TagStyle? reportStatusTag(ReportStatus status) {
         background: ToyVillageColor.gray20,
       );
     case ReportStatus.missing:
-      return null;
+      return (
+        label: '누락됨',
+        text: ToyVillageColor.red,
+        background: ToyVillageColor.redBackground,
+      );
   }
 }
 
