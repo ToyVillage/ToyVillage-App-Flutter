@@ -104,7 +104,10 @@ class _DayOffViewState extends ConsumerState<DayOffView> {
       onRefresh: () async {
         ref.invalidate(openTimeViewModelProvider);
         ref.invalidate(closeDayViewModelProvider);
-        await ref.read(closeDayViewModelProvider.future);
+        await Future.wait([
+          ref.read(openTimeViewModelProvider.future),
+          ref.read(closeDayViewModelProvider.future),
+        ]);
       },
       child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
