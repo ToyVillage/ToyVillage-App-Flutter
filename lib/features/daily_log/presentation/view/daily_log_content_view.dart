@@ -199,6 +199,31 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
     });
   }
 
+  bool _isAnswered(int sectionId, TemplateQuestion question) {
+    final sid = sectionId;
+    final qid = question.questionId;
+    return switch (question.questionType) {
+      QuestionType.text =>
+        (_textControllers[sid]?[qid]?.text ?? '').trim().isNotEmpty,
+      QuestionType.multipleChoice => _radio[sid]?[qid]?.index != null,
+      QuestionType.checkBox =>
+        (_check[sid]?[qid]?.indices ?? const <int>{}).isNotEmpty,
+      QuestionType.fileUpload =>
+        (_fileValues[sid]?[qid] ?? const <ReportAttachment>[]).isNotEmpty,
+    };
+  }
+
+  bool _canComplete(DailyLogTemplate template) {
+    if (_selectedSectionId == null) return false;
+    for (final section in template.sections) {
+      for (final question in template.questions) {
+        if (!question.required) continue;
+        if (!_isAnswered(section.sectionId, question)) return false;
+      }
+    }
+    return true;
+  }
+
   Future<void> _complete() async {
     final overlay = Overlay.of(context, rootOverlay: true);
     final router = GoRouter.of(context);
@@ -461,9 +486,18 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: ToyVillageButton(
-                          label: _submitting ? '등록 중' : '작성 완료하기',
-                          onTap: _submitting ? () {} : _complete,
+                        child: Builder(
+                          builder: (context) {
+                            final canComplete =
+                                _canComplete(template) && !_submitting;
+                            return ToyVillageButton(
+                              label: _submitting ? '등록 중' : '작성 완료하기',
+                              background: canComplete
+                                  ? ToyVillageColor.gray100
+                                  : ToyVillageColor.gray60,
+                              onTap: canComplete ? _complete : () {},
+                            );
+                          },
                         ),
                       ),
                     ],

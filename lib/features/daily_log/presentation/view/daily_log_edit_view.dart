@@ -51,10 +51,73 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
   DailyLogDetail? _detail;
 
   int? _selectedSectionId;
+  String _originalSignature = '';
   final Map<int, Map<int, TextEditingController>> _textControllers = {};
   final Map<int, Map<int, RadioSelection>> _radio = {};
   final Map<int, Map<int, CheckboxSelection>> _check = {};
   final Map<int, Map<int, List<ReportAttachment>>> _fileValues = {};
+
+  void _refresh() => setState(() {});
+
+  String _signature() {
+    final sids =
+        <int>{
+          ..._textControllers.keys,
+          ..._radio.keys,
+          ..._check.keys,
+          ..._fileValues.keys,
+        }.toList()..sort();
+    final buffer = StringBuffer();
+    for (final sid in sids) {
+      final qids =
+          <int>{
+            ...?_textControllers[sid]?.keys,
+            ...?_radio[sid]?.keys,
+            ...?_check[sid]?.keys,
+            ...?_fileValues[sid]?.keys,
+          }.toList()..sort();
+      for (final qid in qids) {
+        final text = _textControllers[sid]?[qid]?.text ?? '';
+        final radio = _radio[sid]?[qid];
+        final check = _check[sid]?[qid];
+        final checkIndices = (check?.indices.toList() ?? <int>[])..sort();
+        final files = (_fileValues[sid]?[qid] ?? const <ReportAttachment>[])
+            .map((f) => f.fileKey)
+            .join(',');
+        buffer.write(
+          '$sid:$qid|t=$text|r=${radio?.index}/${radio?.etcText}'
+          '|c=$checkIndices/${check?.etcText}|f=$files;',
+        );
+      }
+    }
+    return buffer.toString();
+  }
+
+  bool _isAnswered(int sectionId, TemplateQuestion question) {
+    final sid = sectionId;
+    final qid = question.questionId;
+    return switch (question.questionType) {
+      QuestionType.text =>
+        (_textControllers[sid]?[qid]?.text ?? '').trim().isNotEmpty,
+      QuestionType.multipleChoice => _radio[sid]?[qid]?.index != null,
+      QuestionType.checkBox =>
+        (_check[sid]?[qid]?.indices ?? const <int>{}).isNotEmpty,
+      QuestionType.fileUpload =>
+        (_fileValues[sid]?[qid] ?? const <ReportAttachment>[]).isNotEmpty,
+    };
+  }
+
+  bool _canUpdate(DailyLogTemplate template) {
+    if (_selectedSectionId == null) return false;
+    if (_signature() == _originalSignature) return false;
+    for (final section in template.sections) {
+      for (final question in template.questions) {
+        if (!question.required) continue;
+        if (!_isAnswered(section.sectionId, question)) return false;
+      }
+    }
+    return true;
+  }
 
   @override
   void dispose() {
@@ -76,8 +139,11 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
       for (final answer in section.answers) {
         switch (answer.questionType) {
           case QuestionType.text:
-            (_textControllers[sid] ??= {})[answer.questionId] =
-                TextEditingController(text: answer.answerText ?? '');
+            final controller = TextEditingController(
+              text: answer.answerText ?? '',
+            );
+            controller.addListener(_refresh);
+            (_textControllers[sid] ??= {})[answer.questionId] = controller;
           case QuestionType.fileUpload:
             (_fileValues[sid] ??= {})[answer.questionId] = answer.file == null
                 ? []
@@ -126,6 +192,7 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
         }
       }
     }
+    _originalSignature = _signature();
   }
 
   int _optionIndex(TemplateQuestion question, QuestionOption selected) {
@@ -141,7 +208,11 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
 
   TextEditingController _controllerFor(int sectionId, int questionId) {
     final section = _textControllers.putIfAbsent(sectionId, () => {});
-    return section.putIfAbsent(questionId, TextEditingController.new);
+    return section.putIfAbsent(questionId, () {
+      final controller = TextEditingController();
+      controller.addListener(_refresh);
+      return controller;
+    });
   }
 
   Future<void> _save() async {
@@ -271,8 +342,13 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
               hasEtc: hasEtc,
               initialIndex: _radio[sectionId]?[qid]?.index,
               initialEtcText: _radio[sectionId]?[qid]?.etcText,
-              onSelected: (index, etcText) => (_radio[sectionId] ??= {})[qid] =
-                  (index: index, etcText: etcText),
+              onSelected: (index, etcText) {
+                (_radio[sectionId] ??= {})[qid] = (
+                  index: index,
+                  etcText: etcText,
+                );
+                _refresh();
+              },
             ),
           ],
         );
@@ -288,11 +364,13 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
               hasEtc: hasEtc,
               initialIndices: _check[sectionId]?[qid]?.indices ?? const {},
               initialEtcText: _check[sectionId]?[qid]?.etcText,
-              onSelected: (indices, etcText) =>
-                  (_check[sectionId] ??= {})[qid] = (
-                    indices: indices,
-                    etcText: etcText,
-                  ),
+              onSelected: (indices, etcText) {
+                (_check[sectionId] ??= {})[qid] = (
+                  indices: indices,
+                  etcText: etcText,
+                );
+                _refresh();
+              },
             ),
           ],
         );
@@ -306,8 +384,10 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
               key: key,
               maxCount: 1,
               initialFiles: _fileValues[sectionId]?[qid] ?? const [],
-              onChanged: (value) =>
-                  (_fileValues[sectionId] ??= {})[qid] = value,
+              onChanged: (value) {
+                (_fileValues[sectionId] ??= {})[qid] = value;
+                _refresh();
+              },
             ),
           ],
         );
@@ -378,9 +458,17 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
           left: 20,
           right: 20,
           bottom: 16,
-          child: ToyVillageButton(
-            label: _submitting ? '수정 중' : '수정 완료하기',
-            onTap: _submitting ? () {} : _save,
+          child: Builder(
+            builder: (context) {
+              final canUpdate = _canUpdate(template) && !_submitting;
+              return ToyVillageButton(
+                label: _submitting ? '수정 중' : '수정 완료하기',
+                background: canUpdate
+                    ? ToyVillageColor.gray100
+                    : ToyVillageColor.gray60,
+                onTap: canUpdate ? _save : () {},
+              );
+            },
           ),
         ),
       ],
