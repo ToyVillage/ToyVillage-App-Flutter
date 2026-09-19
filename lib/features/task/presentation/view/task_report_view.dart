@@ -267,13 +267,13 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
                     if (_autoSaveShown) ...[
                       Icon(
                         Symbols.check,
-                        size: 18,
+                        size: 24,
                         color: _autoSaveColor,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         '자동 저장됨',
-                        style: ToyVillageTextStyle.caption2.copyWith(
+                        style: ToyVillageTextStyle.caption4.copyWith(
                           color: _autoSaveColor,
                         ),
                       ),
