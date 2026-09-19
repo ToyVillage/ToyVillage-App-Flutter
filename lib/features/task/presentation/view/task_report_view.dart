@@ -45,6 +45,7 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   bool _uploading = false;
   bool _dirty = false;
   bool _autoSaveShown = false;
+  int _editGeneration = 0;
   String _originalContent = '';
   String _originalNote = '';
   List<String> _originalFileKeys = const [];
@@ -131,6 +132,7 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   }
 
   void _onEdited() {
+    _editGeneration++;
     setState(() => _dirty = true);
     _scheduleAutoSave();
   }
@@ -139,6 +141,7 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
       _dirty ? ToyVillageColor.gray60 : ToyVillageColor.gray100;
 
   bool get _canSubmit {
+    if (_uploading) return false;
     if (_contentController.text.trim().isEmpty) return false;
     if (!_isEdit) return true;
     final filesChanged = !listEquals(
@@ -153,30 +156,37 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   void _scheduleAutoSave() {
     if (!_loaded || _isEdit) return;
     _autoSaveTimer?.cancel();
+    final generation = _editGeneration;
     _autoSaveTimer = Timer(const Duration(seconds: 30), () async {
       try {
         await _draftRepo.save(widget.id, _currentDraft());
         if (!mounted) return;
         setState(() {
           _autoSaveShown = true;
-          _dirty = false;
+          if (generation == _editGeneration) _dirty = false;
         });
       } catch (_) {}
     });
   }
 
   Future<void> _addAttachment() async {
+    if (_uploading) return;
     setState(() => _uploading = true);
-    final attachment = await pickAndUploadAttachment(context, ref);
-    if (!mounted) return;
-    setState(() {
-      _uploading = false;
-      if (attachment != null) _files = [..._files, attachment];
-    });
-    if (attachment != null) _scheduleAutoSave();
+    try {
+      final attachment = await pickAndUploadAttachment(context, ref);
+      if (!mounted) return;
+      if (attachment != null) {
+        _editGeneration++;
+        setState(() => _files = [..._files, attachment]);
+        _scheduleAutoSave();
+      }
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
   }
 
   void _deleteAttachment(int index) {
+    _editGeneration++;
     setState(() => _files = [..._files]..removeAt(index));
     _scheduleAutoSave();
   }
@@ -192,7 +202,7 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   }
 
   Future<void> _complete() async {
-    if (_isSubmitting) return;
+    if (_isSubmitting || _uploading) return;
     final overlay = Overlay.of(context, rootOverlay: true);
     if (_contentController.text.trim().isEmpty) {
       showTopToast(overlay, '내용을 추가해야 합니다.', isError: true);

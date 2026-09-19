@@ -38,7 +38,7 @@ class AttachmentEditor extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         if (showAddCell && index == files.length + uploadingCount) {
-          return _AddMoreCell(onTap: onAdd);
+          return _AddMoreCell(onTap: uploading ? () {} : onAdd);
         }
         if (uploading && index == files.length) return const _LoadingCell();
         final file = files[index];
