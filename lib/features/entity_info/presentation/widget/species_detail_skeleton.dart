@@ -9,7 +9,7 @@ class SpeciesDetailSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SkeletonZone(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
