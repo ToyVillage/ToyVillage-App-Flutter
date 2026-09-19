@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -44,10 +45,19 @@ class _SplashViewState extends ConsumerState<SplashView> {
         refreshToken: tokens.refreshToken,
       );
       return '/notice';
+    } on DioException catch (error) {
+      if (_isAuthFailure(error)) {
+        await store.clear();
+      }
+      return '/login';
     } catch (_) {
-      await store.clear();
       return '/login';
     }
+  }
+
+  bool _isAuthFailure(DioException error) {
+    final status = error.response?.statusCode;
+    return status == 401 || status == 403;
   }
 
   @override
