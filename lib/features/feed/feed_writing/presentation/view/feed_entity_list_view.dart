@@ -46,6 +46,9 @@ class FeedEntityListView extends ConsumerWidget {
                       items: page.items,
                       hasMore: page.hasMore,
                       isLoadingMore: page.isLoadingMore,
+                      onRefresh: () async => ref.refresh(
+                        animalListViewModelProvider(filter).future,
+                      ),
                       onLoadMore: () => ref
                           .read(animalListViewModelProvider(filter).notifier)
                           .loadMore(),

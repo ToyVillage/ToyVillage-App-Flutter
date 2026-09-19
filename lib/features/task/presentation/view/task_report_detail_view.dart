@@ -102,10 +102,23 @@ class TaskReportDetailView extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: report == null
-                ? const EmptyState(message: '제출된 보고서가 없습니다')
-                : SingleChildScrollView(
-                    child: Column(
+            child: RefreshIndicator(
+              color: ToyVillageColor.gray100,
+              onRefresh: () async {
+                ref.invalidate(workReportProvider(id));
+                await ref.read(workReportProvider(id).future);
+              },
+              child: report == null
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: const [
+                        SizedBox(height: 200),
+                        EmptyState(message: '제출된 보고서가 없습니다'),
+                      ],
+                    )
+                  : SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ToyVillageReadonlyField(
@@ -138,6 +151,7 @@ class TaskReportDetailView extends ConsumerWidget {
                       ],
                     ),
                   ),
+            ),
           ),
         ],
       ),

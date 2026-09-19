@@ -45,18 +45,32 @@ class EntityDetailView extends ConsumerWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (notification) {
-              if (notification.metrics.pixels >=
-                  notification.metrics.maxScrollExtent - 200) {
-                ref
-                    .read(observationListViewModelProvider(animalManageId).notifier)
-                    .loadMore();
-              }
-              return false;
+          child: RefreshIndicator(
+            color: ToyVillageColor.gray100,
+            onRefresh: () async {
+              ref.invalidate(observationListViewModelProvider(animalManageId));
+              ref.invalidate(animalDetailViewModelProvider(animalManageId));
+              await ref.read(
+                animalDetailViewModelProvider(animalManageId).future,
+              );
             },
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 80),
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification.metrics.pixels >=
+                    notification.metrics.maxScrollExtent - 200) {
+                  ref
+                      .read(
+                        observationListViewModelProvider(
+                          animalManageId,
+                        ).notifier,
+                      )
+                      .loadMore();
+                }
+                return false;
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.only(bottom: 80),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -91,6 +105,7 @@ class EntityDetailView extends ConsumerWidget {
                 ],
               ),
             ),
+          ),
           ),
         ),
         Positioned(

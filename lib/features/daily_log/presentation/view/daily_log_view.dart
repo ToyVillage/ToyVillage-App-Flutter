@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
@@ -39,14 +40,27 @@ class DailyLogView extends ConsumerWidget {
                       onRetry: () =>
                           ref.invalidate(myDailyLogViewModelProvider),
                       errorMessage: '업무일지를 불러오지 못했어요.',
-                      data: (logs) => logs.isEmpty
-                          ? const EmptyState(message: '최근 작성한 업무일지가 없습니다')
-                          : ListView.builder(
-                              padding: const EdgeInsets.only(bottom: 80),
-                              itemCount: logs.length,
-                              itemBuilder: (context, index) =>
-                                  LogCard(log: logs[index]),
-                            ),
+                      data: (logs) => RefreshIndicator(
+                        color: ToyVillageColor.gray100,
+                        onRefresh: () async =>
+                            ref.refresh(myDailyLogViewModelProvider.future),
+                        child: logs.isEmpty
+                            ? ListView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                children: const [
+                                  SizedBox(height: 200),
+                                  EmptyState(message: '최근 작성한 업무일지가 없습니다'),
+                                ],
+                              )
+                            : ListView.builder(
+                                physics:
+                                    const AlwaysScrollableScrollPhysics(),
+                                padding: const EdgeInsets.only(bottom: 80),
+                                itemCount: logs.length,
+                                itemBuilder: (context, index) =>
+                                    LogCard(log: logs[index]),
+                              ),
+                      ),
                     ),
                   ),
                 ],

@@ -54,11 +54,11 @@ class DocumentCard extends StatelessWidget {
                     children: [
                       Text(
                         timeCheck(createdAt),
-                        style: ToyVillageTextStyle.caption4.copyWith(
+                        style: ToyVillageTextStyle.caption5.copyWith(
                           color: ToyVillageColor.gray60,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(title, style: ToyVillageTextStyle.heading5),
                     ],
                   ),

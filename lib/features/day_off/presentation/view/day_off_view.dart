@@ -98,11 +98,19 @@ class _DayOffViewState extends ConsumerState<DayOffView> {
     final closeDays = async.value ?? const <CloseDayModel>[];
     final infoDay = _selectedDay ?? DateTime.now();
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(child: CalendarHeader(focusedDay: _focusedDay)),
+    return RefreshIndicator(
+      color: ToyVillageColor.gray100,
+      onRefresh: () async {
+        ref.invalidate(openTimeViewModelProvider);
+        ref.invalidate(closeDayViewModelProvider);
+        await ref.read(closeDayViewModelProvider.future);
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(child: CalendarHeader(focusedDay: _focusedDay)),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: DayOffCalendar(
@@ -139,6 +147,7 @@ class _DayOffViewState extends ConsumerState<DayOffView> {
             },
           ),
         ],
+      ),
       ),
     );
   }

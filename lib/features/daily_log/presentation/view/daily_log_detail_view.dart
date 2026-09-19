@@ -54,7 +54,19 @@ class _DailyLogDetailViewState extends ConsumerState<DailyLogDetailView> {
             onRetry: () => ref.invalidate(
               dailyLogTemplateViewModelProvider(detail.templateId),
             ),
-            data: (template) => _content(detail, template),
+            data: (template) => RefreshIndicator(
+              color: ToyVillageColor.gray100,
+              onRefresh: () async {
+                ref.invalidate(
+                  dailyLogTemplateViewModelProvider(detail.templateId),
+                );
+                ref.invalidate(dailyLogDetailViewModelProvider(widget.id));
+                await ref.read(
+                  dailyLogDetailViewModelProvider(widget.id).future,
+                );
+              },
+              child: _content(detail, template),
+            ),
           ),
         ),
       ),
@@ -80,6 +92,7 @@ class _DailyLogDetailViewState extends ConsumerState<DailyLogDetailView> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 16,

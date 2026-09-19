@@ -30,24 +30,37 @@ class FeedInfoListView extends ConsumerWidget {
             value: ref.watch(animalFeedLogsViewModelProvider(animalManageId)),
             onRetry: () =>
                 ref.invalidate(animalFeedLogsViewModelProvider(animalManageId)),
-            data: (logs) {
-              if (logs.isEmpty) {
-                return const EmptyView(message: '급여 기록이 없어요.');
-              }
-              return ListView.separated(
-                padding: const EdgeInsets.symmetric(vertical: 32),
-                itemCount: logs.length,
-                itemBuilder: (context, index) {
-                  final log = logs[index];
-                  return _FeedLogCard(
-                    log: log,
-                    onTap: () =>
-                        context.push('/feed-info/detail', extra: log.feedLogId),
-                  );
-                },
-                separatorBuilder: (context, index) => const SizedBox(height: 8),
-              );
-            },
+            data: (logs) => RefreshIndicator(
+              color: ToyVillageColor.gray100,
+              onRefresh: () async => ref.refresh(
+                animalFeedLogsViewModelProvider(animalManageId).future,
+              ),
+              child: logs.isEmpty
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: const [
+                        SizedBox(height: 200),
+                        EmptyView(message: '급여 기록이 없어요.'),
+                      ],
+                    )
+                  : ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(vertical: 32),
+                      itemCount: logs.length,
+                      itemBuilder: (context, index) {
+                        final log = logs[index];
+                        return _FeedLogCard(
+                          log: log,
+                          onTap: () => context.push(
+                            '/feed-info/detail',
+                            extra: log.feedLogId,
+                          ),
+                        );
+                      },
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 8),
+                    ),
+            ),
           ),
         ),
       ),

@@ -50,6 +50,9 @@ class _SpeciesListViewState extends ConsumerState<SpeciesListView> {
                   items: page.items,
                   hasMore: page.hasMore,
                   isLoadingMore: page.isLoadingMore,
+                  onRefresh: () async => ref.refresh(
+                    animalKindListViewModelProvider(filter).future,
+                  ),
                   onLoadMore: () => ref
                       .read(animalKindListViewModelProvider(filter).notifier)
                       .loadMore(),

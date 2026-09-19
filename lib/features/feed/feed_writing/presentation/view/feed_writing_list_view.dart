@@ -54,6 +54,9 @@ class _FeedWritingListViewState extends ConsumerState<FeedWritingListView> {
                   items: page.items,
                   hasMore: page.hasMore,
                   isLoadingMore: page.isLoadingMore,
+                  onRefresh: () async => ref.refresh(
+                    animalKindListViewModelProvider(filter).future,
+                  ),
                   onLoadMore: () => ref
                       .read(animalKindListViewModelProvider(filter).notifier)
                       .loadMore(),

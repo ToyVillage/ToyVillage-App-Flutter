@@ -34,11 +34,18 @@ class ReservationDetailView extends ConsumerWidget {
           value: ref.watch(reservationDetailViewModelProvider(id)),
           loading: const ReservationDetailSkeleton(),
           onRetry: () => ref.invalidate(reservationDetailViewModelProvider(id)),
-          data: (detail) => SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ToyVillageTitle(
+          data: (detail) => RefreshIndicator(
+            color: ToyVillageColor.gray100,
+            onRefresh: () async {
+              ref.invalidate(reservationDetailViewModelProvider(id));
+              await ref.read(reservationDetailViewModelProvider(id).future);
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ToyVillageTitle(
                   title: title,
                   subTitle: '예약인 : ${detail.reservationName}',
                 ),
@@ -194,6 +201,7 @@ class ReservationDetailView extends ConsumerWidget {
                 ),
                 const SizedBox(height: 80),
               ],
+            ),
             ),
           ),
         ),

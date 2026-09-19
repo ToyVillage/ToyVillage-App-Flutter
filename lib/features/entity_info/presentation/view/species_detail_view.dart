@@ -52,16 +52,26 @@ class SpeciesDetailView extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: NotificationListener<ScrollNotification>(
-        onNotification: (notification) {
-          if (notification.metrics.pixels >=
-              notification.metrics.maxScrollExtent - 200) {
-            ref.read(animalListViewModelProvider(filter).notifier).loadMore();
-          }
-          return false;
+      child: RefreshIndicator(
+        color: ToyVillageColor.gray100,
+        onRefresh: () async {
+          ref.invalidate(animalListViewModelProvider(filter));
+          ref.invalidate(animalKindDetailViewModelProvider(animalKindId));
+          await ref.read(
+            animalKindDetailViewModelProvider(animalKindId).future,
+          );
         },
-        child: SingleChildScrollView(
-          child: Column(
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.pixels >=
+                notification.metrics.maxScrollExtent - 200) {
+              ref.read(animalListViewModelProvider(filter).notifier).loadMore();
+            }
+            return false;
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ToyVillageTitle(title: detail.kindName),
@@ -91,6 +101,7 @@ class SpeciesDetailView extends ConsumerWidget {
               const SizedBox(height: 20),
             ],
           ),
+        ),
         ),
       ),
     );

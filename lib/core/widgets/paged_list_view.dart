@@ -9,6 +9,7 @@ class PagedListView<T> extends StatelessWidget {
   final Widget Function(BuildContext, T) itemBuilder;
   final EdgeInsetsGeometry padding;
   final double separatorHeight;
+  final Future<void> Function()? onRefresh;
 
   const PagedListView({
     super.key,
@@ -19,11 +20,12 @@ class PagedListView<T> extends StatelessWidget {
     required this.itemBuilder,
     this.padding = EdgeInsets.zero,
     this.separatorHeight = 8,
+    this.onRefresh,
   });
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
+    final list = NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         if (hasMore &&
             !isLoadingMore &&
@@ -35,6 +37,7 @@ class PagedListView<T> extends StatelessWidget {
       },
       child: ListView.separated(
         padding: padding,
+        physics: const AlwaysScrollableScrollPhysics(),
         itemCount: items.length + (hasMore && isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index >= items.length) {
@@ -56,6 +59,13 @@ class PagedListView<T> extends StatelessWidget {
         },
         separatorBuilder: (context, index) => SizedBox(height: separatorHeight),
       ),
+    );
+
+    if (onRefresh == null) return list;
+    return RefreshIndicator(
+      onRefresh: onRefresh!,
+      color: ToyVillageColor.gray100,
+      child: list,
     );
   }
 }

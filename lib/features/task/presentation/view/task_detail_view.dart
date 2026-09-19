@@ -45,9 +45,16 @@ class TaskDetailView extends ConsumerWidget {
             return Stack(
               fit: StackFit.expand,
               children: [
-                SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
-                  child: Column(
+                RefreshIndicator(
+                  color: ToyVillageColor.gray100,
+                  onRefresh: () async {
+                    ref.invalidate(taskDetailViewModelProvider(id));
+                    await ref.read(taskDetailViewModelProvider(id).future);
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
+                    child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _Header(task: task, reportStatus: reportStatus),
@@ -83,6 +90,7 @@ class TaskDetailView extends ConsumerWidget {
                         ),
                       ],
                     ],
+                  ),
                   ),
                 ),
                 Positioned(

@@ -39,7 +39,12 @@ class FeedView extends ConsumerWidget {
           value: ref.watch(feedLogDetailViewModelProvider(feedLogId)),
           onRetry: () =>
               ref.invalidate(feedLogDetailViewModelProvider(feedLogId)),
-          data: (detail) => _content(context, detail),
+          data: (detail) => RefreshIndicator(
+            color: ToyVillageColor.gray100,
+            onRefresh: () async =>
+                ref.refresh(feedLogDetailViewModelProvider(feedLogId).future),
+            child: _content(context, detail),
+          ),
         ),
       ),
     );
@@ -49,6 +54,7 @@ class FeedView extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 16,
