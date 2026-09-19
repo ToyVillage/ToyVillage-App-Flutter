@@ -20,15 +20,25 @@ class TokenStore {
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_accessKey, accessToken);
-    await prefs.setString(_refreshKey, refreshToken);
+    final results = await Future.wait([
+      prefs.setString(_accessKey, accessToken),
+      prefs.setString(_refreshKey, refreshToken),
+    ]);
+    if (results.any((ok) => !ok)) {
+      throw StateError('토큰 저장에 실패했습니다');
+    }
   }
 
   Future<void> clear() async {
+    final prefs = await SharedPreferences.getInstance();
+    final results = await Future.wait([
+      prefs.remove(_accessKey),
+      prefs.remove(_refreshKey),
+    ]);
+    if (results.any((ok) => !ok)) {
+      throw StateError('토큰 삭제에 실패했습니다');
+    }
     accessToken = null;
     refreshToken = null;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_accessKey);
-    await prefs.remove(_refreshKey);
   }
 }
