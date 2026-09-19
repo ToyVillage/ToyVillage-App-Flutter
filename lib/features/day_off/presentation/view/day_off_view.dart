@@ -80,11 +80,12 @@ class _DayOffViewState extends ConsumerState<DayOffView> {
   Widget _content(AsyncValue<List<CloseDayModel>> async) {
     final openAsync = ref.watch(openTimeViewModelProvider);
 
-    if (async.isLoading || openAsync.isLoading) {
+    if ((async.isLoading && !async.hasValue) ||
+        (openAsync.isLoading && !openAsync.hasValue)) {
       return const SingleChildScrollView(child: DayOffSkeleton());
     }
 
-    if (async.hasError) {
+    if (async.hasError && !async.hasValue) {
       return Align(
         alignment: const Alignment(0, -0.1),
         child: Text(
