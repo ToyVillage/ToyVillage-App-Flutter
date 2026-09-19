@@ -131,10 +131,11 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tags = <TagStyle>[taskPriorityTag(task.priority)];
-    final statusTag = reportStatus == null
-        ? null
-        : reportStatusTag(reportStatus!);
-    if (statusTag != null) tags.add(statusTag);
+    final showStatus =
+        reportStatus != null &&
+        (reportStatus != ReportStatus.missing ||
+            task.status == TaskStatus.expired);
+    if (showStatus) tags.add(reportStatusTag(reportStatus!));
     final deadlineTag = taskDeadlineTag(task.finishDate);
     if (deadlineTag != null) tags.add(deadlineTag);
 
