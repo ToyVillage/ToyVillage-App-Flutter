@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:toy_village_app/features/task/presentation/widget/work_report_detail_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -102,23 +103,17 @@ class TaskReportDetailView extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: RefreshIndicator(
-              color: ToyVillageColor.gray100,
+            child: PullToRefresh.child(
               onRefresh: () async {
                 ref.invalidate(workReportProvider(id));
                 await ref.read(workReportProvider(id).future);
               },
               child: report == null
-                  ? ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: const [
-                        SizedBox(height: 200),
-                        EmptyState(message: '제출된 보고서가 없습니다'),
-                      ],
+                  ? const Padding(
+                      padding: EdgeInsets.only(top: 200),
+                      child: EmptyState(message: '제출된 보고서가 없습니다'),
                     )
-                  : SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: Column(
+                  : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ToyVillageReadonlyField(
@@ -150,7 +145,6 @@ class TaskReportDetailView extends ConsumerWidget {
                         const SizedBox(height: 20),
                       ],
                     ),
-                  ),
             ),
           ),
         ],

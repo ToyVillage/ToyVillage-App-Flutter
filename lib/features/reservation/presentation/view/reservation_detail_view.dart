@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:toy_village_app/features/reservation/presentation/widget/reservation_detail_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -34,15 +35,12 @@ class ReservationDetailView extends ConsumerWidget {
           value: ref.watch(reservationDetailViewModelProvider(id)),
           loading: const ReservationDetailSkeleton(),
           onRetry: () => ref.invalidate(reservationDetailViewModelProvider(id)),
-          data: (detail) => RefreshIndicator(
-            color: ToyVillageColor.gray100,
+          data: (detail) => PullToRefresh.child(
             onRefresh: () async {
               ref.invalidate(reservationDetailViewModelProvider(id));
               await ref.read(reservationDetailViewModelProvider(id).future);
             },
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Column(
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ToyVillageTitle(
@@ -201,7 +199,6 @@ class ReservationDetailView extends ConsumerWidget {
                 ),
                 const SizedBox(height: 80),
               ],
-            ),
             ),
           ),
         ),

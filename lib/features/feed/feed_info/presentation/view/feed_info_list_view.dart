@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
@@ -30,22 +31,22 @@ class FeedInfoListView extends ConsumerWidget {
             value: ref.watch(animalFeedLogsViewModelProvider(animalManageId)),
             onRetry: () =>
                 ref.invalidate(animalFeedLogsViewModelProvider(animalManageId)),
-            data: (logs) => RefreshIndicator(
-              color: ToyVillageColor.gray100,
+            data: (logs) => PullToRefresh(
               onRefresh: () async => ref.refresh(
                 animalFeedLogsViewModelProvider(animalManageId).future,
               ),
-              child: logs.isEmpty
-                  ? ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: const [
-                        SizedBox(height: 200),
-                        EmptyView(message: '급여 기록이 없어요.'),
-                      ],
-                    )
-                  : ListView.separated(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(vertical: 32),
+              slivers: [
+                if (logs.isEmpty)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 200),
+                      child: EmptyView(message: '급여 기록이 없어요.'),
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    sliver: SliverList.separated(
                       itemCount: logs.length,
                       itemBuilder: (context, index) {
                         final log = logs[index];
@@ -60,6 +61,8 @@ class FeedInfoListView extends ConsumerWidget {
                       separatorBuilder: (context, index) =>
                           const SizedBox(height: 8),
                     ),
+                  ),
+              ],
             ),
           ),
         ),

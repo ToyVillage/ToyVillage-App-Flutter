@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/daily_log_detail_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -54,8 +55,7 @@ class _DailyLogDetailViewState extends ConsumerState<DailyLogDetailView> {
             onRetry: () => ref.invalidate(
               dailyLogTemplateViewModelProvider(detail.templateId),
             ),
-            data: (template) => RefreshIndicator(
-              color: ToyVillageColor.gray100,
+            data: (template) => PullToRefresh.child(
               onRefresh: () async {
                 ref.invalidate(
                   dailyLogTemplateViewModelProvider(detail.templateId),
@@ -65,6 +65,7 @@ class _DailyLogDetailViewState extends ConsumerState<DailyLogDetailView> {
                   dailyLogDetailViewModelProvider(widget.id).future,
                 );
               },
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: _content(detail, template),
             ),
           ),
@@ -89,14 +90,10 @@ class _DailyLogDetailViewState extends ConsumerState<DailyLogDetailView> {
     };
     final current = _sectionOf(detail, _selectedSectionId);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 16,
-          children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 16,
+      children: [
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Row(
@@ -133,8 +130,6 @@ class _DailyLogDetailViewState extends ConsumerState<DailyLogDetailView> {
               for (final answer in current.answers)
                 _answer(answer, questionsById[answer.questionId]),
           ],
-        ),
-      ),
     );
   }
 

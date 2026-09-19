@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_detail_skeleton.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,16 +46,13 @@ class TaskDetailView extends ConsumerWidget {
             return Stack(
               fit: StackFit.expand,
               children: [
-                RefreshIndicator(
-                  color: ToyVillageColor.gray100,
+                PullToRefresh.child(
                   onRefresh: () async {
                     ref.invalidate(taskDetailViewModelProvider(id));
                     await ref.read(taskDetailViewModelProvider(id).future);
                   },
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
-                    child: Column(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _Header(task: task, reportStatus: reportStatus),
@@ -90,7 +88,6 @@ class TaskDetailView extends ConsumerWidget {
                         ),
                       ],
                     ],
-                  ),
                   ),
                 ),
                 Positioned(

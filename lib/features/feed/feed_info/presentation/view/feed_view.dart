@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -39,10 +40,10 @@ class FeedView extends ConsumerWidget {
           value: ref.watch(feedLogDetailViewModelProvider(feedLogId)),
           onRetry: () =>
               ref.invalidate(feedLogDetailViewModelProvider(feedLogId)),
-          data: (detail) => RefreshIndicator(
-            color: ToyVillageColor.gray100,
+          data: (detail) => PullToRefresh.child(
             onRefresh: () async =>
                 ref.refresh(feedLogDetailViewModelProvider(feedLogId).future),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: _content(context, detail),
           ),
         ),
@@ -51,11 +52,7 @@ class FeedView extends ConsumerWidget {
   }
 
   Widget _content(BuildContext context, FeedLogDetail detail) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Column(
+    return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 16,
           children: [
@@ -110,9 +107,7 @@ class FeedView extends ConsumerWidget {
             ),
             const SizedBox(height: 10),
           ],
-        ),
-      ),
-    );
+        );
   }
 
   Widget _section(String label, Widget child) {

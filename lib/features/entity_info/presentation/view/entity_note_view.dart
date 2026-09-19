@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/file/attachment_section.dart';
 import 'package:toy_village_app/core/widgets/text_field/readonly_field.dart';
@@ -31,15 +31,11 @@ class EntityNoteView extends ConsumerWidget {
           value: ref.watch(observationDetailViewModelProvider(key)),
           onRetry: () =>
               ref.invalidate(observationDetailViewModelProvider(key)),
-          data: (detail) => RefreshIndicator(
-            color: ToyVillageColor.gray100,
+          data: (detail) => PullToRefresh.child(
             onRefresh: () async =>
                 ref.refresh(observationDetailViewModelProvider(key).future),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 28),
@@ -62,8 +58,6 @@ class EntityNoteView extends ConsumerWidget {
               ),
             ),
           ),
-        ),
-        ),
       ),
     );
   }

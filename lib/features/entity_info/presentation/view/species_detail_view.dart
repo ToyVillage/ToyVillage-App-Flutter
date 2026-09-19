@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
@@ -50,10 +51,15 @@ class SpeciesDetailView extends ConsumerWidget {
         : detail.legalStatuses.map((e) => e.kind).join(', ');
     final filter = (animalKindId: animalKindId, keyword: '');
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: RefreshIndicator(
-        color: ToyVillageColor.gray100,
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification.metrics.pixels >=
+            notification.metrics.maxScrollExtent - 200) {
+          ref.read(animalListViewModelProvider(filter).notifier).loadMore();
+        }
+        return false;
+      },
+      child: PullToRefresh.child(
         onRefresh: () async {
           ref.invalidate(animalListViewModelProvider(filter));
           ref.invalidate(animalKindDetailViewModelProvider(animalKindId));
@@ -61,17 +67,8 @@ class SpeciesDetailView extends ConsumerWidget {
             animalKindDetailViewModelProvider(animalKindId).future,
           );
         },
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            if (notification.metrics.pixels >=
-                notification.metrics.maxScrollExtent - 200) {
-              ref.read(animalListViewModelProvider(filter).notifier).loadMore();
-            }
-            return false;
-          },
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ToyVillageTitle(title: detail.kindName),
@@ -102,8 +99,6 @@ class SpeciesDetailView extends ConsumerWidget {
             ],
           ),
         ),
-        ),
-      ),
     );
   }
 

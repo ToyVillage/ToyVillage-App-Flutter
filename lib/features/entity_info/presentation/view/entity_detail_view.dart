@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
@@ -43,10 +44,19 @@ class EntityDetailView extends ConsumerWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: RefreshIndicator(
-            color: ToyVillageColor.gray100,
+        NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.pixels >=
+                notification.metrics.maxScrollExtent - 200) {
+              ref
+                  .read(
+                    observationListViewModelProvider(animalManageId).notifier,
+                  )
+                  .loadMore();
+            }
+            return false;
+          },
+          child: PullToRefresh.child(
             onRefresh: () async {
               ref.invalidate(observationListViewModelProvider(animalManageId));
               ref.invalidate(animalDetailViewModelProvider(animalManageId));
@@ -54,24 +64,8 @@ class EntityDetailView extends ConsumerWidget {
                 animalDetailViewModelProvider(animalManageId).future,
               );
             },
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (notification) {
-                if (notification.metrics.pixels >=
-                    notification.metrics.maxScrollExtent - 200) {
-                  ref
-                      .read(
-                        observationListViewModelProvider(
-                          animalManageId,
-                        ).notifier,
-                      )
-                      .loadMore();
-                }
-                return false;
-              },
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 80),
-              child: Column(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                 ToyVillageTitle(title: detail.animalName),
@@ -106,8 +100,6 @@ class EntityDetailView extends ConsumerWidget {
               ),
             ),
           ),
-          ),
-        ),
         Positioned(
           left: 20,
           right: 20,

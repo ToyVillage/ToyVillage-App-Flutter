@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 
@@ -23,9 +24,27 @@ class PagedListView<T> extends StatelessWidget {
     this.onRefresh,
   });
 
+  Widget _loader() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: ToyVillageColor.gray60,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final list = NotificationListener<ScrollNotification>(
+    final itemCount = items.length + (hasMore && isLoadingMore ? 1 : 0);
+
+    return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         if (hasMore &&
             !isLoadingMore &&
@@ -35,37 +54,27 @@ class PagedListView<T> extends StatelessWidget {
         }
         return false;
       },
-      child: ListView.separated(
-        padding: padding,
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: items.length + (hasMore && isLoadingMore ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index >= items.length) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: ToyVillageColor.gray60,
-                  ),
-                ),
-              ),
-            );
-          }
-          return itemBuilder(context, items[index]);
-        },
-        separatorBuilder: (context, index) => SizedBox(height: separatorHeight),
+      child: CustomScrollView(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
+        slivers: [
+          if (onRefresh != null)
+            CupertinoSliverRefreshControl(onRefresh: onRefresh),
+          SliverPadding(
+            padding: padding,
+            sliver: SliverList.separated(
+              itemCount: itemCount,
+              itemBuilder: (context, index) {
+                if (index >= items.length) return _loader();
+                return itemBuilder(context, items[index]);
+              },
+              separatorBuilder: (context, index) =>
+                  SizedBox(height: separatorHeight),
+            ),
+          ),
+        ],
       ),
-    );
-
-    if (onRefresh == null) return list;
-    return RefreshIndicator(
-      onRefresh: onRefresh!,
-      color: ToyVillageColor.gray100,
-      child: list,
     );
   }
 }
