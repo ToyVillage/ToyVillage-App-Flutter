@@ -48,6 +48,7 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
   bool _submitting = false;
   bool _dirty = false;
   bool _autoSaveShown = false;
+  int _editGeneration = 0;
   Timer? _autoSaveTimer;
   final Map<int, Map<int, TextEditingController>> _textControllers = {};
   final Map<int, Map<int, RadioSelection>> _radio = {};
@@ -61,6 +62,7 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
   }
 
   void _onAnswerChanged() {
+    _editGeneration++;
     setState(() => _dirty = true);
     _scheduleAutoSave();
   }
@@ -176,6 +178,7 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
 
   Future<void> _saveDraft({bool auto = false}) async {
     final overlay = Overlay.of(context, rootOverlay: true);
+    final generation = _editGeneration;
     final draft = _draftJson();
     if ((draft['sections'] as Map).isEmpty) return;
     await _draftRepo.save(widget.templateId, draft);
@@ -183,7 +186,7 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
     if (auto) {
       setState(() {
         _autoSaveShown = true;
-        _dirty = false;
+        if (generation == _editGeneration) _dirty = false;
       });
     } else {
       showTopToast(overlay, '임시저장되었어요.');
