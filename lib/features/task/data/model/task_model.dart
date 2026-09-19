@@ -10,6 +10,7 @@ class TaskModel {
   final ReportStatus myReportStatus;
   final TaskPriority priority;
   final DateTime? finishDate;
+  final DateTime? createdAt;
 
   TaskModel({
     required this.id,
@@ -20,10 +21,12 @@ class TaskModel {
     required this.myReportStatus,
     required this.priority,
     required this.finishDate,
+    required this.createdAt,
   });
 
   factory TaskModel.fromJson(Map<String, dynamic> json) {
     final finishDate = json['finishDate'] as String?;
+    final createdAt = json['createdAt'] as String?;
     final assignees = (json['assignees'] as List?) ?? const [];
     return TaskModel(
       id: json['id'] as int,
@@ -38,6 +41,7 @@ class TaskModel {
       ),
       priority: TaskPriority.fromCode(json['priority'] as String),
       finishDate: finishDate != null ? DateTime.parse(finishDate) : null,
+      createdAt: createdAt != null ? DateTime.parse(createdAt) : null,
     );
   }
 }

@@ -131,6 +131,7 @@ class _TaskListItem extends ConsumerWidget {
       status: task.status,
       reportStatus: task.myReportStatus,
       finishDate: task.finishDate,
+      createdAt: task.createdAt,
       isNew: !seenIds.contains(task.id),
       onTap: () {
         ref.read(seenTaskProvider.notifier).markAsSeen(task.id);
