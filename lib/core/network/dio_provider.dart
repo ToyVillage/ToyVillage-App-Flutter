@@ -18,11 +18,33 @@ final dioProvider = Provider<Dio>((ref) {
     ),
   );
 
+  Future<bool>? refreshing;
+
+  Future<bool> reissue() async {
+    final refreshToken = store.refreshToken;
+    if (refreshToken == null) return false;
+    try {
+      final res = await dio.post(
+        '/app/auth/reissue',
+        data: {'refresh_token': refreshToken},
+      );
+      final data = res.data as Map<String, dynamic>;
+      await store.setTokens(
+        accessToken: data['access_token'] as String,
+        refreshToken: data['refresh_token'] as String,
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) {
+        final isAuthCall = options.path.contains('/app/auth/');
         final token = store.accessToken;
-        if (token != null) {
+        if (token != null && !isAuthCall) {
           options.headers['Authorization'] = 'Bearer $token';
         }
         handler.next(options);
@@ -37,30 +59,25 @@ final dioProvider = Provider<Dio>((ref) {
             !isAuthCall &&
             !alreadyRetried &&
             store.refreshToken != null) {
+          final refreshed = await (refreshing ??= reissue());
+          refreshing = null;
+
+          if (!refreshed) {
+            await store.clear();
+            return handler.next(error);
+          }
+
           try {
-            final res = await dio.post(
-              '/app/auth/reissue',
-              data: {'refresh_token': store.refreshToken},
-            );
-            final data = res.data as Map<String, dynamic>;
-            await store.setTokens(
-              accessToken: data['access_token'] as String,
-              refreshToken: data['refresh_token'] as String,
-            );
             final options = error.requestOptions
               ..headers['Authorization'] = 'Bearer ${store.accessToken}'
               ..extra['__retried'] = true;
             final response = await dio.fetch(options);
             return handler.resolve(response);
-          } catch (_) {
-            await store.clear();
-            return handler.next(error);
+          } on DioException catch (e) {
+            return handler.next(e);
           }
         }
 
-        if (status == 401 || status == 403) {
-          store.accessToken = null;
-        }
         handler.next(error);
       },
     ),
