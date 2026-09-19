@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/constants/color.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
@@ -50,9 +51,19 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
 
+  String _originalFeedType = '';
+  String _originalAmountText = '';
+  String _originalNote = '';
+  DateTime? _originalDate;
+  FeedTime? _originalTime;
+  String _originalUnit = feedAmountUnits.first;
+
   @override
   void initState() {
     super.initState();
+    _feedTypeController.addListener(_refresh);
+    _amountController.addListener(_refresh);
+    _noteController.addListener(_refresh);
     final initial = widget.initial;
     if (initial == null) return;
     final dateTime = initial.feedDateTime;
@@ -64,6 +75,29 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
     _feedTypeController.text = initial.feedType;
     _amountController.text = formatFeedAmount(initial.feedAmount);
     _noteController.text = initial.significant;
+    _originalFeedType = _feedTypeController.text;
+    _originalAmountText = _amountController.text;
+    _originalNote = _noteController.text;
+    _originalDate = _date;
+    _originalTime = _time;
+    _originalUnit = _amountUnit;
+  }
+
+  void _refresh() => setState(() {});
+
+  bool get _canSubmit {
+    final feedType = _feedTypeController.text.trim();
+    final amount = double.tryParse(_amountController.text.trim());
+    if (_date == null || _time == null || feedType.isEmpty || amount == null) {
+      return false;
+    }
+    if (!widget.isEdit) return true;
+    return _feedTypeController.text != _originalFeedType ||
+        _amountController.text != _originalAmountText ||
+        _noteController.text != _originalNote ||
+        _date != _originalDate ||
+        _time != _originalTime ||
+        _amountUnit != _originalUnit;
   }
 
   @override
@@ -220,7 +254,10 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
                   label: widget.isEdit
                       ? (isSaving ? '수정 중...' : '수정 완료하기')
                       : (isSaving ? '저장 중...' : '작성 완료하기'),
-                  onTap: _complete,
+                  background: (_canSubmit && !isSaving)
+                      ? ToyVillageColor.gray100
+                      : ToyVillageColor.gray60,
+                  onTap: (_canSubmit && !isSaving) ? _complete : () {},
                 ),
               ),
             ],
