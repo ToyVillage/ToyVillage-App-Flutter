@@ -59,6 +59,7 @@ class _TaskViewState extends ConsumerState<TaskView> {
                       ),
                     ),
                     MenuDropdown(
+                      width: 100,
                       items: [
                         for (final filter in TaskFilter.values)
                           MenuDropdownItem(
