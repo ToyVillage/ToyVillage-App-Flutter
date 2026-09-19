@@ -3,42 +3,51 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/time_util.dart';
-import 'package:toy_village_app/features/notice/data/model/notice_kind.dart';
 
 class NoticeTimeLabel extends StatelessWidget {
-  final String kind;
+  final List<String> teams;
   final DateTime time;
   final bool clockIcon;
 
   const NoticeTimeLabel({
     super.key,
-    required this.kind,
+    required this.teams,
     required this.time,
-    this.clockIcon = false
+    this.clockIcon = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final label = teams.isEmpty ? '전체' : teams.join(', ');
+
     return Row(
       children: [
-        Container(
-          decoration: BoxDecoration(
-            color: ToyVillageColor.redBackground,
-            borderRadius: BorderRadius.circular(25),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-            child: Text(
-              NoticeKind.labelOf(kind),
-              style: ToyVillageTextStyle.button5.copyWith(
-                color: ToyVillageColor.red,
+        Flexible(
+          child: Container(
+            decoration: BoxDecoration(
+              color: ToyVillageColor.redBackground,
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: ToyVillageTextStyle.button5.copyWith(
+                  color: ToyVillageColor.red,
+                ),
               ),
             ),
           ),
         ),
         const Spacer(),
         if (clockIcon) ...[
-          const Icon(MdiIcons.clockOutline, size: 16, color: ToyVillageColor.gray60),
+          const Icon(
+            MdiIcons.clockOutline,
+            size: 16,
+            color: ToyVillageColor.gray60,
+          ),
           const SizedBox(width: 4),
         ],
         Text(

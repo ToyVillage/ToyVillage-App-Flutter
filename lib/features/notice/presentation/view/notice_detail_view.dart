@@ -36,7 +36,7 @@ class NoticeDetailView extends ConsumerWidget {
             children: [
               NoticeTitle(
                 title: value.title,
-                kind: value.kind,
+                teams: value.teams,
                 time: value.createdAt,
               ),
               const SectionDivider(),

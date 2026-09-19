@@ -96,7 +96,7 @@ class _NoticeViewState extends ConsumerState<NoticeView> {
                               }
                               final notice = value[index];
                               return NoticeCard(
-                                kind: notice.kind,
+                                teams: notice.teams,
                                 title: notice.title,
                                 time: notice.createdAt,
                                 isRead: readIds.contains(notice.id),
