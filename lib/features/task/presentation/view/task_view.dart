@@ -7,11 +7,13 @@ import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/empty_state.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
+import 'package:toy_village_app/features/task/data/model/task_filter.dart';
 import 'package:toy_village_app/features/task/data/model/task_model.dart';
 import 'package:toy_village_app/features/task/data/model/task_status.dart';
 import 'package:toy_village_app/features/task/presentation/view_model/seen_task_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/view_model/task_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_card.dart';
+import 'package:toy_village_app/features/task/presentation/widget/task_filter_menu.dart';
 
 int _rank(TaskModel task) {
   switch (task.status) {
@@ -24,11 +26,18 @@ int _rank(TaskModel task) {
   }
 }
 
-class TaskView extends ConsumerWidget {
+class TaskView extends ConsumerStatefulWidget {
   const TaskView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TaskView> createState() => _TaskViewState();
+}
+
+class _TaskViewState extends ConsumerState<TaskView> {
+  TaskFilter _filter = TaskFilter.all;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: const ToyVillageAppBar(),
       body: SafeArea(
@@ -37,11 +46,22 @@ class TaskView extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.only(bottom: 22),
-                child: ToyVillageTitle(
-                  title: '오늘의 업무',
-                  subTitle: '오늘 자신의 업무를 조회합니다',
+              Padding(
+                padding: const EdgeInsets.only(bottom: 22),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Expanded(
+                      child: ToyVillageTitle(
+                        title: '오늘의 업무',
+                        subTitle: '오늘 자신의 업무를 조회합니다',
+                      ),
+                    ),
+                    TaskFilterMenu(
+                      selected: _filter,
+                      onSelected: (filter) => setState(() => _filter = filter),
+                    ),
+                  ],
                 ),
               ),
               Expanded(
@@ -50,8 +70,10 @@ class TaskView extends ConsumerWidget {
                   loading: const TaskListSkeleton(),
                   onRetry: () => ref.invalidate(taskViewModelProvider),
                   data: (tasks) {
-                    final sorted = [...tasks]
-                      ..sort((a, b) => _rank(a).compareTo(_rank(b)));
+                    final sorted = [
+                      for (final task in tasks)
+                        if (_filter.matches(task)) task,
+                    ]..sort((a, b) => _rank(a).compareTo(_rank(b)));
                     return CustomScrollView(
                       physics: const BouncingScrollPhysics(
                         parent: AlwaysScrollableScrollPhysics(),
