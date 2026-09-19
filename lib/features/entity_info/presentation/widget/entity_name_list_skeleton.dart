@@ -3,7 +3,6 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/widgets/skeleton/skeleton_zone.dart';
 
-/// 개체 이름 카드(EntityNameCard) 목록 스켈레톤.
 class EntityNameListSkeleton extends StatelessWidget {
   final int count;
 
@@ -38,7 +37,6 @@ class EntityNameListSkeleton extends StatelessWidget {
   }
 }
 
-/// 관찰 및 특이사항 카드 목록 스켈레톤.
 class ObservationListSkeleton extends StatelessWidget {
   final int count;
 

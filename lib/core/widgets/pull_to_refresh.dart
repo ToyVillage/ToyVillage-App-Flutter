@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 
-/// 업무지시 조회와 동일한 iOS 스타일 당겨서 새로고침 래퍼.
 class PullToRefresh extends StatelessWidget {
   final Future<void> Function() onRefresh;
   final List<Widget> slivers;
@@ -11,7 +10,6 @@ class PullToRefresh extends StatelessWidget {
     required this.slivers,
   });
 
-  /// 단일 콘텐츠(상세 화면 등)를 감쌀 때 사용.
   factory PullToRefresh.child({
     Key? key,
     required Future<void> Function() onRefresh,
