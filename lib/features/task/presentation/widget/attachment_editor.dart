@@ -21,16 +21,15 @@ class AttachmentEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (files.isEmpty) {
-      return uploading ? const _LoadingBox() : FileAddBox(onTap: onAdd);
-    }
+    if (files.isEmpty && !uploading) return FileAddBox(onTap: onAdd);
 
     final uploadingCount = uploading ? 1 : 0;
+    final showAddCell = files.isNotEmpty;
 
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: files.length + uploadingCount + 1,
+      itemCount: files.length + uploadingCount + (showAddCell ? 1 : 0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         mainAxisSpacing: 12,
@@ -38,7 +37,7 @@ class AttachmentEditor extends StatelessWidget {
         mainAxisExtent: 60,
       ),
       itemBuilder: (context, index) {
-        if (index == files.length + uploadingCount) {
+        if (showAddCell && index == files.length + uploadingCount) {
           return _AddMoreCell(onTap: onAdd);
         }
         if (uploading && index == files.length) return const _LoadingCell();
@@ -48,26 +47,6 @@ class AttachmentEditor extends StatelessWidget {
           onDelete: () => onDelete(index),
         );
       },
-    );
-  }
-}
-
-class _LoadingBox extends StatelessWidget {
-  const _LoadingBox();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        border: Border.all(color: ToyVillageColor.gray60),
-        borderRadius: BorderRadius.circular(8),
-        color: ToyVillageColor.gray20,
-      ),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(vertical: 30),
-        child: _LoadingContent(),
-      ),
     );
   }
 }
