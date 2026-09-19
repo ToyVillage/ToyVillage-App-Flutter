@@ -40,7 +40,8 @@ class _EntityNoteWriteViewState extends ConsumerState<EntityNoteWriteView> {
 
   bool get _canSubmit =>
       _titleController.text.trim().isNotEmpty &&
-      _contentController.text.trim().isNotEmpty;
+      _contentController.text.trim().isNotEmpty &&
+      !_uploading;
 
   @override
   void dispose() {
@@ -51,12 +52,15 @@ class _EntityNoteWriteViewState extends ConsumerState<EntityNoteWriteView> {
 
   Future<void> _addAttachment() async {
     setState(() => _uploading = true);
-    final attachment = await pickAndUploadAttachment(context, ref);
-    if (!mounted) return;
-    setState(() {
-      _uploading = false;
-      if (attachment != null) _files = [..._files, attachment];
-    });
+    try {
+      final attachment = await pickAndUploadAttachment(context, ref);
+      if (!mounted) return;
+      setState(() {
+        if (attachment != null) _files = [..._files, attachment];
+      });
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
   }
 
   void _deleteAttachment(int index) {
