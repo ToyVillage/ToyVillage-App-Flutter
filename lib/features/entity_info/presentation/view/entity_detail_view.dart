@@ -10,6 +10,7 @@ import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
 import 'package:toy_village_app/features/entity_info/presentation/widget/species_detail_skeleton.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/features/entity_info/presentation/widget/entity_name_list_skeleton.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/entity_info/data/model/animal_detail.dart';
 import 'package:toy_village_app/features/entity_info/data/model/observation.dart';
@@ -93,6 +94,7 @@ class EntityDetailView extends ConsumerWidget {
                   value: ref.watch(
                     observationListViewModelProvider(animalManageId),
                   ),
+                  loading: const ObservationListSkeleton(),
                   onRetry: () => ref.invalidate(
                     observationListViewModelProvider(animalManageId),
                   ),
