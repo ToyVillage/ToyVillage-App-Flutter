@@ -2,30 +2,22 @@ import 'package:toy_village_app/features/task/data/model/task_model.dart';
 import 'package:toy_village_app/features/task/data/model/task_status.dart';
 
 enum TaskFilter {
-  all('전체'),
-  expired('기한만료'),
-  rejected('반려됨'),
-  inProgress('진행중'),
-  pending('제출됨');
+  all('전체', null),
+  inProgress('진행중', ReportStatus.missing),
+  pending('제출됨', ReportStatus.pending),
+  approved('승인됨', ReportStatus.approved),
+  rejected('반려됨', ReportStatus.rejected);
 
   final String label;
+  final ReportStatus? status;
 
-  const TaskFilter(this.label);
+  const TaskFilter(this.label, this.status);
+
+  String? get code => status?.code;
 
   bool matches(TaskModel task) {
-    switch (this) {
-      case TaskFilter.all:
-        return true;
-      case TaskFilter.expired:
-        return task.myReportStatus == ReportStatus.missing &&
-            task.status == TaskStatus.expired;
-      case TaskFilter.rejected:
-        return task.myReportStatus == ReportStatus.rejected;
-      case TaskFilter.inProgress:
-        return task.myReportStatus == ReportStatus.missing &&
-            task.status == TaskStatus.inProgress;
-      case TaskFilter.pending:
-        return task.myReportStatus == ReportStatus.pending;
-    }
+    final status = this.status;
+    if (status == null) return true;
+    return task.myReportStatus == status;
   }
 }
