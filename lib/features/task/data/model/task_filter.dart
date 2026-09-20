@@ -3,7 +3,7 @@ import 'package:toy_village_app/features/task/data/model/task_status.dart';
 
 enum TaskFilter {
   all('전체', null),
-  inProgress('진행중', ReportStatus.missing),
+  expired('기한만료', ReportStatus.missing),
   pending('제출됨', ReportStatus.pending),
   approved('승인됨', ReportStatus.approved),
   rejected('반려됨', ReportStatus.rejected);
