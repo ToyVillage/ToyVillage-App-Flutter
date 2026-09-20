@@ -1,3 +1,5 @@
+import 'package:toy_village_app/features/notice/data/model/notice_kind.dart';
+
 class NoticeFileModel {
   final String fileName;
   final String fileKey;
@@ -15,7 +17,7 @@ class NoticeFileModel {
 class NoticeDetailModel {
   final int id;
   final String title;
-  final String kind;
+  final List<String> teams;
   final String content;
   final DateTime createdAt;
   final List<NoticeFileModel> files;
@@ -23,7 +25,7 @@ class NoticeDetailModel {
   NoticeDetailModel({
     required this.id,
     required this.title,
-    required this.kind,
+    required this.teams,
     required this.content,
     required this.createdAt,
     required this.files,
@@ -35,7 +37,7 @@ class NoticeDetailModel {
     return NoticeDetailModel(
         id: json['id'] as int,
         title: json['title'] as String,
-        kind: json['kind'] as String,
+        teams: parseTeamNames(json['teams']),
         content: json['content'] as String,
         createdAt: DateTime.parse(json['createdAt'] as String),
         files: files

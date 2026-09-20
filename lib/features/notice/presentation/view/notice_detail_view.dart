@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:toy_village_app/features/notice/presentation/widget/notice_detail_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
@@ -24,14 +25,18 @@ class NoticeDetailView extends ConsumerWidget {
         loading: const NoticeDetailSkeleton(),
         onRetry: () => ref.invalidate(noticeDetailViewModelProvider(id)),
         errorMessage: '공지사항을 불러오지 못했어요.',
-        data: (value) => SingleChildScrollView(
+        data: (value) => PullToRefresh.child(
+          onRefresh: () async {
+            ref.invalidate(noticeDetailViewModelProvider(id));
+            await ref.read(noticeDetailViewModelProvider(id).future);
+          },
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               NoticeTitle(
                 title: value.title,
-                kind: value.kind,
+                teams: value.teams,
                 time: value.createdAt,
               ),
               const SectionDivider(),

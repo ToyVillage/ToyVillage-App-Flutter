@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/features/entity_info/presentation/widget/observation_detail_skeleton.dart';
 import 'package:toy_village_app/core/widgets/file/attachment_section.dart';
 import 'package:toy_village_app/core/widgets/text_field/readonly_field.dart';
 import 'package:toy_village_app/features/entity_info/presentation/view_model/observation_detail_view_model.dart';
@@ -28,15 +30,17 @@ class EntityNoteView extends ConsumerWidget {
       body: SafeArea(
         child: CustomAsyncValue(
           value: ref.watch(observationDetailViewModelProvider(key)),
+          loading: const ObservationDetailSkeleton(),
           onRetry: () =>
               ref.invalidate(observationDetailViewModelProvider(key)),
-          data: (detail) => Padding(
+          data: (detail) => PullToRefresh.child(
+            onRefresh: () async =>
+                ref.refresh(observationDetailViewModelProvider(key).future),
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 28),
+            child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 28),
                   ToyVillageReadonlyField(label: '제목', value: detail.title),
                   const SizedBox(height: 20),
                   ToyVillageReadonlyField(
@@ -56,7 +60,6 @@ class EntityNoteView extends ConsumerWidget {
               ),
             ),
           ),
-        ),
       ),
     );
   }

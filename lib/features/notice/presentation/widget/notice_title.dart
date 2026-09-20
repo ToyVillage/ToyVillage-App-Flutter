@@ -4,13 +4,13 @@ import 'package:toy_village_app/features/notice/presentation/widget/notice_time_
 
 class NoticeTitle extends StatelessWidget {
   final String title;
-  final String kind;
+  final List<String> teams;
   final DateTime time;
 
   const NoticeTitle({
     super.key,
     required this.title,
-    required this.kind,
+    required this.teams,
     required this.time,
   });
 
@@ -22,7 +22,7 @@ class NoticeTitle extends StatelessWidget {
           Text(title, style: ToyVillageTextStyle.heading2,),
           Padding(
             padding: const EdgeInsets.only(top: 10),
-            child: NoticeTimeLabel(kind: kind, time: time, clockIcon: true)
+            child: NoticeTimeLabel(teams: teams, time: time, clockIcon: true)
           )
         ]
     );

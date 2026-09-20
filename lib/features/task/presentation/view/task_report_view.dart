@@ -1,6 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
+import 'package:toy_village_app/core/constants/color.dart';
+import 'package:toy_village_app/core/constants/text_style.dart';
+import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
@@ -37,6 +42,13 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   bool _isSubmitting = false;
   bool _isEdit = false;
   int? _workReportId;
+  bool _uploading = false;
+  bool _dirty = false;
+  bool _autoSaveShown = false;
+  int _editGeneration = 0;
+  String _originalContent = '';
+  String _originalNote = '';
+  List<String> _originalFileKeys = const [];
 
   TaskReportDraftRepository get _draftRepo =>
       ref.read(taskReportDraftRepositoryProvider);
@@ -46,8 +58,8 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   @override
   void initState() {
     super.initState();
-    _contentController.addListener(_scheduleAutoSave);
-    _noteController.addListener(_scheduleAutoSave);
+    _contentController.addListener(_onEdited);
+    _noteController.addListener(_onEdited);
     _load();
   }
 
@@ -77,6 +89,9 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
             .toList();
         _isEdit = true;
         _workReportId = report.id;
+        _originalContent = report.content;
+        _originalNote = report.note ?? '';
+        _originalFileKeys = report.files.map((f) => f.fileKey).toList();
       } else {
         final draft = await _draftRepo.load(widget.id);
         if (!mounted) return;
@@ -90,6 +105,7 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
       setState(() {
         _loaded = true;
         _loading = false;
+        _dirty = false;
       });
     } catch (_) {
       if (!mounted) return;
@@ -115,24 +131,62 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
     );
   }
 
+  void _onEdited() {
+    _editGeneration++;
+    setState(() => _dirty = true);
+    _scheduleAutoSave();
+  }
+
+  Color get _autoSaveColor =>
+      _dirty ? ToyVillageColor.gray60 : ToyVillageColor.gray100;
+
+  bool get _canSubmit {
+    if (_uploading) return false;
+    if (_contentController.text.trim().isEmpty) return false;
+    if (!_isEdit) return true;
+    final filesChanged = !listEquals(
+      _files.map((f) => f.fileKey).toList(),
+      _originalFileKeys,
+    );
+    return _contentController.text != _originalContent ||
+        _noteController.text != _originalNote ||
+        filesChanged;
+  }
+
   void _scheduleAutoSave() {
     if (!_loaded || _isEdit) return;
     _autoSaveTimer?.cancel();
-    _autoSaveTimer = Timer(const Duration(milliseconds: 1500), () async {
+    final generation = _editGeneration;
+    _autoSaveTimer = Timer(const Duration(seconds: 30), () async {
       try {
         await _draftRepo.save(widget.id, _currentDraft());
+        if (!mounted) return;
+        setState(() {
+          _autoSaveShown = true;
+          if (generation == _editGeneration) _dirty = false;
+        });
       } catch (_) {}
     });
   }
 
   Future<void> _addAttachment() async {
-    final attachment = await pickAndUploadAttachment(context, ref);
-    if (attachment == null || !mounted) return;
-    setState(() => _files = [..._files, attachment]);
-    _scheduleAutoSave();
+    if (_uploading) return;
+    setState(() => _uploading = true);
+    try {
+      final attachment = await pickAndUploadAttachment(context, ref);
+      if (!mounted) return;
+      if (attachment != null) {
+        _editGeneration++;
+        setState(() => _files = [..._files, attachment]);
+        _scheduleAutoSave();
+      }
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
   }
 
   void _deleteAttachment(int index) {
+    _editGeneration++;
     setState(() => _files = [..._files]..removeAt(index));
     _scheduleAutoSave();
   }
@@ -148,7 +202,7 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
   }
 
   Future<void> _complete() async {
-    if (_isSubmitting) return;
+    if (_isSubmitting || _uploading) return;
     final overlay = Overlay.of(context, rootOverlay: true);
     if (_contentController.text.trim().isEmpty) {
       showTopToast(overlay, '내용을 추가해야 합니다.', isError: true);
@@ -189,7 +243,7 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
 
   Widget _body(Widget spacing) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: AppLoadingIndicator());
     }
     if (_loadFailed) {
       return Center(
@@ -213,8 +267,28 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(bottom: 28),
-                child: ToyVillageTitle(
-                  title: _isEdit ? '업무 보고서 수정' : '업무 보고서 작성',
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ToyVillageTitle(
+                        title: _isEdit ? '업무 보고서 수정' : '업무 보고서 작성',
+                      ),
+                    ),
+                    if (_autoSaveShown) ...[
+                      Icon(
+                        Symbols.check,
+                        size: 24,
+                        color: _autoSaveColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '자동 저장됨',
+                        style: ToyVillageTextStyle.caption4.copyWith(
+                          color: _autoSaveColor,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
               Expanded(
@@ -244,6 +318,7 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
                         files: _files,
                         onAdd: _addAttachment,
                         onDelete: _deleteAttachment,
+                        uploading: _uploading,
                       ),
                       spacing,
                     ],
@@ -271,7 +346,10 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
               Expanded(
                 child: ToyVillageButton(
                   label: _isSubmitting ? '등록 중' : '작성 완료하기',
-                  onTap: _isSubmitting ? () {} : _complete,
+                  background: (_canSubmit && !_isSubmitting)
+                      ? ToyVillageColor.gray100
+                      : ToyVillageColor.gray60,
+                  onTap: (_canSubmit && !_isSubmitting) ? _complete : () {},
                 ),
               ),
             ],

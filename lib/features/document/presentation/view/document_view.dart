@@ -77,6 +77,7 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
                                 id: document.id,
                                 title: document.title,
                                 type: document.type,
+                                createdAt: document.createdAt,
                               );
                             },
                           ),

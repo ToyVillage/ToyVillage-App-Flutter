@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/constants/color.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
@@ -67,7 +68,13 @@ class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
               left: 20,
               right: 20,
               bottom: 16,
-              child: ToyVillageButton(label: '다음', onTap: _next),
+              child: ToyVillageButton(
+                label: '다음',
+                background: _templateId == null
+                    ? ToyVillageColor.gray60
+                    : ToyVillageColor.gray100,
+                onTap: _templateId == null ? () {} : _next,
+              ),
             ),
           ],
         ),

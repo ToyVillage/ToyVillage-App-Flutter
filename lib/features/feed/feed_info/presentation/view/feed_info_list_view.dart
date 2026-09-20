@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/features/feed/feed_info/presentation/widget/feed_log_list_skeleton.dart';
 import 'package:toy_village_app/core/widgets/empty_view.dart';
 import 'package:toy_village_app/features/feed/feed_log/data/model/feed_log.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/animal_feed_logs_view_model.dart';
@@ -28,26 +30,42 @@ class FeedInfoListView extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: CustomAsyncValue(
             value: ref.watch(animalFeedLogsViewModelProvider(animalManageId)),
+            loading: const FeedLogListSkeleton(),
             onRetry: () =>
                 ref.invalidate(animalFeedLogsViewModelProvider(animalManageId)),
-            data: (logs) {
-              if (logs.isEmpty) {
-                return const EmptyView(message: '급여 기록이 없어요.');
-              }
-              return ListView.separated(
-                padding: const EdgeInsets.symmetric(vertical: 32),
-                itemCount: logs.length,
-                itemBuilder: (context, index) {
-                  final log = logs[index];
-                  return _FeedLogCard(
-                    log: log,
-                    onTap: () =>
-                        context.push('/feed-info/detail', extra: log.feedLogId),
-                  );
-                },
-                separatorBuilder: (context, index) => const SizedBox(height: 8),
-              );
-            },
+            data: (logs) => PullToRefresh(
+              onRefresh: () async => ref.refresh(
+                animalFeedLogsViewModelProvider(animalManageId).future,
+              ),
+              slivers: [
+                if (logs.isEmpty)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 200),
+                      child: EmptyView(message: '급여 기록이 없어요.'),
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    sliver: SliverList.separated(
+                      itemCount: logs.length,
+                      itemBuilder: (context, index) {
+                        final log = logs[index];
+                        return _FeedLogCard(
+                          log: log,
+                          onTap: () => context.push(
+                            '/feed-info/detail',
+                            extra: log.feedLogId,
+                          ),
+                        );
+                      },
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 8),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -90,20 +108,27 @@ class _FeedLogCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Flexible(
-                    child: Text(
-                      log.feedType,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: ToyVillageTextStyle.subTitle3,
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            log.feedType,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: ToyVillageTextStyle.subTitle3,
+                          ),
+                        ),
+                        const SizedBox(width: 7),
+                        Text(
+                          formatFeedAmount(log.feedAmount),
+                          style: ToyVillageTextStyle.body5,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 7),
-                  Text(
-                    formatFeedAmount(log.feedAmount),
-                    style: ToyVillageTextStyle.body5,
-                  ),
-                  const Spacer(),
+                  const SizedBox(width: 8),
                   Text(
                     formatFeedTime(log.feedDateTime),
                     style: ToyVillageTextStyle.caption4.copyWith(
@@ -118,7 +143,7 @@ class _FeedLogCard extends StatelessWidget {
               ),
               Text(
                 log.significant.isEmpty ? '특이사항이 없습니다.' : log.significant,
-                style: ToyVillageTextStyle.caption3,
+                style: log.significant.isEmpty ? ToyVillageTextStyle.caption4.copyWith(color: ToyVillageColor.gray60) : ToyVillageTextStyle.caption3,
               ),
             ],
           ),

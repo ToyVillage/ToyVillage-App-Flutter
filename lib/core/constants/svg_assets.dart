@@ -30,4 +30,5 @@ class SvgAssets {
   static const meatBook = 'assets/svg/meat_book.svg';
   static const lock = 'assets/svg/lock.svg';
   static const arrowRight = 'assets/svg/arrow_right.svg';
+  static const signOut = 'assets/svg/sign_out.svg';
 }

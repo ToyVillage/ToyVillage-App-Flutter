@@ -16,6 +16,11 @@ bool isImageFileName(String name) {
 
 bool isPdfFileName(String name) => name.toLowerCase().endsWith('.pdf');
 
+bool isPptFileName(String name) {
+  final n = name.toLowerCase();
+  return n.endsWith('.ppt') || n.endsWith('.pptx');
+}
+
 String _safeFileName(String fileName) {
   final base = fileName.split(RegExp(r'[\\/]')).last;
   if (base.isEmpty || base == '.' || base == '..') {

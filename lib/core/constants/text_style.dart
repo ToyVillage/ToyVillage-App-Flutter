@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 
 abstract final class ToyVillageTextStyle {
-  /// Heading
   static TextStyle heading1 = defaultTextStyle.copyWith(
     fontSize: 32,
     fontWeight: FontWeight.w600,
@@ -33,7 +32,6 @@ abstract final class ToyVillageTextStyle {
     fontWeight: FontWeight.w600,
   );
 
-  /// SubTitle
   static TextStyle subTitle1 = defaultTextStyle.copyWith(
     fontSize: 24,
     fontWeight: FontWeight.w500,
@@ -54,7 +52,6 @@ abstract final class ToyVillageTextStyle {
     fontWeight: FontWeight.w500,
   );
 
-  /// Body
   static TextStyle body1 = defaultTextStyle.copyWith(
     fontSize: 24,
     fontWeight: FontWeight.w500,
@@ -80,7 +77,6 @@ abstract final class ToyVillageTextStyle {
     fontWeight: FontWeight.w500,
   );
 
-  /// Button
   static TextStyle button1 = defaultTextStyle.copyWith(
     fontSize: 22,
     fontWeight: FontWeight.w500,
@@ -106,7 +102,6 @@ abstract final class ToyVillageTextStyle {
     fontWeight: FontWeight.w500,
   );
 
-  /// Caption
   static TextStyle caption1 = defaultTextStyle.copyWith(
     fontSize: 20,
     fontWeight: FontWeight.w500,
@@ -132,7 +127,6 @@ abstract final class ToyVillageTextStyle {
     fontWeight: FontWeight.w500
   );
 
-  /// Calendar
   static TextStyle calendarWeek = defaultTextStyle.copyWith(
     fontSize: 14,
     fontWeight: FontWeight.w500,

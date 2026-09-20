@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
@@ -39,14 +40,30 @@ class DailyLogView extends ConsumerWidget {
                       onRetry: () =>
                           ref.invalidate(myDailyLogViewModelProvider),
                       errorMessage: '업무일지를 불러오지 못했어요.',
-                      data: (logs) => logs.isEmpty
-                          ? const EmptyState(message: '최근 작성한 업무일지가 없습니다')
-                          : ListView.builder(
+                      data: (logs) => PullToRefresh(
+                        onRefresh: () async =>
+                            ref.refresh(myDailyLogViewModelProvider.future),
+                        slivers: [
+                          if (logs.isEmpty)
+                            const SliverToBoxAdapter(
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 200),
+                                child: EmptyState(
+                                  message: '최근 작성한 업무일지가 없습니다',
+                                ),
+                              ),
+                            )
+                          else
+                            SliverPadding(
                               padding: const EdgeInsets.only(bottom: 80),
-                              itemCount: logs.length,
-                              itemBuilder: (context, index) =>
-                                  LogCard(log: logs[index]),
+                              sliver: SliverList.builder(
+                                itemCount: logs.length,
+                                itemBuilder: (context, index) =>
+                                    LogCard(log: logs[index]),
+                              ),
                             ),
+                        ],
+                      ),
                     ),
                   ),
                 ],

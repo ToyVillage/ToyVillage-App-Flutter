@@ -4,7 +4,7 @@ import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/features/notice/presentation/widget/notice_time_label.dart';
 
 class NoticeCard extends StatelessWidget {
-  final String kind;
+  final List<String> teams;
   final String title;
   final DateTime time;
   final bool isRead;
@@ -12,7 +12,7 @@ class NoticeCard extends StatelessWidget {
 
   const NoticeCard({
     super.key,
-    required this.kind,
+    required this.teams,
     required this.title,
     required this.time,
     required this.isRead,
@@ -37,7 +37,7 @@ class NoticeCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    NoticeTimeLabel(kind: kind, time: time),
+                    NoticeTimeLabel(teams: teams, time: time),
                     const SizedBox(height: 8,),
                     Text(title, style: ToyVillageTextStyle.heading4,)
                   ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/daily_log_detail_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -54,7 +55,19 @@ class _DailyLogDetailViewState extends ConsumerState<DailyLogDetailView> {
             onRetry: () => ref.invalidate(
               dailyLogTemplateViewModelProvider(detail.templateId),
             ),
-            data: (template) => _content(detail, template),
+            data: (template) => PullToRefresh.child(
+              onRefresh: () async {
+                ref.invalidate(
+                  dailyLogTemplateViewModelProvider(detail.templateId),
+                );
+                ref.invalidate(dailyLogDetailViewModelProvider(widget.id));
+                await ref.read(
+                  dailyLogDetailViewModelProvider(widget.id).future,
+                );
+              },
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _content(detail, template),
+            ),
           ),
         ),
       ),
@@ -77,13 +90,10 @@ class _DailyLogDetailViewState extends ConsumerState<DailyLogDetailView> {
     };
     final current = _sectionOf(detail, _selectedSectionId);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 16,
-          children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 16,
+      children: [
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Row(
@@ -120,8 +130,6 @@ class _DailyLogDetailViewState extends ConsumerState<DailyLogDetailView> {
               for (final answer in current.answers)
                 _answer(answer, questionsById[answer.questionId]),
           ],
-        ),
-      ),
     );
   }
 
@@ -309,10 +317,18 @@ class _SectionCard extends StatelessWidget {
           color: selected ? ToyVillageColor.gray100 : ToyVillageColor.white,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Text(
-          label,
-          style: ToyVillageTextStyle.button4.copyWith(
-            color: selected ? ToyVillageColor.white : ToyVillageColor.gray100,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              style: ToyVillageTextStyle.button4.copyWith(
+                color: selected
+                    ? ToyVillageColor.white
+                    : ToyVillageColor.gray100,
+              ),
+            ),
           ),
         ),
       ),

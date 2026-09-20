@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/features/entity_info/presentation/widget/entity_name_list_skeleton.dart';
 import 'package:toy_village_app/core/widgets/empty_view.dart';
 import 'package:toy_village_app/core/widgets/paged_list_view.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
@@ -36,6 +37,7 @@ class FeedEntityListView extends ConsumerWidget {
               Expanded(
                 child: CustomAsyncValue(
                   value: ref.watch(animalListViewModelProvider(filter)),
+                  loading: const EntityNameListSkeleton(),
                   onRetry: () =>
                       ref.invalidate(animalListViewModelProvider(filter)),
                   data: (page) {
@@ -46,6 +48,9 @@ class FeedEntityListView extends ConsumerWidget {
                       items: page.items,
                       hasMore: page.hasMore,
                       isLoadingMore: page.isLoadingMore,
+                      onRefresh: () async => ref.refresh(
+                        animalListViewModelProvider(filter).future,
+                      ),
                       onLoadMore: () => ref
                           .read(animalListViewModelProvider(filter).notifier)
                           .loadMore(),
