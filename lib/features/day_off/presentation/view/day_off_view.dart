@@ -89,7 +89,7 @@ class _DayOffViewState extends ConsumerState<DayOffView> {
       return Align(
         alignment: const Alignment(0, -0.1),
         child: Text(
-          '휴관 정보를 불러오지 못했어요.',
+          '휴무 정보를 불러오지 못했어요.',
           style: ToyVillageTextStyle.body5.copyWith(
             color: ToyVillageColor.gray60,
           ),

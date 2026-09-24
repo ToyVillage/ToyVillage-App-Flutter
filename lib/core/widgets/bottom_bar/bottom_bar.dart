@@ -17,7 +17,7 @@ class _NavItem {
 
 const _items = <_NavItem>[
   _NavItem('공지사항', SvgAssets.navMegaphone),
-  _NavItem('휴관일정', SvgAssets.navCalendar),
+  _NavItem('휴무일정', SvgAssets.navCalendar),
   _NavItem('업무확인', SvgAssets.navTask),
   _NavItem('자료실', SvgAssets.navFolder),
   _NavItem('메뉴', SvgAssets.navMenu),
