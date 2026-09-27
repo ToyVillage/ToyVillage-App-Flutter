@@ -21,7 +21,7 @@ Future<bool?> _showIntroSheet(BuildContext context) {
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
     builder: (ctx) => SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -117,26 +117,14 @@ class _CoachStep {
 }
 
 const _steps = <_CoachStep>[
-  _CoachStep(
-    '공지사항에서는 토이빌리지 관리자가 등록한 \n공지사항을 확인할 수 있어요',
-    TextAlign.left,
-  ),
-  _CoachStep(
-    '휴무일정에서는 토이빌리지의 휴관 날짜와 \n영업시간을 확인 가능해요',
-    TextAlign.left,
-  ),
+  _CoachStep('공지사항에서는 토이빌리지 관리자가 등록한 \n공지사항을 확인할 수 있어요', TextAlign.left),
+  _CoachStep('휴무일정에서는 토이빌리지의 휴관 날짜와 \n영업시간을 확인 가능해요', TextAlign.left),
   _CoachStep(
     '업무확인에서 현재 자신이 받은 업무 목록을 조회하고 \n업무 보고서 작성이 가능해요',
     TextAlign.center,
   ),
-  _CoachStep(
-    '자료실에는 여러 토이빌리지 관련 자료들이 모여있어요',
-    TextAlign.center,
-  ),
-  _CoachStep(
-    '동물 확인, 업무일지 작성 등 더 많은 옵션은 \n메뉴에서 찾으실 수 있습니다',
-    TextAlign.right,
-  ),
+  _CoachStep('자료실에는 여러 토이빌리지 관련 자료들이 모여있어요', TextAlign.center),
+  _CoachStep('동물 확인, 업무일지 작성 등 더 많은 옵션은 \n메뉴에서 찾으실 수 있습니다', TextAlign.right),
 ];
 
 class _OnboardingCoach extends StatefulWidget {
@@ -161,46 +149,49 @@ class _OnboardingCoachState extends State<_OnboardingCoach> {
   Widget build(BuildContext context) {
     final step = _steps[_step];
 
-    return Material(
-      type: MaterialType.transparency,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _next,
-        child: Stack(
-          children: [
-            const Positioned.fill(
-              child: ColoredBox(color: Color(0xB3000000)),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: SafeArea(
-                top: false,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(
-                        left: step.align == TextAlign.left ? 0 : 24,
-                        right: step.align == TextAlign.right ? 0 : 24,
-                      ),
-                      child: Text(
-                        step.text,
-                        textAlign: step.align,
-                        style: ToyVillageTextStyle.body5.copyWith(
-                          color: ToyVillageColor.white,
-                          height: 1.4,
+    return PopScope(
+      canPop: false,
+      child: Material(
+        type: MaterialType.transparency,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _next,
+          child: Stack(
+            children: [
+              const Positioned.fill(
+                child: ColoredBox(color: Color(0xB3000000)),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: SafeArea(
+                  top: false,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(
+                          left: step.align == TextAlign.left ? 0 : 24,
+                          right: step.align == TextAlign.right ? 0 : 24,
+                        ),
+                        child: Text(
+                          step.text,
+                          textAlign: step.align,
+                          style: ToyVillageTextStyle.body5.copyWith(
+                            color: ToyVillageColor.white,
+                            height: 1.4,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    _CoachBottomBar(currentIndex: _step),
-                  ],
+                      const SizedBox(height: 20),
+                      _CoachBottomBar(currentIndex: _step),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
