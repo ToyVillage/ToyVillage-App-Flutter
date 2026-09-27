@@ -1,4 +1,5 @@
 import 'package:toy_village_app/features/notice/data/model/notice_kind.dart';
+import 'package:toy_village_app/core/utils/time_util.dart';
 
 class NoticeFileModel {
   final String fileName;
@@ -39,7 +40,7 @@ class NoticeDetailModel {
         title: json['title'] as String,
         teams: parseTeamNames(json['teams']),
         content: json['content'] as String,
-        createdAt: DateTime.parse(json['createdAt'] as String),
+        createdAt: parseServerTime(json['createdAt'] as String),
         files: files
             .map((e) => NoticeFileModel.fromJson(e as Map<String, dynamic>))
             .toList(),

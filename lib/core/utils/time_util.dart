@@ -1,3 +1,20 @@
+final _zoneSuffix = RegExp(r'(Z|[+-]\d{2}:?\d{2})$');
+
+DateTime parseServerTime(String value) {
+  final parsed = DateTime.parse(value);
+  if (_zoneSuffix.hasMatch(value)) return parsed.toLocal();
+  return DateTime.utc(
+    parsed.year,
+    parsed.month,
+    parsed.day,
+    parsed.hour,
+    parsed.minute,
+    parsed.second,
+    parsed.millisecond,
+    parsed.microsecond,
+  ).toLocal();
+}
+
 String timeCheck(DateTime date) {
   final diff = DateTime.now().difference(date);
 

@@ -1,3 +1,4 @@
+import 'package:toy_village_app/core/utils/time_util.dart';
 import 'package:toy_village_app/features/task/data/model/assignee.dart';
 import 'package:toy_village_app/features/task/data/model/task_status.dart';
 
@@ -41,7 +42,7 @@ class TaskModel {
       ),
       priority: TaskPriority.fromCode(json['priority'] as String),
       finishDate: finishDate != null ? DateTime.parse(finishDate) : null,
-      createdAt: createdAt != null ? DateTime.parse(createdAt) : null,
+      createdAt: createdAt != null ? parseServerTime(createdAt) : null,
     );
   }
 }

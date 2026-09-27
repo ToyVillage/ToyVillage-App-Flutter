@@ -1,5 +1,6 @@
 import 'package:toy_village_app/features/task/data/model/assignee.dart';
 import 'package:toy_village_app/features/task/data/model/task_status.dart';
+import 'package:toy_village_app/core/utils/time_util.dart';
 
 class TaskFileModel {
   final String fileName;
@@ -110,7 +111,7 @@ class TaskDetailModel {
       priority: TaskPriority.fromCode(json['priority'] as String),
       status: TaskStatus.fromCode(json['status'] as String),
       finishDate: finishDate != null ? DateTime.parse(finishDate) : null,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: parseServerTime(json['createdAt'] as String),
       files: files
           .map((e) => TaskFileModel.fromJson(e as Map<String, dynamic>))
           .toList(),

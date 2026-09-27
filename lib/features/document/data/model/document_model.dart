@@ -1,3 +1,5 @@
+import 'package:toy_village_app/core/utils/time_util.dart';
+
 class DocumentModel {
   final int id;
   final String title;
@@ -16,7 +18,7 @@ class DocumentModel {
       id: json['id'] as int,
       title: json['title'] as String,
       type: json['type'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: parseServerTime(json['createdAt'] as String),
     );
   }
 }
