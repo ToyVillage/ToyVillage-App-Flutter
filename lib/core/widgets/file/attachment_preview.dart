@@ -231,9 +231,19 @@ class _WebDocPreviewState extends State<_WebDocPreview> {
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
         NavigationDelegate(
-          onPageFinished: (_) => setState(() => _loading = false),
+          onPageFinished: (_) {
+            if (!mounted) return;
+            setState(() => _loading = false);
+          },
           onWebResourceError: (error) {
-            if (error.isForMainFrame == false) return;
+            if (!mounted || error.isForMainFrame == false) return;
+            setState(() {
+              _loading = false;
+              _error = true;
+            });
+          },
+          onHttpError: (error) {
+            if (!mounted) return;
             setState(() {
               _loading = false;
               _error = true;
