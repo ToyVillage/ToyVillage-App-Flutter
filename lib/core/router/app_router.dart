@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/bottom_bar/main_scaffold.dart';
 import 'package:toy_village_app/features/auth/presentation/view/login_view.dart';
@@ -45,6 +46,7 @@ const _invalidAccess = Scaffold(
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/',
+  observers: [SentryNavigatorObserver()],
   routes: [
     GoRoute(path: '/', builder: (_, _) => const SplashView()),
     StatefulShellRoute.indexedStack(

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' hide appFlavor;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:screen_protector/screen_protector.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:toy_village_app/core/config/app_env.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/provider_logger.dart';
 import 'package:toy_village_app/core/router/app_router.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  SentryWidgetsFlutterBinding.ensureInitialized();
   try {
     await ScreenProtector.preventScreenshotOn();
     await ScreenProtector.protectDataLeakageOn();
@@ -22,6 +24,25 @@ Future<void> main() async {
       systemNavigationBarContrastEnforced: false,
     ),
   );
+
+  final dsn = AppEnv.current.sentryDsn;
+  if (dsn.isEmpty) {
+    _runApp();
+    return;
+  }
+
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = dsn;
+      options.environment = appFlavor.name;
+      options.tracesSampleRate = 0.2;
+      options.sendDefaultPii = false;
+    },
+    appRunner: _runApp,
+  );
+}
+
+void _runApp() {
   runApp(
     ProviderScope(
       observers: [ProviderLogger()],

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sentry_dio/sentry_dio.dart';
 import 'package:toy_village_app/core/config/app_env.dart';
 import 'package:toy_village_app/core/network/token_store.dart';
 
@@ -85,6 +86,10 @@ final dioProvider = Provider<Dio>((ref) {
       },
     ),
   );
+
+  if (AppEnv.current.sentryDsn.isNotEmpty) {
+    dio.addSentry();
+  }
 
   return dio;
 });
