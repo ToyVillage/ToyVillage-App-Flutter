@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/svg_assets.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 
+const _onboardingSeenKey = 'onboarding_seen';
+
 Future<void> runOnboarding(BuildContext context) async {
+  final prefs = await SharedPreferences.getInstance();
+  if (prefs.getBool(_onboardingSeenKey) == true) return;
+  if (!context.mounted) return;
+
   final start = await _showIntroSheet(context);
   if (start == true && context.mounted) {
     await _showCoach(context);
   }
+  await prefs.setBool(_onboardingSeenKey, true);
 }
 
 Future<bool?> _showIntroSheet(BuildContext context) {
