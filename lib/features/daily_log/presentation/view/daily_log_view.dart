@@ -1,0 +1,86 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
+import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
+import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/core/widgets/empty_state.dart';
+import 'package:toy_village_app/core/widgets/text/title.dart';
+import 'package:toy_village_app/features/daily_log/presentation/view_model/my_daily_log_view_model.dart';
+import 'package:toy_village_app/features/daily_log/presentation/widget/daily_log_list_skeleton.dart';
+import 'package:toy_village_app/features/daily_log/presentation/widget/log_card.dart';
+
+class DailyLogView extends ConsumerWidget {
+  const DailyLogView({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      appBar: const ToyVillageAppBar(hasIcon: true),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 22),
+                    child: ToyVillageTitle(
+                      title: '업무일지 작성',
+                      subTitle: '오늘 자신의 업무일지를 작성합니다',
+                    ),
+                  ),
+                  Expanded(
+                    child: CustomAsyncValue(
+                      value: ref.watch(myDailyLogViewModelProvider),
+                      loading: const DailyLogListSkeleton(),
+                      onRetry: () =>
+                          ref.invalidate(myDailyLogViewModelProvider),
+                      errorMessage: '업무일지를 불러오지 못했어요.',
+                      data: (logs) => PullToRefresh(
+                        onRefresh: () async =>
+                            ref.refresh(myDailyLogViewModelProvider.future),
+                        slivers: [
+                          if (logs.isEmpty)
+                            const SliverToBoxAdapter(
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 200),
+                                child: EmptyState(
+                                  message: '최근 작성한 업무일지가 없습니다',
+                                ),
+                              ),
+                            )
+                          else
+                            SliverPadding(
+                              padding: const EdgeInsets.only(bottom: 80),
+                              sliver: SliverList.builder(
+                                itemCount: logs.length,
+                                itemBuilder: (context, index) =>
+                                    LogCard(log: logs[index]),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              left: 20,
+              right: 20,
+              bottom: 16,
+              child: ToyVillageButton(
+                label: '업무일지 작성',
+                onTap: () => context.push('/daily-log/create'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

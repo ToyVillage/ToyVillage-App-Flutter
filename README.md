@@ -1,17 +1,15 @@
-# toy_village_app
+# Toy Village
 
-토이빌리지 모바일 앱입니다.
+## 환경 설정
 
-## Getting Started
+- `lib/core/config/app_env.dart` : gitignore 대상 (없으면 빌드 및 로그인 실패)
+- 최초 클론 후 예제 복사 필요
 
-This project is a starting point for a Flutter application.
+```bash
+cp lib/core/config/app_env.example.dart lib/core/config/app_env.dart
+```
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- 복사 후 값 설정
+  - `baseUrl` : API 서버 주소
+  - `adminEmail` : 관리자 이메일
+  - `adminPassword` : 관리자 비밀번호

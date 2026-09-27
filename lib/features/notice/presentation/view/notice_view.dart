@@ -1,0 +1,126 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/core/widgets/dialog/password_change_dialog.dart';
+import 'package:toy_village_app/core/widgets/empty_state.dart';
+import 'package:toy_village_app/core/widgets/text/title.dart';
+import 'package:toy_village_app/features/auth/presentation/view_model/password_prompt_provider.dart';
+import 'package:toy_village_app/features/notice/presentation/view_model/notice_view_model.dart';
+import 'package:toy_village_app/features/notice/presentation/view_model/read_notice_view_model.dart';
+import 'package:toy_village_app/features/notice/presentation/widget/notice_card.dart';
+import 'package:toy_village_app/features/notice/presentation/widget/notice_list_skeleton.dart';
+
+class NoticeView extends ConsumerStatefulWidget {
+  const NoticeView({super.key});
+
+  @override
+  ConsumerState<NoticeView> createState() => _NoticeViewState();
+}
+
+class _NoticeViewState extends ConsumerState<NoticeView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybePromptPassword());
+  }
+
+  Future<void> _maybePromptPassword() async {
+    if (!mounted || !ref.read(passwordChangePromptProvider)) return;
+    ref.read(passwordChangePromptProvider.notifier).set(false);
+    final goChange = await showPasswordChangeDialog(context);
+    if (goChange && mounted) context.push('/password');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: const ToyVillageAppBar(),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(bottom: 22),
+                child: ToyVillageTitle(
+                  title: '공지사항',
+                  subTitle: '토이빌리지의 중요한 공지사항',
+                ),
+              ),
+              Expanded(
+                child: CustomAsyncValue(
+                  value: ref.watch(noticeViewModelProvider),
+                  onRetry: () => ref.invalidate(noticeViewModelProvider),
+                  loading: const NoticeListSkeleton(),
+                  data: (value) {
+                    final readIds =
+                        ref.watch(readNoticeProvider).value ?? <int>{};
+                    final hasMore = ref
+                        .read(noticeViewModelProvider.notifier)
+                        .hasMore;
+                    return CustomScrollView(
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      slivers: [
+                        CupertinoSliverRefreshControl(
+                          onRefresh: () =>
+                              ref.refresh(noticeViewModelProvider.future),
+                        ),
+                        if (value.isEmpty)
+                          const SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: EmptyState(message: '등록된 공지사항이 없습니다'),
+                          )
+                        else
+                          SliverList.builder(
+                            itemCount: value.length + (hasMore ? 1 : 0),
+                            itemBuilder: (BuildContext context, int index) {
+                              if (index >= value.length) {
+                                return const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  child: Center(
+                                    child: AppLoadingIndicator(radius: 10),
+                                  ),
+                                );
+                              }
+                              if (index == value.length - 1) {
+                                ref
+                                    .read(noticeViewModelProvider.notifier)
+                                    .loadMore();
+                              }
+                              final notice = value[index];
+                              return NoticeCard(
+                                teams: notice.teams,
+                                title: notice.title,
+                                time: notice.createdAt,
+                                isRead: readIds.contains(notice.id),
+                                onTap: () {
+                                  ref
+                                      .read(readNoticeProvider.notifier)
+                                      .markAsRead(notice.id);
+                                  context.push(
+                                    '/notice/detail',
+                                    extra: notice.id,
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

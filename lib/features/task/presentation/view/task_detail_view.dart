@@ -1,0 +1,177 @@
+import 'package:flutter/material.dart';
+import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
+import 'package:toy_village_app/features/task/presentation/widget/task_detail_skeleton.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:toy_village_app/core/constants/color.dart';
+import 'package:toy_village_app/core/constants/text_style.dart';
+import 'package:toy_village_app/core/utils/time_util.dart';
+import 'package:toy_village_app/core/utils/word_util.dart';
+import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
+import 'package:toy_village_app/core/widgets/file/attachment_section.dart';
+import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/core/widgets/section_divider.dart';
+import 'package:toy_village_app/core/widgets/tag_chip.dart';
+import 'package:toy_village_app/features/task/data/model/task_detail_model.dart';
+import 'package:toy_village_app/features/task/data/model/task_status.dart';
+import 'package:toy_village_app/features/task/presentation/view_model/task_detail_view_model.dart';
+import 'package:toy_village_app/features/task/presentation/view_model/work_report_view_model.dart';
+import 'package:toy_village_app/features/task/presentation/widget/task_tag_style.dart';
+
+class TaskDetailView extends ConsumerWidget {
+  final int id;
+
+  const TaskDetailView({super.key, required this.id});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reportAsync = ref.watch(workReportProvider(id));
+    final reportData = reportAsync.asData;
+    final report = reportData?.value;
+    final reportStatus = reportData != null
+        ? (report?.status ?? ReportStatus.missing)
+        : null;
+
+    return Scaffold(
+      appBar: const ToyVillageAppBar(hasIcon: true),
+      body: SafeArea(
+        child: CustomAsyncValue(
+          value: ref.watch(taskDetailViewModelProvider(id)),
+          loading: const TaskDetailSkeleton(),
+          onRetry: () => ref.invalidate(taskDetailViewModelProvider(id)),
+          errorMessage: '업무를 불러오지 못했어요.',
+          data: (task) {
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                PullToRefresh.child(
+                  onRefresh: () async {
+                    ref.invalidate(taskDetailViewModelProvider(id));
+                    await ref.read(taskDetailViewModelProvider(id).future);
+                  },
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _Header(task: task, reportStatus: reportStatus),
+                      const SectionDivider(),
+                      Text(
+                        breakByWord(task.content),
+                        style: ToyVillageTextStyle.body5,
+                      ),
+                      if (task.files.isNotEmpty) ...[
+                        const SectionDivider(),
+                        AttachmentSection(
+                          files: task.files
+                              .map(
+                                (f) =>
+                                    (fileName: f.fileName, fileKey: f.fileKey),
+                              )
+                              .toList(),
+                        ),
+                      ],
+                      if (reportStatus == ReportStatus.rejected &&
+                          report?.rejectionReason != null) ...[
+                        const SectionDivider(),
+                        Text(
+                          '반려 사유',
+                          style: ToyVillageTextStyle.caption4.copyWith(
+                            color: ToyVillageColor.gray60,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          breakByWord(report!.rejectionReason!),
+                          style: ToyVillageTextStyle.body5,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                Positioned(
+                  left: 20,
+                  right: 20,
+                  bottom: 16,
+                  child: switch (reportAsync) {
+                    AsyncData(:final value) => ToyVillageButton(
+                      label: value == null ? '업무 보고서 작성하기' : '내가 쓴 글 조회하기',
+                      onTap: () async {
+                        final route = value == null
+                            ? '/task/report/create'
+                            : '/task/report/detail';
+                        await context.push(route, extra: task.id);
+                        if (!context.mounted) return;
+                        ref.invalidate(workReportProvider(id));
+                      },
+                    ),
+                    AsyncError() => ToyVillageButton(
+                      label: '다시 시도',
+                      onTap: () => ref.invalidate(workReportProvider(id)),
+                    ),
+                    _ => ToyVillageButton(label: '불러오는 중', onTap: () {}),
+                  },
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  final TaskDetailModel task;
+  final ReportStatus? reportStatus;
+
+  const _Header({required this.task, required this.reportStatus});
+
+  @override
+  Widget build(BuildContext context) {
+    final tags = <TagStyle>[taskPriorityTag(task.priority)];
+    final showStatus =
+        reportStatus != null &&
+        (reportStatus != ReportStatus.missing ||
+            task.status == TaskStatus.expired);
+    if (showStatus) tags.add(reportStatusTag(reportStatus!));
+    final deadlineTag = taskDeadlineTag(task.finishDate);
+    if (deadlineTag != null) tags.add(deadlineTag);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(task.title, style: ToyVillageTextStyle.heading2),
+        Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Row(
+            children: [
+              for (var i = 0; i < tags.length; i++) ...[
+                if (i > 0) const SizedBox(width: 6),
+                TagChip(
+                  label: tags[i].label,
+                  textColor: tags[i].text,
+                  backgroundColor: tags[i].background,
+                ),
+              ],
+              const Spacer(),
+              const Icon(
+                MdiIcons.clockOutline,
+                size: 16,
+                color: ToyVillageColor.gray60,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                timeCheck(task.createdAt),
+                style: ToyVillageTextStyle.caption4.copyWith(
+                  color: ToyVillageColor.gray60,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}

@@ -1,0 +1,4 @@
+storePassword=키스토어_비밀번호
+keyPassword=키_비밀번호
+keyAlias=upload
+storeFile=/절대경로/release-keystore.jks
