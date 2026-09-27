@@ -29,12 +29,15 @@ dependencies:
   image_picker: ^1.2.3
   file_picker: ^10.3.2
   screen_protector: ^1.5.1
+  sentry_flutter: ^9.30.1
+  sentry_dio: ^9.30.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.3
+  sentry_dart_plugin: ^3.4.0
 
 flutter_launcher_icons:
   android: true
@@ -45,6 +48,15 @@ flutter_launcher_icons:
   min_sdk_android: 21
   adaptive_icon_background: "#ffffff"
   adaptive_icon_foreground: "assets/png/app_logo.png"
+
+sentry:
+  upload_debug_symbols: true
+  upload_sources: false
+  upload_source_maps: false
+  project: toy-village-app
+  org: cidal
+  wait_for_processing: false
+  log_level: error
 
 flutter:
   uses-material-design: true
