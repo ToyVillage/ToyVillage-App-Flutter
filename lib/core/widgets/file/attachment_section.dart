@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/file_download.dart';
+import 'package:toy_village_app/core/widgets/file/attachment_preview.dart';
 import 'package:toy_village_app/core/widgets/file/file_attachment.dart';
 
 class AttachmentSection extends StatelessWidget {
@@ -31,6 +32,11 @@ class AttachmentSection extends StatelessWidget {
             final file = files[index];
             return FileAttachment(
               fileName: file.fileName,
+              onTap: () => showAttachmentPreview(
+                context,
+                fileName: file.fileName,
+                fileKey: file.fileKey,
+              ),
               onDownload: () => downloadFile(
                 context,
                 fileName: file.fileName,

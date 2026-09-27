@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/file_url.dart';
+import 'package:toy_village_app/core/widgets/file/attachment_preview.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
 import 'package:toy_village_app/features/entity_info/presentation/widget/species_detail_skeleton.dart';
@@ -154,14 +155,17 @@ class _KindImage extends StatelessWidget {
     );
     if (fileKey == null) return placeholder;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Image.network(
-        documentFileUrl(fileKey!),
-        width: double.infinity,
-        height: 180,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => placeholder,
+    return GestureDetector(
+      onTap: () => showImagePreview(context, fileKey: fileKey!),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          documentFileUrl(fileKey!),
+          width: double.infinity,
+          height: 180,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => placeholder,
+        ),
       ),
     );
   }

@@ -1,16 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:toy_village_app/core/widgets/app_loading_indicator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/file_download.dart';
-import 'package:toy_village_app/core/utils/file_url.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
-import 'package:toy_village_app/features/document/data/model/document_detail_model.dart';
+import 'package:toy_village_app/core/widgets/file/attachment_preview.dart';
 import 'package:toy_village_app/features/document/presentation/view_model/document_detail_view_model.dart';
 
 void showDocumentPreview(
@@ -83,7 +79,7 @@ class _DocumentPreviewModal extends ConsumerWidget {
                   ),
                   child: CustomAsyncValue(
                     value: async,
-                    loading: const _PreviewLoading(),
+                    loading: const Center(child: AppLoadingIndicator()),
                     onRetry: () =>
                         ref.invalidate(documentDetailViewModelProvider(id)),
                     data: (detail) {
@@ -92,7 +88,10 @@ class _DocumentPreviewModal extends ConsumerWidget {
                           : null;
                       return file == null
                           ? const _EmptyPreview()
-                          : _FilePreview(file: file);
+                          : AttachmentPreviewBody(
+                              fileName: file.fileName,
+                              fileKey: file.fileKey,
+                            );
                     },
                   ),
                 ),
@@ -144,146 +143,6 @@ class _DocumentPreviewModal extends ConsumerWidget {
         ),
         padding: const EdgeInsets.all(6),
         child: Icon(icon, color: ToyVillageColor.white, size: 22),
-      ),
-    );
-  }
-}
-
-class _FilePreview extends StatelessWidget {
-  final DocumentFileModel file;
-
-  const _FilePreview({required this.file});
-
-  @override
-  Widget build(BuildContext context) {
-    final url = documentFileUrl(file.fileKey);
-    if (isPdfFileName(file.fileName)) return _WebDocPreview(url: url);
-    if (isPptFileName(file.fileName)) {
-      return _WebDocPreview(url: url, alwaysGView: true);
-    }
-    if (!isImageFileName(file.fileName)) {
-      return _UnsupportedPreview(fileName: file.fileName);
-    }
-
-    return InteractiveViewer(
-      child: Image.network(
-        url,
-        fit: BoxFit.contain,
-        loadingBuilder: (context, child, progress) {
-          if (progress == null) return child;
-          return const _PreviewLoading();
-        },
-        errorBuilder: (context, error, stackTrace) => const _EmptyPreview(),
-      ),
-    );
-  }
-}
-
-class _WebDocPreview extends StatefulWidget {
-  final String url;
-  final bool alwaysGView;
-
-  const _WebDocPreview({required this.url, this.alwaysGView = false});
-
-  @override
-  State<_WebDocPreview> createState() => _WebDocPreviewState();
-}
-
-class _WebDocPreviewState extends State<_WebDocPreview> {
-  late final WebViewController _controller;
-  bool _loading = true;
-  bool _error = false;
-
-  @override
-  void initState() {
-    super.initState();
-    final useGView = widget.alwaysGView || Platform.isAndroid;
-    final target = useGView
-        ? 'https://docs.google.com/gview?embedded=true&url=${Uri.encodeComponent(widget.url)}'
-        : widget.url;
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (_) => setState(() => _loading = false),
-          onWebResourceError: (error) {
-            if (error.isForMainFrame == false) return;
-            setState(() {
-              _loading = false;
-              _error = true;
-            });
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse(target));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_error) return const _EmptyPreview();
-    return Stack(
-      children: [
-        WebViewWidget(controller: _controller),
-        if (_loading) const _PreviewLoading(),
-      ],
-    );
-  }
-}
-
-class _PreviewLoading extends StatelessWidget {
-  const _PreviewLoading();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: AppLoadingIndicator());
-  }
-}
-
-class _UnsupportedPreview extends StatelessWidget {
-  final String fileName;
-
-  const _UnsupportedPreview({required this.fileName});
-
-  String get _extension {
-    final dot = fileName.lastIndexOf('.');
-    if (dot == -1 || dot == fileName.length - 1) return 'FILE';
-    return fileName.substring(dot + 1).toUpperCase();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: ToyVillageColor.gray10,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              _extension,
-              style: ToyVillageTextStyle.subTitle3.copyWith(
-                color: ToyVillageColor.gray100,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '미리보기를 지원하지 않는 형식이에요.',
-            style: ToyVillageTextStyle.body5.copyWith(
-              color: ToyVillageColor.gray60,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '다운로드 후 확인해주세요.',
-            style: ToyVillageTextStyle.caption3.copyWith(
-              color: ToyVillageColor.gray40,
-            ),
-          ),
-        ],
       ),
     );
   }

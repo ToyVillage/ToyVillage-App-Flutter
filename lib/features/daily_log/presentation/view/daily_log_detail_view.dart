@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/utils/file_download.dart';
+import 'package:toy_village_app/core/widgets/file/attachment_preview.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/dialog/delete_confirm_dialog.dart';
@@ -208,6 +209,11 @@ class _DailyLogDetailViewState extends ConsumerState<DailyLogDetailView> {
               children: [
                 FileAttachment(
                   fileName: file.fileName,
+                  onTap: () => showAttachmentPreview(
+                    context,
+                    fileName: file.fileName,
+                    fileKey: file.fileKey,
+                  ),
                   onDownload: () => downloadFile(
                     context,
                     fileName: file.fileName,
