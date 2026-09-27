@@ -39,10 +39,13 @@ final dioProvider = Provider<Dio>((ref) {
     }
   }
 
+  bool isNoAuthCall(String path) =>
+      path.contains('/app/auth/login') || path.contains('/app/auth/reissue');
+
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) {
-        final isAuthCall = options.path.contains('/app/auth/');
+        final isAuthCall = isNoAuthCall(options.path);
         final token = store.accessToken;
         if (token != null && !isAuthCall) {
           options.headers['Authorization'] = 'Bearer $token';
@@ -52,7 +55,7 @@ final dioProvider = Provider<Dio>((ref) {
       onError: (error, handler) async {
         final status = error.response?.statusCode;
         final path = error.requestOptions.path;
-        final isAuthCall = path.contains('/app/auth/');
+        final isAuthCall = isNoAuthCall(path);
         final alreadyRetried = error.requestOptions.extra['__retried'] == true;
 
         if (status == 401 &&
