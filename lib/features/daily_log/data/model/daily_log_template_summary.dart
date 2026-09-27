@@ -1,3 +1,5 @@
+import 'package:toy_village_app/core/utils/time_util.dart';
+
 class DailyLogTemplateSummary {
   final int templateId;
   final String templateTitle;
@@ -13,7 +15,7 @@ class DailyLogTemplateSummary {
     return DailyLogTemplateSummary(
       templateId: json['templateId'] as int,
       templateTitle: json['templateTitle'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: parseServerTime(json['createdAt'] as String),
     );
   }
 }

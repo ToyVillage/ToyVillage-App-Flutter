@@ -1,4 +1,5 @@
 import 'package:toy_village_app/features/task/data/model/report_attachment.dart';
+import 'package:toy_village_app/core/utils/time_util.dart';
 
 class Observation {
   final int animalObservationId;
@@ -19,7 +20,7 @@ class Observation {
     return Observation(
       animalObservationId: json['animalObservationId'] as int,
       title: json['title'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: parseServerTime(json['createdAt'] as String),
       authorName: json['authorName'] as String,
       files: (json['files'] as List? ?? const [])
           .map((e) => ReportAttachment.fromJson(e as Map<String, dynamic>))
@@ -50,7 +51,7 @@ class ObservationDetail {
       animalObservationId: json['animalObservationId'] as int,
       title: json['title'] as String,
       content: json['content'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: parseServerTime(json['createdAt'] as String),
       authorName: json['authorName'] as String,
       files: (json['files'] as List? ?? const [])
           .map((e) => ReportAttachment.fromJson(e as Map<String, dynamic>))

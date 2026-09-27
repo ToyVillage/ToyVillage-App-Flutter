@@ -1,4 +1,5 @@
 import 'package:toy_village_app/features/notice/data/model/notice_kind.dart';
+import 'package:toy_village_app/core/utils/time_util.dart';
 
 class NoticeModel {
   final int id;
@@ -18,7 +19,7 @@ class NoticeModel {
       id: json['id'] as int,
       title: json['title'] as String,
       teams: parseTeamNames(json['teams']),
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: parseServerTime(json['createdAt'] as String),
     );
   }
 }

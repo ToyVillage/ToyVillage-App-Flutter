@@ -1,3 +1,5 @@
+import 'package:toy_village_app/core/utils/time_util.dart';
+
 class DocumentFileModel {
   final String fileName;
   final String fileKey;
@@ -34,7 +36,7 @@ class DocumentDetailModel {
       id: json['id'] as int,
       title: json['title'] as String,
       type: json['type'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: parseServerTime(json['createdAt'] as String),
       files: files
           .map((e) => DocumentFileModel.fromJson(e as Map<String, dynamic>))
           .toList(),
