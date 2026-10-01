@@ -31,7 +31,7 @@ class WorkReportRepository {
     );
   }
 
-  Future<void> updateReport(int workReportId, WorkReportRequest request) async {
+  Future<void> resubmitReport(int workReportId, WorkReportRequest request) async {
     await _dio.put(
       '${ApiEndpoints.workReport}/$workReportId',
       data: request.toJson(),

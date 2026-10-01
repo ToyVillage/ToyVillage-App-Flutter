@@ -18,6 +18,7 @@ String _finishDateLabel(DateTime finishDate) =>
     case ReportStatus.rejected:
       return (label: '반려됨', color: ToyVillageColor.yellow);
     case ReportStatus.pending:
+    case ReportStatus.resubmit:
       return (label: '제출됨', color: ToyVillageColor.gray60);
     case ReportStatus.missing:
       break;
@@ -77,6 +78,7 @@ TagStyle reportStatusTag(ReportStatus status) {
         background: ToyVillageColor.yellowBackground,
       );
     case ReportStatus.pending:
+    case ReportStatus.resubmit:
       return (
         label: '제출됨',
         text: ToyVillageColor.gray60,
