@@ -21,6 +21,14 @@ class DailyLogCreateView extends ConsumerStatefulWidget {
 class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
   int? _templateId;
 
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+      () => ref.invalidate(dailyLogTemplateListViewModelProvider),
+    );
+  }
+
   void _next() {
     final templateId = _templateId;
     if (templateId == null) {
