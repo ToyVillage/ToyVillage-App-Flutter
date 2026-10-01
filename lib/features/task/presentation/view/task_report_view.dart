@@ -13,6 +13,7 @@ import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
+import 'package:toy_village_app/core/widgets/dialog/submit_confirm_dialog.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/task/data/model/report_attachment.dart';
 import 'package:toy_village_app/features/task/data/model/work_report_request.dart';
@@ -208,12 +209,14 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
       showTopToast(overlay, '내용을 추가해야 합니다.', isError: true);
       return;
     }
+    final confirmed = await showSubmitConfirmDialog(context);
+    if (!confirmed || !mounted) return;
     _autoSaveTimer?.cancel();
     setState(() => _isSubmitting = true);
     try {
       final workReportId = _workReportId;
       if (_isEdit && workReportId != null) {
-        await _repo.updateReport(workReportId, _request());
+        await _repo.resubmitReport(workReportId, _request());
       } else {
         await _repo.createReport(widget.id, _request());
       }

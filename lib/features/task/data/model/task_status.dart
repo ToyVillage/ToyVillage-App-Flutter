@@ -37,7 +37,8 @@ enum ReportStatus {
   missing('MISSING'),
   pending('PENDING'),
   approved('APPROVED'),
-  rejected('REJECTED');
+  rejected('REJECTED'),
+  resubmit('RESUBMIT');
 
   final String code;
 
