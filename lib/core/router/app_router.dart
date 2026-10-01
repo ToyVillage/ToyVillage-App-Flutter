@@ -38,6 +38,9 @@ import 'package:toy_village_app/features/task/presentation/view/task_view.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
+final RouteObserver<PageRoute<dynamic>> appRouteObserver =
+    RouteObserver<PageRoute<dynamic>>();
+
 const _invalidAccess = Scaffold(
   appBar: ToyVillageAppBar(hasIcon: true),
   body: Center(child: Text('잘못된 접근입니다.')),
@@ -46,7 +49,7 @@ const _invalidAccess = Scaffold(
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/',
-  observers: [SentryNavigatorObserver()],
+  observers: [SentryNavigatorObserver(), appRouteObserver],
   routes: [
     GoRoute(path: '/', builder: (_, _) => const SplashView()),
     StatefulShellRoute.indexedStack(

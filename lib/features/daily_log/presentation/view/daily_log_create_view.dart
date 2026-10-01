@@ -7,6 +7,7 @@ import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
+import 'package:toy_village_app/core/router/app_router.dart';
 import 'package:toy_village_app/features/daily_log/data/model/daily_log_template_summary.dart';
 import 'package:toy_village_app/features/daily_log/presentation/view_model/daily_log_template_list_view_model.dart';
 import 'package:toy_village_app/features/daily_log/presentation/widget/template_dropdown_field.dart';
@@ -18,15 +19,33 @@ class DailyLogCreateView extends ConsumerStatefulWidget {
   ConsumerState<DailyLogCreateView> createState() => _DailyLogCreateViewState();
 }
 
-class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView> {
+class _DailyLogCreateViewState extends ConsumerState<DailyLogCreateView>
+    with RouteAware {
   int? _templateId;
 
   @override
-  void initState() {
-    super.initState();
-    Future.microtask(
-      () => ref.invalidate(dailyLogTemplateListViewModelProvider),
-    );
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      appRouteObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void dispose() {
+    appRouteObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPush() => _refreshTemplates();
+
+  @override
+  void didPopNext() => _refreshTemplates();
+
+  void _refreshTemplates() {
+    ref.invalidate(dailyLogTemplateListViewModelProvider);
   }
 
   void _next() {
