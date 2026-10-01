@@ -23,7 +23,8 @@ enum TaskFilter {
         return task.myReportStatus == ReportStatus.missing &&
             task.status == TaskStatus.inProgress;
       case TaskFilter.pending:
-        return task.myReportStatus == ReportStatus.pending;
+        return task.myReportStatus == ReportStatus.pending ||
+            task.myReportStatus == ReportStatus.resubmit;
       case TaskFilter.approved:
         return task.myReportStatus == ReportStatus.approved;
       case TaskFilter.rejected:
