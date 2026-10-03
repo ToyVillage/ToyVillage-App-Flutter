@@ -102,6 +102,7 @@ class FeedView extends ConsumerWidget {
               ],
             ),
             ToyVillageReadonlyField(label: '먹이 종류', value: detail.feedType),
+            _section('잔여량', _amountBox('-')),
             ToyVillageReadonlyField(
               label: '특이사항',
               value: detail.significant,
