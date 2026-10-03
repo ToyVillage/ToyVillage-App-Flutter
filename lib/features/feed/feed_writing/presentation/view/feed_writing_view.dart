@@ -46,9 +46,11 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
   DateTime? _date;
   FeedTime? _time;
   String _amountUnit = feedAmountUnits.first;
+  String _remainUnit = feedAmountUnits.first;
 
   final _feedTypeController = TextEditingController();
   final _amountController = TextEditingController();
+  final _remainController = TextEditingController();
   final _noteController = TextEditingController();
 
   String _originalFeedType = '';
@@ -63,6 +65,7 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
     super.initState();
     _feedTypeController.addListener(_refresh);
     _amountController.addListener(_refresh);
+    _remainController.addListener(_refresh);
     _noteController.addListener(_refresh);
     final initial = widget.initial;
     if (initial == null) return;
@@ -104,6 +107,7 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
   void dispose() {
     _feedTypeController.dispose();
     _amountController.dispose();
+    _remainController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -235,6 +239,16 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
                         label: '먹이 종류',
                         hintText: '먹이 종류 입력',
                         controller: _feedTypeController,
+                      ),
+                      _section(
+                        '잔여량',
+                        FeedAmountField(
+                          controller: _remainController,
+                          unit: _remainUnit,
+                          onUnitChanged: (value) =>
+                              setState(() => _remainUnit = value),
+                          hintText: '잔여량 입력',
+                        ),
                       ),
                       ToyVillageTextField(
                         label: '특이사항',
