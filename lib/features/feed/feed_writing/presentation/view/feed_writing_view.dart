@@ -55,10 +55,12 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
 
   String _originalFeedType = '';
   String _originalAmountText = '';
+  String _originalRemainText = '';
   String _originalNote = '';
   DateTime? _originalDate;
   FeedTime? _originalTime;
   String _originalUnit = feedAmountUnits.first;
+  String _originalRemainUnit = feedAmountUnits.first;
 
   @override
   void initState() {
@@ -77,13 +79,16 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
     _time = (hour: hour, minute: dateTime.minute, isPm: isPm);
     _feedTypeController.text = initial.feedType;
     _amountController.text = formatFeedAmount(initial.feedAmount);
+    _remainController.text = formatFeedAmount(initial.remainingAmount);
     _noteController.text = initial.significant;
     _originalFeedType = _feedTypeController.text;
     _originalAmountText = _amountController.text;
+    _originalRemainText = _remainController.text;
     _originalNote = _noteController.text;
     _originalDate = _date;
     _originalTime = _time;
     _originalUnit = _amountUnit;
+    _originalRemainUnit = _remainUnit;
   }
 
   void _refresh() => setState(() {});
@@ -97,10 +102,12 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
     if (!widget.isEdit) return true;
     return _feedTypeController.text != _originalFeedType ||
         _amountController.text != _originalAmountText ||
+        _remainController.text != _originalRemainText ||
         _noteController.text != _originalNote ||
         _date != _originalDate ||
         _time != _originalTime ||
-        _amountUnit != _originalUnit;
+        _amountUnit != _originalUnit ||
+        _remainUnit != _originalRemainUnit;
   }
 
   @override
@@ -136,10 +143,13 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
       time.minute,
     );
     final baseAmount = _amountUnit == 'kg/L' ? amount * 1000 : amount;
+    final remain = double.tryParse(_remainController.text.trim()) ?? 0;
+    final baseRemain = _remainUnit == 'kg/L' ? remain * 1000 : remain;
     final request = FeedLogRequest(
       feedDateTime: feedDateTime,
       feedType: feedType,
       feedAmount: baseAmount,
+      remainingAmount: baseRemain,
       significant: _noteController.text.trim(),
     );
 
