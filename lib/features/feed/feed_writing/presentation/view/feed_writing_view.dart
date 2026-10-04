@@ -96,7 +96,12 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
   bool get _canSubmit {
     final feedType = _feedTypeController.text.trim();
     final amount = double.tryParse(_amountController.text.trim());
-    if (_date == null || _time == null || feedType.isEmpty || amount == null) {
+    final remain = double.tryParse(_remainController.text.trim());
+    if (_date == null ||
+        _time == null ||
+        feedType.isEmpty ||
+        amount == null ||
+        remain == null) {
       return false;
     }
     if (!widget.isEdit) return true;
@@ -126,9 +131,14 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
     final time = _time;
     final feedType = _feedTypeController.text.trim();
     final amount = double.tryParse(_amountController.text.trim());
+    final remain = double.tryParse(_remainController.text.trim());
 
-    if (date == null || time == null || feedType.isEmpty || amount == null) {
-      showTopToast(overlay, '급여 날짜·시간·먹이 종류·급여량을 입력해주세요.', isError: true);
+    if (date == null ||
+        time == null ||
+        feedType.isEmpty ||
+        amount == null ||
+        remain == null) {
+      showTopToast(overlay, '급여 날짜·시간·먹이 종류·급여량·잔여량을 입력해주세요.', isError: true);
       return;
     }
 
@@ -143,7 +153,6 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
       time.minute,
     );
     final baseAmount = _amountUnit == 'kg/L' ? amount * 1000 : amount;
-    final remain = double.tryParse(_remainController.text.trim()) ?? 0;
     final baseRemain = _remainUnit == 'kg/L' ? remain * 1000 : remain;
     final request = FeedLogRequest(
       feedDateTime: feedDateTime,
