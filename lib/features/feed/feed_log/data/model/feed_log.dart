@@ -69,7 +69,9 @@ class FeedLogDetail {
       feedLogId: json['feedLogId'] as int,
       feedType: json['feedType'] as String,
       feedAmount: (json['feedAmount'] as num).toDouble(),
-      remainingAmount: (json['remainingAmount'] as num?)?.toDouble() ?? 0,
+      remainingAmount: json['remainingAmount'] is num
+          ? (json['remainingAmount'] as num).toDouble()
+          : 0,
       feedDateTime: DateTime.parse(json['feedDateTime'] as String),
       significant: json['significant'] as String? ?? '',
     );
