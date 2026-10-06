@@ -331,7 +331,10 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
 
   Widget _question(int sectionId, TemplateQuestion question) {
     final qid = question.questionId;
-    final label = ToyVillageLabel(label: question.question);
+    final label = ToyVillageLabel(
+      label: question.question,
+      isOptional: !question.required,
+    );
     final choices = question.options
         .where((option) => !option.etcOption)
         .map((option) => option.content)
@@ -344,6 +347,7 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
         return ToyVillageTextField(
           key: key,
           label: question.question,
+          isOptional: !question.required,
           hintText: '내용 입력',
           minLines: 5,
           controller: _controllerFor(sectionId, qid),
