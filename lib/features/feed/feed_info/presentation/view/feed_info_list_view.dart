@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/pull_to_refresh.dart';
+import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_amount_field.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
@@ -122,7 +123,7 @@ class _FeedLogCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 7),
                         Text(
-                          formatFeedAmount(log.feedAmount),
+                          '${formatFeedAmount(log.feedAmount)} ${feedUnitLabel(log.feedUnit)}',
                           style: ToyVillageTextStyle.body5,
                         ),
                       ],
