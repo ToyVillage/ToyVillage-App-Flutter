@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# 사용:
-#   ./scripts/build.sh prod all     # prod APK + IPA
-#   ./scripts/build.sh stag apk     # stag APK
-#   ./scripts/build.sh prod ipa     # prod IPA
-# flavor: stag | prod,  target: apk | ipa | all (기본 all)
-
 FLAVOR="${1:-}"
 TARGET="${2:-all}"
 
