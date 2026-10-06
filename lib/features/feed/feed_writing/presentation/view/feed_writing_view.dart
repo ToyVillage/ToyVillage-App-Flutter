@@ -45,8 +45,7 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
 
   DateTime? _date;
   FeedTime? _time;
-  String _amountUnit = feedAmountUnits.first;
-  String _remainUnit = feedAmountUnits.first;
+  String _unit = feedAmountUnits.first;
 
   final _feedTypeController = TextEditingController();
   final _amountController = TextEditingController();
@@ -60,7 +59,6 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
   DateTime? _originalDate;
   FeedTime? _originalTime;
   String _originalUnit = feedAmountUnits.first;
-  String _originalRemainUnit = feedAmountUnits.first;
 
   @override
   void initState() {
@@ -77,6 +75,7 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
     var hour = dateTime.hour % 12;
     if (hour == 0) hour = 12;
     _time = (hour: hour, minute: dateTime.minute, isPm: isPm);
+    _unit = feedUnitLabel(initial.feedUnit);
     _feedTypeController.text = initial.feedType;
     _amountController.text = formatFeedAmount(initial.feedAmount);
     _remainController.text = formatFeedAmount(initial.remainingAmount);
@@ -87,8 +86,7 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
     _originalNote = _noteController.text;
     _originalDate = _date;
     _originalTime = _time;
-    _originalUnit = _amountUnit;
-    _originalRemainUnit = _remainUnit;
+    _originalUnit = _unit;
   }
 
   void _refresh() => setState(() {});
@@ -111,8 +109,7 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
         _noteController.text != _originalNote ||
         _date != _originalDate ||
         _time != _originalTime ||
-        _amountUnit != _originalUnit ||
-        _remainUnit != _originalRemainUnit;
+        _unit != _originalUnit;
   }
 
   @override
@@ -152,13 +149,12 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
       hour,
       time.minute,
     );
-    final baseAmount = _amountUnit == 'kg/L' ? amount * 1000 : amount;
-    final baseRemain = _remainUnit == 'kg/L' ? remain * 1000 : remain;
     final request = FeedLogRequest(
       feedDateTime: feedDateTime,
       feedType: feedType,
-      feedAmount: baseAmount,
-      remainingAmount: baseRemain,
+      feedAmount: amount,
+      remainingAmount: remain,
+      feedUnit: feedUnitCode(_unit),
       significant: _noteController.text.trim(),
     );
 
@@ -246,9 +242,9 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
                               '먹이 급여량',
                               FeedAmountField(
                                 controller: _amountController,
-                                unit: _amountUnit,
+                                unit: _unit,
                                 onUnitChanged: (value) =>
-                                    setState(() => _amountUnit = value),
+                                    setState(() => _unit = value),
                               ),
                             ),
                           ),
@@ -263,9 +259,9 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
                         '잔여량',
                         FeedAmountField(
                           controller: _remainController,
-                          unit: _remainUnit,
+                          unit: _unit,
                           onUnitChanged: (value) =>
-                              setState(() => _remainUnit = value),
+                              setState(() => _unit = value),
                           hintText: '잔여량 입력',
                         ),
                       ),

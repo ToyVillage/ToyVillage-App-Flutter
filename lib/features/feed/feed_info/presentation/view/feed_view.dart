@@ -14,6 +14,7 @@ import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/core/widgets/text_field/readonly_field.dart';
 import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_info_list_view.dart';
+import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_amount_field.dart';
 import 'package:toy_village_app/features/feed/feed_log/data/model/feed_log.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/feed_log_detail_view_model.dart';
 
@@ -96,13 +97,20 @@ class FeedView extends ConsumerWidget {
                 Expanded(
                   child: _section(
                     '먹이 급여량',
-                    _amountBox(formatFeedAmount(detail.feedAmount)),
+                    _amountBox(
+                      '${formatFeedAmount(detail.feedAmount)} ${feedUnitLabel(detail.feedUnit)}',
+                    ),
                   ),
                 ),
               ],
             ),
             ToyVillageReadonlyField(label: '먹이 종류', value: detail.feedType),
-            _section('잔여량', _amountBox(formatFeedAmount(detail.remainingAmount))),
+            _section(
+              '잔여량',
+              _amountBox(
+                '${formatFeedAmount(detail.remainingAmount)} ${feedUnitLabel(detail.feedUnit)}',
+              ),
+            ),
             ToyVillageReadonlyField(
               label: '특이사항',
               value: detail.significant,

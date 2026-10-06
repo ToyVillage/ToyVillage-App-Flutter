@@ -23,6 +23,7 @@ class FeedLog {
   final int animalId;
   final String feedType;
   final double feedAmount;
+  final String feedUnit;
   final DateTime feedDateTime;
   final String significant;
 
@@ -31,6 +32,7 @@ class FeedLog {
     required this.animalId,
     required this.feedType,
     required this.feedAmount,
+    required this.feedUnit,
     required this.feedDateTime,
     required this.significant,
   });
@@ -41,6 +43,7 @@ class FeedLog {
       animalId: json['animalId'] as int,
       feedType: json['feedType'] as String,
       feedAmount: (json['feedAmount'] as num).toDouble(),
+      feedUnit: json['feedUnit'] as String? ?? 'GML',
       feedDateTime: DateTime.parse(json['feedDateTime'] as String),
       significant: json['significant'] as String? ?? '',
     );
@@ -52,6 +55,7 @@ class FeedLogDetail {
   final String feedType;
   final double feedAmount;
   final double remainingAmount;
+  final String feedUnit;
   final DateTime feedDateTime;
   final String significant;
 
@@ -60,6 +64,7 @@ class FeedLogDetail {
     required this.feedType,
     required this.feedAmount,
     required this.remainingAmount,
+    required this.feedUnit,
     required this.feedDateTime,
     required this.significant,
   });
@@ -72,6 +77,7 @@ class FeedLogDetail {
       remainingAmount: json['remainingAmount'] is num
           ? (json['remainingAmount'] as num).toDouble()
           : 0,
+      feedUnit: json['feedUnit'] as String? ?? 'GML',
       feedDateTime: DateTime.parse(json['feedDateTime'] as String),
       significant: json['significant'] as String? ?? '',
     );
@@ -83,6 +89,7 @@ class FeedLogRequest {
   final String feedType;
   final double feedAmount;
   final double remainingAmount;
+  final String feedUnit;
   final String significant;
 
   const FeedLogRequest({
@@ -90,6 +97,7 @@ class FeedLogRequest {
     required this.feedType,
     required this.feedAmount,
     required this.remainingAmount,
+    required this.feedUnit,
     required this.significant,
   });
 
@@ -98,6 +106,7 @@ class FeedLogRequest {
     'feedType': feedType,
     'feedAmount': feedAmount,
     'remainingAmount': remainingAmount,
+    'feedUnit': feedUnit,
     'significant': significant,
   };
 }

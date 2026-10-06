@@ -5,6 +5,10 @@ import 'package:toy_village_app/core/constants/text_style.dart';
 
 const feedAmountUnits = ['g/ml', 'kg/L'];
 
+String feedUnitCode(String unit) => unit == 'kg/L' ? 'KGL' : 'GML';
+
+String feedUnitLabel(String code) => code == 'KGL' ? 'kg/L' : 'g/ml';
+
 class FeedAmountField extends StatefulWidget {
   final TextEditingController controller;
   final String unit;
