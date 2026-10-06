@@ -61,7 +61,7 @@ class TemplateQuestion {
       questionId: json['questionId'] as int,
       question: json['question'] as String,
       questionType: QuestionType.fromCode(json['questionType'] as String),
-      required: json['required'] as bool? ?? false,
+      required: json['required'] as bool? ?? true,
       options: (json['options'] as List)
           .map((e) => QuestionOption.fromJson(e as Map<String, dynamic>))
           .toList(),

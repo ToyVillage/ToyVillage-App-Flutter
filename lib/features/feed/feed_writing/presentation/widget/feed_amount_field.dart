@@ -5,16 +5,22 @@ import 'package:toy_village_app/core/constants/text_style.dart';
 
 const feedAmountUnits = ['g/ml', 'kg/L'];
 
+String feedUnitCode(String unit) => unit == 'kg/L' ? 'KGL' : 'GML';
+
+String feedUnitLabel(String code) => code == 'KGL' ? 'kg/L' : 'g/ml';
+
 class FeedAmountField extends StatefulWidget {
   final TextEditingController controller;
   final String unit;
   final ValueChanged<String> onUnitChanged;
+  final String hintText;
 
   const FeedAmountField({
     super.key,
     required this.controller,
     required this.unit,
     required this.onUnitChanged,
+    this.hintText = '급여량',
   });
 
   @override
@@ -134,7 +140,7 @@ class _FeedAmountFieldState extends State<FeedAmountField> {
                   decoration: InputDecoration(
                     isDense: true,
                     isCollapsed: true,
-                    hintText: '급여량',
+                    hintText: widget.hintText,
                     hintStyle: ToyVillageTextStyle.body5.copyWith(
                       color: ToyVillageColor.gray60,
                     ),

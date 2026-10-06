@@ -45,14 +45,16 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
 
   DateTime? _date;
   FeedTime? _time;
-  String _amountUnit = feedAmountUnits.first;
+  String _unit = feedAmountUnits.first;
 
   final _feedTypeController = TextEditingController();
   final _amountController = TextEditingController();
+  final _remainController = TextEditingController();
   final _noteController = TextEditingController();
 
   String _originalFeedType = '';
   String _originalAmountText = '';
+  String _originalRemainText = '';
   String _originalNote = '';
   DateTime? _originalDate;
   FeedTime? _originalTime;
@@ -63,6 +65,7 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
     super.initState();
     _feedTypeController.addListener(_refresh);
     _amountController.addListener(_refresh);
+    _remainController.addListener(_refresh);
     _noteController.addListener(_refresh);
     final initial = widget.initial;
     if (initial == null) return;
@@ -72,15 +75,18 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
     var hour = dateTime.hour % 12;
     if (hour == 0) hour = 12;
     _time = (hour: hour, minute: dateTime.minute, isPm: isPm);
+    _unit = feedUnitLabel(initial.feedUnit);
     _feedTypeController.text = initial.feedType;
     _amountController.text = formatFeedAmount(initial.feedAmount);
+    _remainController.text = formatFeedAmount(initial.remainingAmount);
     _noteController.text = initial.significant;
     _originalFeedType = _feedTypeController.text;
     _originalAmountText = _amountController.text;
+    _originalRemainText = _remainController.text;
     _originalNote = _noteController.text;
     _originalDate = _date;
     _originalTime = _time;
-    _originalUnit = _amountUnit;
+    _originalUnit = _unit;
   }
 
   void _refresh() => setState(() {});
@@ -88,22 +94,29 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
   bool get _canSubmit {
     final feedType = _feedTypeController.text.trim();
     final amount = double.tryParse(_amountController.text.trim());
-    if (_date == null || _time == null || feedType.isEmpty || amount == null) {
+    final remain = double.tryParse(_remainController.text.trim());
+    if (_date == null ||
+        _time == null ||
+        feedType.isEmpty ||
+        amount == null ||
+        remain == null) {
       return false;
     }
     if (!widget.isEdit) return true;
     return _feedTypeController.text != _originalFeedType ||
         _amountController.text != _originalAmountText ||
+        _remainController.text != _originalRemainText ||
         _noteController.text != _originalNote ||
         _date != _originalDate ||
         _time != _originalTime ||
-        _amountUnit != _originalUnit;
+        _unit != _originalUnit;
   }
 
   @override
   void dispose() {
     _feedTypeController.dispose();
     _amountController.dispose();
+    _remainController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -115,9 +128,14 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
     final time = _time;
     final feedType = _feedTypeController.text.trim();
     final amount = double.tryParse(_amountController.text.trim());
+    final remain = double.tryParse(_remainController.text.trim());
 
-    if (date == null || time == null || feedType.isEmpty || amount == null) {
-      showTopToast(overlay, '급여 날짜·시간·먹이 종류·급여량을 입력해주세요.', isError: true);
+    if (date == null ||
+        time == null ||
+        feedType.isEmpty ||
+        amount == null ||
+        remain == null) {
+      showTopToast(overlay, '급여 날짜·시간·먹이 종류·급여량·잔여량을 입력해주세요.', isError: true);
       return;
     }
 
@@ -131,11 +149,12 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
       hour,
       time.minute,
     );
-    final baseAmount = _amountUnit == 'kg/L' ? amount * 1000 : amount;
     final request = FeedLogRequest(
       feedDateTime: feedDateTime,
       feedType: feedType,
-      feedAmount: baseAmount,
+      feedAmount: amount,
+      remainingAmount: remain,
+      feedUnit: feedUnitCode(_unit),
       significant: _noteController.text.trim(),
     );
 
@@ -193,7 +212,6 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
                         padding: const EdgeInsets.only(bottom: 12),
                         child: ToyVillageTitle(
                           title: widget.isEdit ? '먹이 급여 수정' : '먹이 급여 작성',
-                          subTitle: widget.animalName,
                         ),
                       ),
                       _section(
@@ -223,9 +241,9 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
                               '먹이 급여량',
                               FeedAmountField(
                                 controller: _amountController,
-                                unit: _amountUnit,
+                                unit: _unit,
                                 onUnitChanged: (value) =>
-                                    setState(() => _amountUnit = value),
+                                    setState(() => _unit = value),
                               ),
                             ),
                           ),
@@ -235,6 +253,16 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
                         label: '먹이 종류',
                         hintText: '먹이 종류 입력',
                         controller: _feedTypeController,
+                      ),
+                      _section(
+                        '잔여량',
+                        FeedAmountField(
+                          controller: _remainController,
+                          unit: _unit,
+                          onUnitChanged: (value) =>
+                              setState(() => _unit = value),
+                          hintText: '잔여량 입력',
+                        ),
                       ),
                       ToyVillageTextField(
                         label: '특이사항',
