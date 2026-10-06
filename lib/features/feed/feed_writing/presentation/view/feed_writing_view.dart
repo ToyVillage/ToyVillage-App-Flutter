@@ -193,7 +193,6 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
                         padding: const EdgeInsets.only(bottom: 12),
                         child: ToyVillageTitle(
                           title: widget.isEdit ? '먹이 급여 수정' : '먹이 급여 작성',
-                          subTitle: widget.animalName,
                         ),
                       ),
                       _section(
