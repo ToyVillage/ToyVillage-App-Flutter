@@ -15,6 +15,13 @@ if [[ "$FLAVOR" != "stag" && "$FLAVOR" != "prod" ]]; then
   exit 1
 fi
 
+if ! grep -q "String.fromEnvironment('FLAVOR'" lib/core/config/app_env.dart; then
+  echo "lib/core/config/app_env.dart 가 FLAVOR dart-define을 사용하지 않습니다." >&2
+  echo "app_env.example.dart 처럼 appFlavor 를 FLAVOR 기반으로 바꾼 뒤 다시 실행하세요." >&2
+  echo "(안 그러면 파일명은 $FLAVOR 지만 실제 앱은 고정된 환경으로 빌드됩니다)" >&2
+  exit 1
+fi
+
 VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: *//' | tr -d '[:space:]')
 OUT_DIR="build/dist"
 mkdir -p "$OUT_DIR"
