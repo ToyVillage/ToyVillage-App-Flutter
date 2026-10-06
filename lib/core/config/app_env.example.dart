@@ -1,6 +1,9 @@
 enum AppFlavor { stag, prod }
 
-const AppFlavor appFlavor = AppFlavor.stag;
+const String _flavor = String.fromEnvironment('FLAVOR', defaultValue: 'stag');
+const AppFlavor appFlavor = _flavor == 'prod'
+    ? AppFlavor.prod
+    : AppFlavor.stag;
 
 class AppEnv {
   final String baseUrl;
