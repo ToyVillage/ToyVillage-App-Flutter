@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/network/dio_provider.dart';
 import 'package:toy_village_app/features/auth/data/repository/auth_repository.dart';
+import 'package:toy_village_app/features/notification/presentation/fcm_token_sync.dart';
 
 class SplashView extends ConsumerStatefulWidget {
   const SplashView({super.key});
@@ -44,6 +45,7 @@ class _SplashViewState extends ConsumerState<SplashView> {
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
       );
+      await ref.read(fcmTokenSyncProvider).start();
       return '/notice';
     } on DioException catch (error) {
       if (_isAuthFailure(error)) {

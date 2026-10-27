@@ -24,4 +24,6 @@ class ApiEndpoints {
   static const animalManageKind = '/animal-manage/kind';
 
   static const feedLog = '/feed-log';
+
+  static const fcmToken = '/app/fcm/token';
 }
