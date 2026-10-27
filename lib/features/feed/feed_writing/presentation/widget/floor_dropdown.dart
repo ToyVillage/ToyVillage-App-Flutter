@@ -115,27 +115,33 @@ class _FloorDropdownState extends State<FloorDropdown> {
   Widget build(BuildContext context) {
     return CompositedTransformTarget(
       link: _link,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
+      child: Semantics(
+        button: true,
+        label: '층 선택',
+        value: widget.value,
         onTap: _toggle,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              widget.value,
-              style: ToyVillageTextStyle.subTitle4.copyWith(
-                color: ToyVillageColor.gray100,
+        child: InkWell(
+          onTap: _toggle,
+          borderRadius: BorderRadius.circular(8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                widget.value,
+                style: ToyVillageTextStyle.subTitle4.copyWith(
+                  color: ToyVillageColor.gray100,
+                ),
               ),
-            ),
-            const SizedBox(width: 4),
-            Icon(
-              _entry != null
-                  ? Icons.keyboard_arrow_up
-                  : Icons.keyboard_arrow_down,
-              size: 20,
-              color: ToyVillageColor.gray60,
-            ),
-          ],
+              const SizedBox(width: 4),
+              Icon(
+                _entry != null
+                    ? Icons.keyboard_arrow_up
+                    : Icons.keyboard_arrow_down,
+                size: 20,
+                color: ToyVillageColor.gray60,
+              ),
+            ],
+          ),
         ),
       ),
     );

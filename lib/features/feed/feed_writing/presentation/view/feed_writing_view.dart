@@ -234,12 +234,13 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
                                     : '먹이 급여 작성',
                               ),
                             ),
-                            FloorDropdown(
-                              floors: feedFloors,
-                              value: _floor,
-                              onChanged: (value) =>
-                                  setState(() => _floor = value),
-                            ),
+                            if (!widget.isEdit)
+                              FloorDropdown(
+                                floors: feedFloors,
+                                value: _floor,
+                                onChanged: (value) =>
+                                    setState(() => _floor = value),
+                              ),
                           ],
                         ),
                       ),
