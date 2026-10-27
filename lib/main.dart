@@ -15,11 +15,13 @@ import 'package:toy_village_app/firebase_options.dart';
 Future<void> main() async {
   SentryWidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  FirebaseMessaging.onBackgroundMessage(fcmBackgroundHandler);
-  await FcmService.instance.init();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    FirebaseMessaging.onBackgroundMessage(fcmBackgroundHandler);
+    await FcmService.instance.init();
+  } catch (_) {}
   try {
     await ScreenProtector.preventScreenshotOn();
     await ScreenProtector.protectDataLeakageOn();
