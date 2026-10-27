@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "234004131810",
+    "project_id": "toyvillage",
+    "storage_bucket": "toyvillage.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:234004131810:android:827f76bab2bcc38ae353bb",
+        "android_client_info": {
+          "package_name": "com.toyvillage.toyVillageApp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxQuKbVmyF7OEUAr1854Ey2D2dgfgQA9A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
