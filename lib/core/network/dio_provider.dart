@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sentry_dio/sentry_dio.dart';
 import 'package:toy_village_app/core/config/app_env.dart';
@@ -86,6 +87,38 @@ final dioProvider = Provider<Dio>((ref) {
       },
     ),
   );
+
+  if (kDebugMode) {
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          debugPrint('[API] → ${options.method} ${options.uri}');
+          if (options.data != null) {
+            debugPrint('[API]   body: ${options.data}');
+          }
+          handler.next(options);
+        },
+        onResponse: (response, handler) {
+          debugPrint(
+            '[API] ← ${response.statusCode} '
+            '${response.requestOptions.method} '
+            '${response.requestOptions.uri}',
+          );
+          debugPrint('[API]   data: ${response.data}');
+          handler.next(response);
+        },
+        onError: (error, handler) {
+          debugPrint(
+            '[API] ✕ ${error.response?.statusCode} '
+            '${error.requestOptions.method} '
+            '${error.requestOptions.uri}',
+          );
+          debugPrint('[API]   data: ${error.response?.data}');
+          handler.next(error);
+        },
+      ),
+    );
+  }
 
   if (AppEnv.current.sentryDsn.isNotEmpty) {
     dio.addSentry();
