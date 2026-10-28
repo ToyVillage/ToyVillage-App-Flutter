@@ -5,6 +5,29 @@ import 'package:sentry_dio/sentry_dio.dart';
 import 'package:toy_village_app/core/config/app_env.dart';
 import 'package:toy_village_app/core/network/token_store.dart';
 
+const _sensitiveKeys = {
+  'password',
+  'currentPassword',
+  'newPassword',
+  'token',
+  'refresh_token',
+  'refreshToken',
+  'access_token',
+  'accessToken',
+};
+
+Object? _maskSensitive(Object? data) {
+  if (data is Map) {
+    return data.map(
+      (key, value) => _sensitiveKeys.contains(key)
+          ? MapEntry(key, '***')
+          : MapEntry(key, _maskSensitive(value)),
+    );
+  }
+  if (data is List) return data.map(_maskSensitive).toList();
+  return data;
+}
+
 final tokenStoreProvider = Provider((ref) => TokenStore());
 
 final dioProvider = Provider<Dio>((ref) {
@@ -94,7 +117,7 @@ final dioProvider = Provider<Dio>((ref) {
         onRequest: (options, handler) {
           debugPrint('[API] → ${options.method} ${options.uri}');
           if (options.data != null) {
-            debugPrint('[API]   body: ${options.data}');
+            debugPrint('[API]   body: ${_maskSensitive(options.data)}');
           }
           handler.next(options);
         },
@@ -104,7 +127,7 @@ final dioProvider = Provider<Dio>((ref) {
             '${response.requestOptions.method} '
             '${response.requestOptions.uri}',
           );
-          debugPrint('[API]   data: ${response.data}');
+          debugPrint('[API]   data: ${_maskSensitive(response.data)}');
           handler.next(response);
         },
         onError: (error, handler) {
@@ -113,7 +136,7 @@ final dioProvider = Provider<Dio>((ref) {
             '${error.requestOptions.method} '
             '${error.requestOptions.uri}',
           );
-          debugPrint('[API]   data: ${error.response?.data}');
+          debugPrint('[API]   data: ${_maskSensitive(error.response?.data)}');
           handler.next(error);
         },
       ),
