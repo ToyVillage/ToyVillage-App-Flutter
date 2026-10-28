@@ -40,9 +40,9 @@ class FcmService {
         ?.createNotificationChannel(_channel);
 
     await _messaging.setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
+      alert: false,
+      badge: false,
+      sound: false,
     );
 
     FirebaseMessaging.onMessage.listen(_showForeground);
@@ -50,9 +50,15 @@ class FcmService {
       (message) => _openNotice(_noticeIdFrom(message.data)),
     );
 
-    final initial = await _messaging.getInitialMessage();
-    if (initial != null) {
-      _pendingNoticeId = _noticeIdFrom(initial.data);
+    final initialMessage = await _messaging.getInitialMessage();
+    if (initialMessage != null) {
+      _pendingNoticeId = _noticeIdFrom(initialMessage.data);
+    }
+
+    final launchDetails = await _local.getNotificationAppLaunchDetails();
+    if (launchDetails?.didNotificationLaunchApp ?? false) {
+      final payload = launchDetails?.notificationResponse?.payload;
+      _pendingNoticeId ??= payload == null ? null : int.tryParse(payload);
     }
   }
 
@@ -102,7 +108,11 @@ class FcmService {
           priority: Priority.high,
           icon: '@mipmap/ic_launcher',
         ),
-        iOS: const DarwinNotificationDetails(),
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
       ),
     );
   }
