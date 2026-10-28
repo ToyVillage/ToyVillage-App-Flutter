@@ -1,22 +1,23 @@
 final _zoneSuffix = RegExp(r'(Z|[+-]\d{2}:?\d{2})$');
+final _fraction = RegExp(r'\.(\d+)');
 
 DateTime parseServerTime(String value) {
-  if (_zoneSuffix.hasMatch(value)) return DateTime.parse(value).toLocal();
-  try {
-    return DateTime.parse('${value}Z').toLocal();
-  } on FormatException {
-    final parsed = DateTime.parse(value);
-    return DateTime.utc(
-      parsed.year,
-      parsed.month,
-      parsed.day,
-      parsed.hour,
-      parsed.minute,
-      parsed.second,
-      parsed.millisecond,
-      parsed.microsecond,
-    ).toLocal();
+  var normalized = value.trim();
+  final timeIndex = normalized.indexOf('T');
+  if (timeIndex >= 0) {
+    final datePart = normalized.substring(0, timeIndex).replaceAll('.', '-');
+    normalized = '$datePart${normalized.substring(timeIndex)}';
+  } else {
+    normalized = '${normalized.replaceAll('.', '-')}T00:00:00';
   }
+  normalized = normalized.replaceAllMapped(_fraction, (match) {
+    final digits = match.group(1)!;
+    return '.${digits.length > 6 ? digits.substring(0, 6) : digits}';
+  });
+  if (_zoneSuffix.hasMatch(normalized)) {
+    return DateTime.parse(normalized).toLocal();
+  }
+  return DateTime.parse(normalized);
 }
 
 String timeCheck(DateTime date) {
