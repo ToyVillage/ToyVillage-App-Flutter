@@ -50,19 +50,18 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBxQuKbVmyF7OEUAr1854Ey2D2dgfgQA9A',
-    appId: '1:234004131810:android:827f76bab2bcc38ae353bb',
-    messagingSenderId: '234004131810',
-    projectId: 'toyvillage',
-    storageBucket: 'toyvillage.firebasestorage.app',
+    apiKey: 'AIzaSyD_jrw0OH01WcKNsl1AA2WXfXg6pPDgIjU',
+    appId: '1:1011932911393:android:19428cfc9397de4eae9060',
+    messagingSenderId: '1011932911393',
+    projectId: 'teamyot',
+    storageBucket: 'teamyot.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBVHAjfFw6KcwtugmUtETfhED3Jz4Y-5HM',
-    appId: '1:234004131810:ios:7624271a3ef6b1c1e353bb',
-    messagingSenderId: '234004131810',
-    projectId: 'toyvillage',
-    storageBucket: 'toyvillage.firebasestorage.app',
+    apiKey: 'AIzaSyBJfebV4MGQf_5zsXTR5D8pnIdPz6gdOgw',
+    appId: '1:1011932911393:ios:b5ce015310f5060cae9060',
+    messagingSenderId: '1011932911393',
+    projectId: 'teamyot',
+    storageBucket: 'teamyot.firebasestorage.app',
     iosBundleId: 'com.toyvillage.toyVillageApp',
   );
 }
