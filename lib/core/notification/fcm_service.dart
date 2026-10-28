@@ -83,6 +83,11 @@ class FcmService {
 
   void _openNotice(int? id) {
     if (id == null) return;
+    final path = appRouter.routeInformationProvider.value.uri.path;
+    if (path == '/' || path == '/login') {
+      _pendingNoticeId = id;
+      return;
+    }
     navigateToNotice(id);
   }
 
