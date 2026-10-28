@@ -6,6 +6,7 @@ import 'package:toy_village_app/core/config/app_env.dart';
 import 'package:toy_village_app/core/network/token_store.dart';
 
 const _sensitiveKeys = {
+  'username',
   'password',
   'currentPassword',
   'newPassword',
