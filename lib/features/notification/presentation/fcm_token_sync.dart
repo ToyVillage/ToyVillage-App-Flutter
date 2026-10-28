@@ -13,23 +13,36 @@ class FcmTokenSync {
 
   String? _current;
   StreamSubscription<String>? _subscription;
+  bool _loggedOut = false;
 
   Future<void> start() async {
-    _subscription ??= FcmService.instance.onTokenRefresh.listen(_onRefresh);
+    _loggedOut = false;
     try {
+      _subscription ??= FcmService.instance.onTokenRefresh.listen(_onRefresh);
       final token = await FcmService.instance.token();
       if (token == null) return;
       await _ref.read(fcmTokenRepositoryProvider).register(token);
-      _current = token;
+      if (_loggedOut) {
+        await _ref.read(fcmTokenRepositoryProvider).remove(token);
+        return;
+      }
+      if (_current != null && _current != token) {
+        await _ref.read(fcmTokenRepositoryProvider).remove(token);
+      } else {
+        _current = token;
+      }
     } catch (_) {}
   }
 
   Future<void> clear() async {
+    _loggedOut = true;
+    await _subscription?.cancel();
+    _subscription = null;
     final token = _current;
-    _current = null;
     if (token == null) return;
     try {
       await _ref.read(fcmTokenRepositoryProvider).remove(token);
+      _current = null;
     } catch (_) {}
   }
 
@@ -38,6 +51,10 @@ class FcmTokenSync {
     _current = next;
     try {
       await _ref.read(fcmTokenRepositoryProvider).register(next);
+      if (_loggedOut) {
+        await _ref.read(fcmTokenRepositoryProvider).remove(next);
+        return;
+      }
       if (previous != null && previous != next) {
         await _ref.read(fcmTokenRepositoryProvider).remove(previous);
       }
