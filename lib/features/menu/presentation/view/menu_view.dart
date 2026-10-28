@@ -7,6 +7,7 @@ import 'package:toy_village_app/core/network/dio_provider.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/menu/presentation/widget/logout_confirm_sheet.dart';
+import 'package:toy_village_app/features/notification/presentation/fcm_token_sync.dart';
 import 'package:toy_village_app/features/menu/presentation/widget/menu_card.dart';
 
 class MenuView extends ConsumerWidget {
@@ -15,6 +16,7 @@ class MenuView extends ConsumerWidget {
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
     final confirmed = await showLogoutConfirmSheet(context);
     if (!confirmed) return;
+    await ref.read(fcmTokenSyncProvider).clear();
     await ref.read(tokenStoreProvider).clear();
     if (!context.mounted) return;
     context.go('/login');
