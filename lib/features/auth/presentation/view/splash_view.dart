@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/network/dio_provider.dart';
+import 'package:toy_village_app/core/notification/fcm_service.dart';
 import 'package:toy_village_app/features/auth/data/repository/auth_repository.dart';
 import 'package:toy_village_app/features/notification/presentation/fcm_token_sync.dart';
 
@@ -28,6 +29,10 @@ class _SplashViewState extends ConsumerState<SplashView> {
     await minimumDisplay;
     if (!mounted) return;
     context.go(destination);
+    if (destination == '/notice') {
+      final noticeId = FcmService.instance.takeInitialNoticeId();
+      if (noticeId != null) FcmService.instance.navigateToNotice(noticeId);
+    }
   }
 
   Future<String> _resolveDestination() async {
