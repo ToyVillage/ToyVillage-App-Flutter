@@ -13,6 +13,7 @@ class FcmTokenSync {
 
   String? _current;
   final Set<String> _pendingRemovals = {};
+  final Set<String> _uncertain = {};
   StreamSubscription<String>? _subscription;
   bool _loggedOut = false;
   Future<void> _lock = Future<void>.value();
@@ -33,9 +34,11 @@ class FcmTokenSync {
     _loggedOut = true;
     await _subscription?.cancel();
     _subscription = null;
-    final token = _current;
+    final current = _current;
+    if (current != null) _pendingRemovals.add(current);
+    _pendingRemovals.addAll(_uncertain);
+    _uncertain.clear();
     _current = null;
-    if (token != null) _pendingRemovals.add(token);
     await _flushRemovals();
   });
 
@@ -51,10 +54,13 @@ class FcmTokenSync {
     try {
       await _repo.register(token);
       _current = token;
+      _uncertain.remove(token);
       if (previous != null && previous != token) {
         _pendingRemovals.add(previous);
       }
-    } catch (_) {}
+    } catch (_) {
+      _uncertain.add(token);
+    }
   }
 
   Future<void> _flushRemovals() async {
