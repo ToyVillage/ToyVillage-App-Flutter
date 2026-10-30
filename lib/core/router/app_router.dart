@@ -35,6 +35,7 @@ import 'package:toy_village_app/features/task/presentation/view/task_detail_view
 import 'package:toy_village_app/features/task/presentation/view/task_report_detail_view.dart';
 import 'package:toy_village_app/features/task/presentation/view/task_report_view.dart';
 import 'package:toy_village_app/features/task/presentation/view/task_view.dart';
+import 'package:toy_village_app/features/task_assignment/presentation/view/assignment_view.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -346,6 +347,10 @@ final GoRouter appRouter = GoRouter(
           },
         ),
       ],
+    ),
+    GoRoute(
+      path: '/task-assignment',
+      builder: (_, _) => const AssignmentView(),
     ),
   ],
 );
