@@ -169,7 +169,7 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
           ),
         ),
         const SizedBox(height: 24),
-        const ToyVillageLabel(label: '급여 날짜'),
+        const ToyVillageLabel(label: '마감 날짜'),
         const SizedBox(height: 12),
         Container(
           width: double.infinity,
