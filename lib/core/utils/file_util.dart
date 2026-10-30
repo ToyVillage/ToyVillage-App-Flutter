@@ -6,7 +6,7 @@ import 'package:toy_village_app/core/constants/svg_assets.dart';
 enum FileType {
   pdf(label: 'PDF', icon: SvgAssets.pdf, backgroundColor: ToyVillageColor.redBackground),
   jpg(label: 'JPG', icon: SvgAssets.jpg, backgroundColor: ToyVillageColor.yellowBackground),
-  png(label: 'PNG', icon: SvgAssets.png, backgroundColor: ToyVillageColor.greenBackground),
+  png(label: 'PNG', icon: SvgAssets.png, backgroundColor: ToyVillageColor.pngIconBackground),
   etc(label: 'FILE', icon: SvgAssets.etc, backgroundColor: ToyVillageColor.gray20);
 
   final String label;
