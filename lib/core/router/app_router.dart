@@ -35,6 +35,7 @@ import 'package:toy_village_app/features/task/presentation/view/task_detail_view
 import 'package:toy_village_app/features/task/presentation/view/task_report_detail_view.dart';
 import 'package:toy_village_app/features/task/presentation/view/task_report_view.dart';
 import 'package:toy_village_app/features/task/presentation/view/task_view.dart';
+import 'package:toy_village_app/features/task_assignment/data/model/assignment.dart';
 import 'package:toy_village_app/features/task_assignment/presentation/view/assignment_create_view.dart';
 import 'package:toy_village_app/features/task_assignment/presentation/view/assignment_detail_view.dart';
 import 'package:toy_village_app/features/task_assignment/presentation/view/assignment_report_view.dart';
@@ -357,7 +358,12 @@ final GoRouter appRouter = GoRouter(
       routes: [
         GoRoute(
           path: 'create',
-          builder: (_, _) => const AssignmentCreateView(),
+          builder: (context, state) {
+            final extra = state.extra;
+            return AssignmentCreateView(
+              assignment: extra is Assignment ? extra : null,
+            );
+          },
         ),
         GoRoute(
           path: 'detail',

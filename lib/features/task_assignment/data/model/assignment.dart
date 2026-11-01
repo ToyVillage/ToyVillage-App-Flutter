@@ -2,7 +2,7 @@ import 'package:toy_village_app/features/task/data/model/task_status.dart';
 
 enum AssignmentStatus {
   notStarted('시작 전'),
-  inProgress('진행중'),
+  inProgress('진행 중'),
   completed('완료');
 
   const AssignmentStatus(this.label);
@@ -17,6 +17,7 @@ class Assignment {
   final AssignmentStatus status;
   final TaskPriority priority;
   final DateTime dueDate;
+  final bool hasReport;
 
   const Assignment({
     required this.id,
@@ -25,6 +26,7 @@ class Assignment {
     required this.status,
     required this.priority,
     required this.dueDate,
+    this.hasReport = false,
   });
 }
 
@@ -36,6 +38,7 @@ final sampleAssignments = <Assignment>[
     status: AssignmentStatus.inProgress,
     priority: TaskPriority.low,
     dueDate: DateTime(2026, 11, 1),
+    hasReport: true,
   ),
   Assignment(
     id: 2,
@@ -52,6 +55,7 @@ final sampleAssignments = <Assignment>[
     status: AssignmentStatus.completed,
     priority: TaskPriority.low,
     dueDate: DateTime(2026, 11, 1),
+    hasReport: true,
   ),
 ];
 

@@ -11,12 +11,14 @@ class AssignmentCard extends StatelessWidget {
   final Assignment assignment;
   final VoidCallback onTap;
   final VoidCallback onDelete;
+  final VoidCallback onUpdate;
 
   const AssignmentCard({
     super.key,
     required this.assignment,
     required this.onTap,
     required this.onDelete,
+    required this.onUpdate
   });
 
   @override
@@ -45,13 +47,18 @@ class AssignmentCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         assignment.title,
-                        style: ToyVillageTextStyle.heading3,
+                        style: ToyVillageTextStyle.button2,
                       ),
                     ),
                     const SizedBox(width: 8),
                     MenuDropdown(
                       iconSize: 20,
                       items: [
+                        MenuDropdownItem(
+                          label: '수정',
+                          color: ToyVillageColor.gray100,
+                          onTap: onUpdate,
+                        ),
                         MenuDropdownItem(
                           label: '삭제',
                           color: ToyVillageColor.red,
@@ -64,13 +71,13 @@ class AssignmentCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   assignment.description,
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: ToyVillageTextStyle.caption3.copyWith(
                     color: ToyVillageColor.gray60,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     TagChip(
@@ -87,7 +94,7 @@ class AssignmentCard extends StatelessWidget {
                     const SizedBox(width: 6),
                     TagChip(
                       label: assignmentDueLabel(assignment.dueDate),
-                      textColor: ToyVillageColor.gray70,
+                      textColor: ToyVillageColor.gray90,
                       backgroundColor: ToyVillageColor.gray20,
                     ),
                   ],

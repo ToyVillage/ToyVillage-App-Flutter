@@ -1,13 +1,32 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
+import 'package:toy_village_app/core/widgets/dialog/delete_confirm_dialog.dart';
 import 'package:toy_village_app/core/widgets/text/title.dart';
+import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/task_assignment/data/model/assignment.dart';
 import 'package:toy_village_app/features/task_assignment/presentation/widget/assignment_card.dart';
 
 class AssignmentView extends StatelessWidget {
   const AssignmentView({super.key});
+
+  Future<void> _onRefresh() async {
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+  }
+
+  Future<void> _onDelete(BuildContext context, Assignment assignment) async {
+    if (assignment.hasReport) {
+      showTopToast(
+        Overlay.of(context),
+        '업무보고가 등록된 업무는 삭제할 수 없습니다',
+        isError: true,
+      );
+      return;
+    }
+    await showDeleteConfirmDialog(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,20 +49,34 @@ class AssignmentView extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 92),
-                      itemCount: sampleAssignments.length,
-                      itemBuilder: (context, index) {
-                        final assignment = sampleAssignments[index];
-                        return AssignmentCard(
-                          assignment: assignment,
-                          onTap: () => context.push(
-                            '/task-assignment/detail',
-                            extra: assignment.id,
+                    child: CustomScrollView(
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      slivers: [
+                        CupertinoSliverRefreshControl(onRefresh: _onRefresh),
+                        SliverPadding(
+                          padding: const EdgeInsets.only(bottom: 92),
+                          sliver: SliverList.builder(
+                            itemCount: sampleAssignments.length,
+                            itemBuilder: (context, index) {
+                              final assignment = sampleAssignments[index];
+                              return AssignmentCard(
+                                assignment: assignment,
+                                onTap: () => context.push(
+                                  '/task-assignment/detail',
+                                  extra: assignment.id,
+                                ),
+                                onDelete: () => _onDelete(context, assignment),
+                                onUpdate: () => context.push(
+                                  '/task-assignment/create',
+                                  extra: assignment,
+                                ),
+                              );
+                            },
                           ),
-                          onDelete: () {},
-                        );
-                      },
+                        ),
+                      ],
                     ),
                   ),
                 ],

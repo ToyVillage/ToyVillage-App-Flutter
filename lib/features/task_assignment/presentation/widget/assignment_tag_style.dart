@@ -7,7 +7,7 @@ TagStyle assignmentStatusTag(AssignmentStatus status) {
     case AssignmentStatus.notStarted:
       return (
         label: status.label,
-        text: ToyVillageColor.gray70,
+        text: ToyVillageColor.gray90,
         background: ToyVillageColor.gray20,
       );
     case AssignmentStatus.inProgress:
