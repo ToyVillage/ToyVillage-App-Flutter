@@ -21,7 +21,7 @@ class TagChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(25),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
         child: Text(
           label,
           style: ToyVillageTextStyle.button5.copyWith(color: textColor),
