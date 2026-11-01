@@ -22,12 +22,13 @@ class AssignmentReportView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(height: 32),
                   ToyVillageReadonlyField(
                     label: '내용',
                     value: '배고픈 우현이에게 복숭아 500g을 줬어요',
                     minLines: 4,
                   ),
-                  SizedBox(height: 24),
+                  SizedBox(height: 40),
                   ToyVillageReadonlyField(
                     label: '특이사항',
                     value: '알러지가 올라왔어요',
@@ -43,8 +44,11 @@ class AssignmentReportView extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: ToyVillageButton.outlined(
+                    child: ToyVillageButton(
                       label: '반려하기',
+                      background: ToyVillageColor.gray10,
+                      textColor: ToyVillageColor.red,
+                      border: Border.all(color: ToyVillageColor.red),
                       onTap: () => _showRejectDialog(context),
                     ),
                   ),
@@ -68,26 +72,27 @@ class AssignmentReportView extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => Dialog(
-        backgroundColor: ToyVillageColor.white,
+        backgroundColor: ToyVillageColor.gray10,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              const SizedBox(height: 12),
               Text(
                 '반려 사유를 입력해주세요',
-                style: ToyVillageTextStyle.subTitle3,
+                style: ToyVillageTextStyle.heading6,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               Container(
                 height: 140,
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: ToyVillageColor.gray10,
+                  color: ToyVillageColor.white,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: TextField(
@@ -99,7 +104,7 @@ class AssignmentReportView extends StatelessWidget {
                     isCollapsed: true,
                     border: InputBorder.none,
                     hintText: '반려 사유 입력',
-                    hintStyle: ToyVillageTextStyle.body5.copyWith(
+                    hintStyle: ToyVillageTextStyle.button5.copyWith(
                       color: ToyVillageColor.gray60,
                     ),
                   ),
@@ -115,13 +120,13 @@ class AssignmentReportView extends StatelessWidget {
                         height: 44,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: ToyVillageColor.gray20,
+                          color: ToyVillageColor.gray60,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           '취소',
                           style: ToyVillageTextStyle.button4.copyWith(
-                            color: ToyVillageColor.gray70,
+                            color: ToyVillageColor.white,
                           ),
                         ),
                       ),
@@ -138,7 +143,7 @@ class AssignmentReportView extends StatelessWidget {
                         height: 44,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: ToyVillageColor.white,
+                          color: ToyVillageColor.gray10,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: ToyVillageColor.red),
                         ),

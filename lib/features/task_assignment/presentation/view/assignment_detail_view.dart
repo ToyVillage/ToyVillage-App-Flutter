@@ -44,7 +44,7 @@ class AssignmentDetailView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(assignment.title, style: ToyVillageTextStyle.heading2),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   TagChip(
@@ -79,22 +79,16 @@ class AssignmentDetailView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SectionDivider(),
               Text(
                 '배고픈 우현이에게 복숭아 500g을 주세요',
                 style: ToyVillageTextStyle.body5,
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: SectionDivider(),
-              ),
+              const SectionDivider(),
               const AttachmentSection(files: _files),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: SectionDivider(),
-              ),
+              const SectionDivider(),
               Text('업무보고', style: ToyVillageTextStyle.subTitle4),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               for (final reporter in _reporters) _reportRow(context, reporter),
             ],
           ),
@@ -106,17 +100,23 @@ class AssignmentDetailView extends StatelessWidget {
   Widget _reportRow(BuildContext context, String name) {
     return InkWell(
       onTap: () => context.push('/task-assignment/report'),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Row(
-          children: [
-            Expanded(child: Text(name, style: ToyVillageTextStyle.body5)),
-            const Icon(
-              Symbols.chevron_right_rounded,
-              size: 18,
-              color: ToyVillageColor.gray60,
-            ),
-          ],
+      child: Container(
+        decoration: BoxDecoration(
+          color: ToyVillageColor.white,
+          borderRadius: BorderRadius.circular(8)
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Expanded(child: Text(name, style: ToyVillageTextStyle.body5)),
+              const Icon(
+                Symbols.chevron_right_rounded,
+                size: 18,
+                color: ToyVillageColor.gray60,
+              ),
+            ],
+          ),
         ),
       ),
     );
