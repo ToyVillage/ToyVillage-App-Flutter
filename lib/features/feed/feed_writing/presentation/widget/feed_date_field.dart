@@ -9,8 +9,14 @@ import 'package:toy_village_app/core/constants/text_style.dart';
 class FeedDateField extends StatefulWidget {
   final DateTime? value;
   final ValueChanged<DateTime> onChanged;
+  final bool selectTodayByDefault;
 
-  const FeedDateField({super.key, this.value, required this.onChanged});
+  const FeedDateField({
+    super.key,
+    this.value,
+    required this.onChanged,
+    this.selectTodayByDefault = false,
+  });
 
   @override
   State<FeedDateField> createState() => _FeedDateFieldState();
@@ -19,17 +25,20 @@ class FeedDateField extends StatefulWidget {
 class _FeedDateFieldState extends State<FeedDateField> {
   static const _weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 
+  DateTime? get _initialSelected =>
+      widget.value ?? (widget.selectTodayByDefault ? DateTime.now() : null);
+
   bool _open = false;
-  late DateTime _focusedDay = widget.value ?? DateTime.now();
-  late DateTime? _tempSelected = widget.value;
+  late DateTime _focusedDay = _initialSelected ?? DateTime.now();
+  late DateTime? _tempSelected = _initialSelected;
 
   void _toggle() {
     FocusScope.of(context).unfocus();
     setState(() {
       _open = !_open;
       if (_open) {
-        _tempSelected = widget.value;
-        _focusedDay = widget.value ?? DateTime.now();
+        _tempSelected = _initialSelected;
+        _focusedDay = _initialSelected ?? DateTime.now();
       }
     });
   }
