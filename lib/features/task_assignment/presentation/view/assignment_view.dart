@@ -96,43 +96,39 @@ class AssignmentView extends ConsumerWidget {
     WidgetRef ref,
     List<TaskModel> assignments,
   ) {
-    if (assignments.isEmpty) {
-      return PullToRefresh.child(
-        onRefresh: () => _onRefresh(ref),
-        child: const SizedBox(
-          height: 400,
-          child: EmptyState(message: '아직 생성한 업무가 없어요'),
-        ),
-      );
-    }
-
     return PullToRefresh(
       onRefresh: () => _onRefresh(ref),
       slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.only(bottom: 92),
-          sliver: SliverList.builder(
-            itemCount: assignments.length,
-            itemBuilder: (context, index) {
-              final assignment = assignments[index];
-              return AssignmentCard(
-                assignment: assignment,
-                onTap: () => context.push(
-                  '/task-assignment/detail',
-                  extra: assignment.id,
-                ),
-                onDelete: () => _onDelete(context, ref, assignment),
-                onUpdate: () async {
-                  await context.push(
-                    '/task-assignment/create',
+        if (assignments.isEmpty)
+          const SliverFillRemaining(
+            hasScrollBody: false,
+            child: EmptyState(message: '아직 생성한 업무가 없어요'),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.only(bottom: 92),
+            sliver: SliverList.builder(
+              itemCount: assignments.length,
+              itemBuilder: (context, index) {
+                final assignment = assignments[index];
+                return AssignmentCard(
+                  assignment: assignment,
+                  onTap: () => context.push(
+                    '/task-assignment/detail',
                     extra: assignment.id,
-                  );
-                  ref.invalidate(assignmentListViewModelProvider);
-                },
-              );
-            },
+                  ),
+                  onDelete: () => _onDelete(context, ref, assignment),
+                  onUpdate: () async {
+                    await context.push(
+                      '/task-assignment/create',
+                      extra: assignment.id,
+                    );
+                    ref.invalidate(assignmentListViewModelProvider);
+                  },
+                );
+              },
+            ),
           ),
-        ),
       ],
     );
   }
