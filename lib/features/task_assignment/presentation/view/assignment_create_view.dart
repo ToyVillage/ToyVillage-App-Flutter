@@ -31,7 +31,10 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   final _searchController = TextEditingController();
+  final _searchFocus = FocusNode();
   final Set<String> _selected = {};
+  final _dropdownLink = LayerLink();
+  final _dropdownController = OverlayPortalController();
 
   @override
   void initState() {
@@ -43,6 +46,7 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
       _priority = assignment.priority;
       _dueDate = assignment.dueDate;
     }
+    _searchFocus.addListener(_onSearchFocusChange);
   }
 
   @override
@@ -50,15 +54,47 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
     _titleController.dispose();
     _contentController.dispose();
     _searchController.dispose();
+    _searchFocus.removeListener(_onSearchFocusChange);
+    _searchFocus.dispose();
     super.dispose();
   }
 
+  void _onSearchFocusChange() {
+    setState(() {
+      if (_searchFocus.hasFocus) {
+        _updateDropdown();
+      } else if (_dropdownController.isShowing) {
+        _dropdownController.hide();
+      }
+    });
+  }
+
   void _back() {
+    if (_step == 2 && _dropdownController.isShowing) {
+      _dropdownController.hide();
+    }
     if (_step == 0) {
       context.pop();
       return;
     }
     setState(() => _step -= 1);
+  }
+
+  bool _hasCandidate(String keyword) {
+    return _employees.any(
+      (name) => !_selected.contains(name) && _matchStart(name, keyword) >= 0,
+    );
+  }
+
+  void _updateDropdown() {
+    final keyword = _searchController.text.trim();
+    final shouldShow =
+        _searchFocus.hasFocus && keyword.isNotEmpty && _hasCandidate(keyword);
+    if (shouldShow && !_dropdownController.isShowing) {
+      _dropdownController.show();
+    } else if (!shouldShow && _dropdownController.isShowing) {
+      _dropdownController.hide();
+    }
   }
 
   void _toast(String message) {
@@ -224,6 +260,7 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
         const SizedBox(height: 12),
         FeedDateField(
           value: _dueDate,
+          selectTodayByDefault: true,
           onChanged: (date) => setState(() => _dueDate = date),
         ),
       ],
@@ -253,79 +290,169 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
   }
 
   Widget _stepEmployees() {
-    final keyword = _searchController.text.trim();
-    final results = [
+    final selected = [
       for (final name in _employees)
-        if (keyword.isNotEmpty && name.contains(keyword)) name,
+        if (_selected.contains(name)) name,
     ];
+
+    const searchBarHeight = 52.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _prompt('업무를 지시할 직원을 선택해주세요'),
-        Container(
-          decoration: BoxDecoration(
-            color: ToyVillageColor.white,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              const Icon(
-                Symbols.search_rounded,
-                size: 16,
-                color: ToyVillageColor.gray60,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (_) => setState(() {}),
-                  style: ToyVillageTextStyle.body5,
-                  decoration: InputDecoration(
-                    isCollapsed: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                    border: InputBorder.none,
-                    hintText: '직원 이름으로 검색',
-                    hintStyle: ToyVillageTextStyle.body5.copyWith(
-                      color: ToyVillageColor.gray60,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+        CompositedTransformTarget(
+          link: _dropdownLink,
+          child: OverlayPortal(
+            controller: _dropdownController,
+            overlayChildBuilder: (context) => _dropdownOverlay(),
+            child: _searchBar(searchBarHeight),
           ),
         ),
-        const SizedBox(height: 20),
-        if (results.isEmpty)
-          const Padding(
-            padding: EdgeInsets.only(top: 160),
-            child: Center(
-              child: Text(
-                '아직 업무를 받은 직원이 없어요',
-                style: TextStyle(color: ToyVillageColor.gray60),
-              ),
-            ),
-          )
-        else
-          Container(
-            decoration: BoxDecoration(
-              color: ToyVillageColor.white,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Column(
-              children: [
-                for (final name in results) _employeeRow(name),
-              ],
-            ),
+        if (selected.isNotEmpty) ...[
+          const SizedBox(height: 32),
+          Column(
+            spacing: 8,
+            children: [
+              for (final name in selected)
+                _employeeCard(_employeeRow(name, keyword: '', added: true)),
+            ],
           ),
+        ],
       ],
     );
   }
 
-  Widget _employeeRow(String name) {
-    final added = _selected.contains(name);
+  Widget _dropdownOverlay() {
+    final keyword = _searchController.text.trim();
+    final candidates = [
+      for (final name in _employees)
+        if (!_selected.contains(name) && _matchStart(name, keyword) >= 0) name,
+    ];
+    if (keyword.isEmpty || candidates.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final width = MediaQuery.of(context).size.width - 40;
+    return CompositedTransformFollower(
+      link: _dropdownLink,
+      targetAnchor: Alignment.bottomLeft,
+      followerAnchor: Alignment.topLeft,
+      showWhenUnlinked: false,
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: width,
+          child: _employeeCard(
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final name in candidates)
+                    _employeeRow(name, keyword: keyword, added: false),
+                ],
+              ),
+            ),
+            shadow: true,
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(8),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _searchBar(double height) {
+    final connected = _dropdownController.isShowing;
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        color: ToyVillageColor.white,
+        borderRadius: connected
+            ? const BorderRadius.vertical(top: Radius.circular(8))
+            : BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          const Icon(
+            Symbols.search_rounded,
+            size: 16,
+            color: ToyVillageColor.gray60,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+              focusNode: _searchFocus,
+              onChanged: (_) => setState(_updateDropdown),
+              style: ToyVillageTextStyle.body5,
+              decoration: InputDecoration(
+                isCollapsed: true,
+                border: InputBorder.none,
+                hintText: '직원 이름으로 검색',
+                hintStyle: ToyVillageTextStyle.body5.copyWith(
+                  color: ToyVillageColor.gray60,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _employeeCard(
+    Widget child, {
+    bool shadow = false,
+    BorderRadius? borderRadius,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: ToyVillageColor.white,
+        borderRadius: borderRadius ?? BorderRadius.circular(8),
+        boxShadow: shadow
+            ? [
+                BoxShadow(
+                  color: ToyVillageColor.gray100.withValues(alpha: 0.08),
+                  blurRadius: 8,
+                  spreadRadius: -4,
+                  offset: const Offset(0, 6),
+                ),
+              ]
+            : null,
+      ),
+      child: child,
+    );
+  }
+
+  Widget _highlightedName(String name, String keyword) {
+    final start = _matchStart(name, keyword);
+    if (start < 0) {
+      return Text(name, style: ToyVillageTextStyle.body5);
+    }
+    final end = start + keyword.length;
+    return Text.rich(
+      TextSpan(
+        style: ToyVillageTextStyle.body5,
+        children: [
+          TextSpan(text: name.substring(0, start)),
+          TextSpan(
+            text: name.substring(start, end),
+            style: const TextStyle(color: ToyVillageColor.blue),
+          ),
+          TextSpan(text: name.substring(end)),
+        ],
+      ),
+    );
+  }
+
+  Widget _employeeRow(
+    String name, {
+    required String keyword,
+    required bool added,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -333,24 +460,32 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
           Container(
             width: 36,
             height: 36,
+            alignment: Alignment.center,
             decoration: const BoxDecoration(
               color: ToyVillageColor.gray20,
               shape: BoxShape.circle,
             ),
+            child: Text(
+              name.isEmpty ? '' : name.characters.first,
+              style: ToyVillageTextStyle.button5.copyWith(
+                color: ToyVillageColor.gray70,
+              ),
+            ),
           ),
           const SizedBox(width: 10),
-          Expanded(
-            child: Text(name, style: ToyVillageTextStyle.body5),
-          ),
+          Expanded(child: _highlightedName(name, keyword)),
           GestureDetector(
-            onTap: () => setState(() {
-              added ? _selected.remove(name) : _selected.add(name);
-            }),
+            onTap: () {
+              setState(() {
+                added ? _selected.remove(name) : _selected.add(name);
+              });
+              _updateDropdown();
+            },
             child: added
                 ? const Icon(
                     Symbols.close_rounded,
                     size: 24,
-                    color: ToyVillageColor.gray60,
+                    color: ToyVillageColor.red,
                   )
                 : Container(
                     decoration: BoxDecoration(
@@ -382,5 +517,24 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
         ],
       ),
     );
+  }
+
+  int _matchStart(String name, String keyword) {
+    if (keyword.isEmpty) return -1;
+    final direct = name.indexOf(keyword);
+    if (direct >= 0) return direct;
+    final choseong = name.split('').map(_choseong).join();
+    return choseong.indexOf(keyword);
+  }
+
+  static const _choseongList = [
+    'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ',
+    'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ',
+  ];
+
+  String _choseong(String char) {
+    final code = char.codeUnitAt(0);
+    if (code < 0xAC00 || code > 0xD7A3) return char;
+    return _choseongList[(code - 0xAC00) ~/ 588];
   }
 }
