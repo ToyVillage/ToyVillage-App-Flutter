@@ -31,3 +31,38 @@ String assignmentFinishLabel(DateTime? date) {
   final day = date.day.toString().padLeft(2, '0');
   return '$month.$day 까지';
 }
+
+TagStyle assignmentReportStatusTag(ReportStatus status) {
+  switch (status) {
+    case ReportStatus.approved:
+      return (
+        label: '완료',
+        text: ToyVillageColor.green,
+        background: ToyVillageColor.greenBackground,
+      );
+    case ReportStatus.rejected:
+      return (
+        label: '반려',
+        text: ToyVillageColor.red,
+        background: ToyVillageColor.redBackground,
+      );
+    case ReportStatus.pending:
+      return (
+        label: '심사대기',
+        text: ToyVillageColor.yellow,
+        background: ToyVillageColor.yellowBackground,
+      );
+    case ReportStatus.resubmit:
+      return (
+        label: '재심사대기',
+        text: ToyVillageColor.yellow,
+        background: ToyVillageColor.yellowBackground,
+      );
+    case ReportStatus.missing:
+      return (
+        label: '미제출',
+        text: ToyVillageColor.gray70,
+        background: ToyVillageColor.gray20,
+      );
+  }
+}

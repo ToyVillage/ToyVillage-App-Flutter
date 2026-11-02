@@ -42,10 +42,7 @@ class AssignmentDetailView extends ConsumerWidget {
       for (final file in detail.files)
         (fileName: file.fileName, fileKey: file.fileKey),
     ];
-    final reports = [
-      for (final report in detail.reports)
-        if (report.workReportId != null) report,
-    ];
+    final reports = detail.reports;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
@@ -121,15 +118,20 @@ class AssignmentDetailView extends ConsumerWidget {
     WidgetRef ref,
     TaskReportSummary report,
   ) {
-    final tag = reportStatusTag(report.status);
+    final tag = assignmentReportStatusTag(report.status);
+    final workReportId = report.workReportId;
+    final tappable = workReportId != null;
+
     return InkWell(
-      onTap: () async {
-        await context.push(
-          '/task-assignment/report',
-          extra: report.workReportId,
-        );
-        ref.invalidate(assignmentDetailViewModelProvider(id));
-      },
+      onTap: tappable
+          ? () async {
+              await context.push(
+                '/task-assignment/report',
+                extra: workReportId,
+              );
+              ref.invalidate(assignmentDetailViewModelProvider(id));
+            }
+          : null,
       child: Container(
         decoration: BoxDecoration(
           color: ToyVillageColor.white,
@@ -146,12 +148,14 @@ class AssignmentDetailView extends ConsumerWidget {
                 textColor: tag.text,
                 backgroundColor: tag.background,
               ),
-              const SizedBox(width: 8),
-              const Icon(
-                Symbols.chevron_right_rounded,
-                size: 18,
-                color: ToyVillageColor.gray60,
-              ),
+              if (tappable) ...[
+                const SizedBox(width: 8),
+                const Icon(
+                  Symbols.chevron_right_rounded,
+                  size: 18,
+                  color: ToyVillageColor.gray60,
+                ),
+              ],
             ],
           ),
         ),
