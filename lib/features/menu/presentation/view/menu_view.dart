@@ -24,6 +24,8 @@ class MenuView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isMiddleAdmin =
+        ref.read(tokenStoreProvider).role == 'MIDDLE_ADMIN';
     return Scaffold(
       appBar: const ToyVillageAppBar(),
       body: SafeArea(
@@ -69,11 +71,12 @@ class MenuView extends ConsumerWidget {
                         title: '먹이 급여 기록 확인하기',
                         onTap: () => context.push('/feed-info'),
                       ),
-                      MenuCard(
-                        icon: SvgAssets.navTask,
-                        title: '업무 관리',
-                        onTap: () => context.push('/task-assignment'),
-                      ),
+                      if (isMiddleAdmin)
+                        MenuCard(
+                          icon: SvgAssets.navTask,
+                          title: '업무 관리',
+                          onTap: () => context.push('/task-assignment'),
+                        ),
                       MenuCard(
                         icon: SvgAssets.lock,
                         title: '비밀번호 변경하기',

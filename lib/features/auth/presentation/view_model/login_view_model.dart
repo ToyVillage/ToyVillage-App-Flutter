@@ -18,15 +18,17 @@ class LoginViewModel extends AsyncNotifier<void> {
   }) async {
     state = const AsyncLoading();
     try {
-      final tokens = await ref
+      final result = await ref
           .read(authRepositoryProvider)
           .login(username: username, password: password);
-      await ref
-          .read(tokenStoreProvider)
-          .setTokens(
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-          );
+      final store = ref.read(tokenStoreProvider);
+      await store.setTokens(
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      );
+      if (result.role != null) {
+        await store.setRole(result.role!);
+      }
       await ref.read(fcmTokenSyncProvider).start();
       state = const AsyncData(null);
       return true;

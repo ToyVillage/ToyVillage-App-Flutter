@@ -3,14 +3,23 @@ import 'package:shared_preferences/shared_preferences.dart';
 class TokenStore {
   static const _accessKey = 'access_token';
   static const _refreshKey = 'refresh_token';
+  static const _roleKey = 'user_role';
 
   String? accessToken;
   String? refreshToken;
+  String? role;
 
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
     accessToken = prefs.getString(_accessKey);
     refreshToken = prefs.getString(_refreshKey);
+    role = prefs.getString(_roleKey);
+  }
+
+  Future<void> setRole(String role) async {
+    this.role = role;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_roleKey, role);
   }
 
   Future<void> setTokens({
@@ -34,11 +43,13 @@ class TokenStore {
     final results = await Future.wait([
       prefs.remove(_accessKey),
       prefs.remove(_refreshKey),
+      prefs.remove(_roleKey),
     ]);
     if (results.any((ok) => !ok)) {
       throw StateError('토큰 삭제에 실패했습니다');
     }
     accessToken = null;
     refreshToken = null;
+    role = null;
   }
 }
