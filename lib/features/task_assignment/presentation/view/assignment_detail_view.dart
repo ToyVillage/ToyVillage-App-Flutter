@@ -89,7 +89,20 @@ class AssignmentDetailView extends StatelessWidget {
               const SectionDivider(),
               Text('업무보고', style: ToyVillageTextStyle.subTitle4),
               const SizedBox(height: 12),
-              for (final reporter in _reporters) _reportRow(context, reporter),
+              if (assignment.hasReport)
+                for (final reporter in _reporters) _reportRow(context, reporter)
+              else
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Center(
+                    child: Text(
+                      '아직 등록된 업무보고가 없어요',
+                      style: ToyVillageTextStyle.body5.copyWith(
+                        color: ToyVillageColor.gray60,
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
