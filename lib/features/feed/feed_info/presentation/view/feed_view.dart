@@ -111,11 +111,12 @@ class FeedView extends ConsumerWidget {
                 '${formatFeedAmount(detail.remainingAmount)} ${feedUnitLabel(detail.feedUnit)}',
               ),
             ),
-            ToyVillageReadonlyField(
-              label: '특이사항',
-              value: detail.significant,
-              minLines: 3,
-            ),
+            if (detail.significant.isNotEmpty)
+              ToyVillageReadonlyField(
+                label: '특이사항',
+                value: detail.significant,
+                minLines: 3,
+              ),
             const SizedBox(height: 10),
           ],
         );
