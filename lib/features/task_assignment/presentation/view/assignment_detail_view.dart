@@ -29,13 +29,13 @@ class AssignmentDetailView extends ConsumerWidget {
           value: ref.watch(assignmentDetailViewModelProvider(id)),
           onRetry: () =>
               ref.invalidate(assignmentDetailViewModelProvider(id)),
-          data: (detail) => _content(context, detail),
+          data: (detail) => _content(context, ref, detail),
         ),
       ),
     );
   }
 
-  Widget _content(BuildContext context, TaskDetailModel detail) {
+  Widget _content(BuildContext context, WidgetRef ref, TaskDetailModel detail) {
     final status = assignmentTaskStatusTag(detail.status);
     final priority = taskPriorityTag(detail.priority);
     final files = [
@@ -98,7 +98,7 @@ class AssignmentDetailView extends ConsumerWidget {
           Text('업무보고', style: ToyVillageTextStyle.subTitle4),
           const SizedBox(height: 12),
           if (reports.isNotEmpty)
-            for (final report in reports) _reportRow(context, report)
+            for (final report in reports) _reportRow(context, ref, report)
           else
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
@@ -116,13 +116,20 @@ class AssignmentDetailView extends ConsumerWidget {
     );
   }
 
-  Widget _reportRow(BuildContext context, TaskReportSummary report) {
+  Widget _reportRow(
+    BuildContext context,
+    WidgetRef ref,
+    TaskReportSummary report,
+  ) {
     final tag = reportStatusTag(report.status);
     return InkWell(
-      onTap: () => context.push(
-        '/task-assignment/report',
-        extra: report.workReportId,
-      ),
+      onTap: () async {
+        await context.push(
+          '/task-assignment/report',
+          extra: report.workReportId,
+        );
+        ref.invalidate(assignmentDetailViewModelProvider(id));
+      },
       child: Container(
         decoration: BoxDecoration(
           color: ToyVillageColor.white,

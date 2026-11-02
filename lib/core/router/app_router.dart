@@ -372,7 +372,11 @@ final GoRouter appRouter = GoRouter(
         ),
         GoRoute(
           path: 'report',
-          builder: (_, _) => const AssignmentReportView(),
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra is! int) return _invalidAccess;
+            return AssignmentReportView(workReportId: extra);
+          },
         ),
       ],
     ),
