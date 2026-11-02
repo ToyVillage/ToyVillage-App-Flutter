@@ -95,7 +95,26 @@ class AssignmentDetailView extends ConsumerWidget {
           Text('업무보고', style: ToyVillageTextStyle.subTitle4),
           const SizedBox(height: 12),
           if (reports.isNotEmpty)
-            for (final report in reports) _reportRow(context, ref, report)
+            Container(
+              decoration: BoxDecoration(
+                color: ToyVillageColor.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  for (var i = 0; i < reports.length; i++) ...[
+                    if (i > 0)
+                      const Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: ToyVillageColor.gray20,
+                      ),
+                    _reportRow(context, ref, reports[i]),
+                  ],
+                ],
+              ),
+            )
           else
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
@@ -132,32 +151,25 @@ class AssignmentDetailView extends ConsumerWidget {
               ref.invalidate(assignmentDetailViewModelProvider(id));
             }
           : null,
-      child: Container(
-        decoration: BoxDecoration(
-          color: ToyVillageColor.white,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        margin: const EdgeInsets.only(bottom: 8),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Expanded(child: Text(report.name, style: ToyVillageTextStyle.body5)),
-              TagChip(
-                label: tag.label,
-                textColor: tag.text,
-                backgroundColor: tag.background,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(child: Text(report.name, style: ToyVillageTextStyle.body5)),
+            TagChip(
+              label: tag.label,
+              textColor: tag.text,
+              backgroundColor: tag.background,
+            ),
+            if (tappable) ...[
+              const SizedBox(width: 8),
+              const Icon(
+                Symbols.chevron_right_rounded,
+                size: 18,
+                color: ToyVillageColor.gray60,
               ),
-              if (tappable) ...[
-                const SizedBox(width: 8),
-                const Icon(
-                  Symbols.chevron_right_rounded,
-                  size: 18,
-                  color: ToyVillageColor.gray60,
-                ),
-              ],
             ],
-          ),
+          ],
         ),
       ),
     );
