@@ -40,11 +40,11 @@ class ToyVillageButton extends StatelessWidget {
           border: border,
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 15.5),
+          padding: const EdgeInsets.symmetric(vertical: 16.5),
           child: Center(
             child: Text(
               label,
-              style: ToyVillageTextStyle.button3.copyWith(color: textColor),
+              style: ToyVillageTextStyle.button4.copyWith(color: textColor),
             ),
           ),
         ),

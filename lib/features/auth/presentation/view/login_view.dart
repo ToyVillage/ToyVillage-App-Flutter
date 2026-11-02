@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
+import 'package:toy_village_app/core/notification/fcm_service.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
 import 'package:toy_village_app/features/auth/presentation/view_model/password_prompt_provider.dart';
@@ -47,6 +48,8 @@ class _LoginViewState extends ConsumerState<LoginView> {
     }
     ref.read(passwordChangePromptProvider.notifier).set(username == password);
     context.go('/notice');
+    final noticeId = FcmService.instance.takeInitialNoticeId();
+    if (noticeId != null) FcmService.instance.navigateToNotice(noticeId);
   }
 
   @override

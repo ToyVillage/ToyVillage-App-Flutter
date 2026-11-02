@@ -8,7 +8,7 @@ class SectionDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Padding(
       padding: EdgeInsets.symmetric(vertical: 24),
-      child: Divider(thickness: 1, color: ToyVillageColor.gray60),
+      child: Divider(thickness: 1, color: ToyVillageColor.gray30),
     );
   }
 }
