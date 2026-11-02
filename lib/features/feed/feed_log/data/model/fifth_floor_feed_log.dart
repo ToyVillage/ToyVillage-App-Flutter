@@ -1,8 +1,4 @@
-String _formatFeedDate(DateTime date) {
-  final month = date.month.toString().padLeft(2, '0');
-  final day = date.day.toString().padLeft(2, '0');
-  return '${date.year}-$month-$day';
-}
+import 'package:toy_village_app/core/utils/time_util.dart';
 
 class FifthFloorFeedLogSummary {
   final int feedId;
@@ -33,7 +29,7 @@ class FifthFloorFeedLog {
   final String feedType;
   final double feedAmount;
   final String feedUnit;
-  final DateTime feedDate;
+  final DateTime feedDateTime;
 
   const FifthFloorFeedLog({
     required this.feedLogId,
@@ -41,7 +37,7 @@ class FifthFloorFeedLog {
     required this.feedType,
     required this.feedAmount,
     required this.feedUnit,
-    required this.feedDate,
+    required this.feedDateTime,
   });
 
   factory FifthFloorFeedLog.fromJson(Map<String, dynamic> json) {
@@ -51,7 +47,7 @@ class FifthFloorFeedLog {
       feedType: json['feedType'] as String? ?? '',
       feedAmount: (json['feedAmount'] as num).toDouble(),
       feedUnit: json['feedUnit'] as String? ?? 'GML',
-      feedDate: DateTime.parse(json['feedDate'] as String),
+      feedDateTime: parseServerTime(json['feedDateTime'] as String),
     );
   }
 }
@@ -61,14 +57,14 @@ class FifthFloorFeedLogDetail {
   final String feedType;
   final double feedAmount;
   final String feedUnit;
-  final DateTime feedDate;
+  final DateTime feedDateTime;
 
   const FifthFloorFeedLogDetail({
     required this.feedLogId,
     required this.feedType,
     required this.feedAmount,
     required this.feedUnit,
-    required this.feedDate,
+    required this.feedDateTime,
   });
 
   factory FifthFloorFeedLogDetail.fromJson(Map<String, dynamic> json) {
@@ -77,26 +73,26 @@ class FifthFloorFeedLogDetail {
       feedType: json['feedType'] as String? ?? '',
       feedAmount: (json['feedAmount'] as num).toDouble(),
       feedUnit: json['feedUnit'] as String? ?? 'GML',
-      feedDate: DateTime.parse(json['feedDate'] as String),
+      feedDateTime: parseServerTime(json['feedDateTime'] as String),
     );
   }
 }
 
 class FifthFloorFeedLogRequest {
-  final DateTime feedDate;
+  final DateTime feedDateTime;
   final String feedType;
   final double feedAmount;
   final String feedUnit;
 
   const FifthFloorFeedLogRequest({
-    required this.feedDate,
+    required this.feedDateTime,
     required this.feedType,
     required this.feedAmount,
     required this.feedUnit,
   });
 
   Map<String, dynamic> toJson() => {
-    'feedDate': _formatFeedDate(feedDate),
+    'feedDateTime': feedDateTime.toIso8601String(),
     'feedType': feedType,
     'feedAmount': feedAmount,
     'feedUnit': feedUnit,
