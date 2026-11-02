@@ -26,4 +26,6 @@ class ApiEndpoints {
   static const feedLog = '/feed-log';
 
   static const fcmToken = '/app/fcm/token';
+
+  static const employees = '/app/admin/employees';
 }
