@@ -241,8 +241,12 @@ class _AssignmentCreateViewState extends ConsumerState<AssignmentCreateView> {
   }
 
   Widget _form() {
-    _employees =
-        ref.watch(employeeListViewModelProvider).asData?.value ?? const [];
+    _employees = [
+      for (final employee
+          in ref.watch(employeeListViewModelProvider).asData?.value ??
+              const <Employee>[])
+        if (employee.isEmployee) employee,
+    ];
 
     return GestureDetector(
       onTap: FocusScope.of(context).unfocus,
