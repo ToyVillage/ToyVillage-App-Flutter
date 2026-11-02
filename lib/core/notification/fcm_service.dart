@@ -100,16 +100,16 @@ class FcmService {
             ? null
             : NotificationRoute(path: '/task/detail', extra: id);
       case 'TASK_COMPLETED':
-        final id = _intOf(data, 'workReportId');
+        final id = _intOf(data, 'taskId');
         return id == null
             ? null
-            : NotificationRoute(path: '/task-assignment/report', extra: id);
+            : NotificationRoute(path: '/task-assignment/detail', extra: id);
       case 'TASK_REJECTED':
       case 'TASK_APPROVED':
         final id = _intOf(data, 'taskId');
         return id == null
             ? null
-            : NotificationRoute(path: '/task/report/detail', extra: id);
+            : NotificationRoute(path: '/task/detail', extra: id);
       default:
         final id = _intOf(data, 'noticeId') ?? _intOf(data, 'id');
         return id == null
