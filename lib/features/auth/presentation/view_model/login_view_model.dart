@@ -27,7 +27,10 @@ class LoginViewModel extends AsyncNotifier<void> {
         refreshToken: result.refreshToken,
       );
       if (result.role != null) {
-        await store.setRole(result.role!);
+        await store.setProfile(
+          role: result.role!,
+          name: result.name ?? '',
+        );
       }
       await ref.read(fcmTokenSyncProvider).start();
       state = const AsyncData(null);

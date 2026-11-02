@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/svg_assets.dart';
+import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/network/dio_provider.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
-import 'package:toy_village_app/core/widgets/text/title.dart';
 import 'package:toy_village_app/features/menu/presentation/widget/logout_confirm_sheet.dart';
 import 'package:toy_village_app/features/notification/presentation/fcm_token_sync.dart';
 import 'package:toy_village_app/features/menu/presentation/widget/menu_card.dart';
@@ -22,10 +22,27 @@ class MenuView extends ConsumerWidget {
     context.go('/login');
   }
 
+  String _roleLabel(String? role) {
+    switch (role) {
+      case 'EMPLOYEE':
+        return '사원';
+      case 'MIDDLE_ADMIN':
+      case 'APP_ADMIN':
+        return '관리자';
+      default:
+        return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isMiddleAdmin =
-        ref.read(tokenStoreProvider).role == 'MIDDLE_ADMIN';
+    final store = ref.read(tokenStoreProvider);
+    final isMiddleAdmin = store.role == 'MIDDLE_ADMIN';
+    final name = store.name ?? '';
+    final displayName = [
+      name,
+      _roleLabel(store.role),
+    ].where((part) => part.isNotEmpty).join(' ');
     return Scaffold(
       appBar: const ToyVillageAppBar(),
       body: SafeArea(
@@ -34,11 +51,28 @@ class MenuView extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.only(bottom: 24),
-                child: ToyVillageTitle(
-                  title: '메뉴',
-                  subTitle: '토이빌리지의 더 많은 기능들',
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                        color: ToyVillageColor.gray20,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        name.isEmpty ? '' : name.characters.first,
+                        style: ToyVillageTextStyle.subTitle3.copyWith(
+                          color: ToyVillageColor.gray70,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(displayName, style: ToyVillageTextStyle.subTitle2),
+                  ],
                 ),
               ),
               Expanded(

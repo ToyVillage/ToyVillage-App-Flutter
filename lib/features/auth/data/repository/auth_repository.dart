@@ -10,6 +10,7 @@ typedef AuthLoginResult = ({
   String accessToken,
   String refreshToken,
   String? role,
+  String? name,
 });
 
 class AuthRepository {
@@ -30,6 +31,7 @@ class AuthRepository {
       accessToken: data['access_token'] as String,
       refreshToken: data['refresh_token'] as String,
       role: data['role'] as String?,
+      name: data['name'] as String?,
     );
   }
 
