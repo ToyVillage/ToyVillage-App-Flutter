@@ -9,8 +9,15 @@ import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/task_assignment/data/model/assignment.dart';
 import 'package:toy_village_app/features/task_assignment/presentation/widget/assignment_card.dart';
 
-class AssignmentView extends StatelessWidget {
+class AssignmentView extends StatefulWidget {
   const AssignmentView({super.key});
+
+  @override
+  State<AssignmentView> createState() => _AssignmentViewState();
+}
+
+class _AssignmentViewState extends State<AssignmentView> {
+  final List<Assignment> _assignments = List.of(sampleAssignments);
 
   Future<void> _onRefresh() async {
     await Future<void>.delayed(const Duration(milliseconds: 600));
@@ -25,7 +32,10 @@ class AssignmentView extends StatelessWidget {
       );
       return;
     }
-    await showDeleteConfirmDialog(context);
+    final confirmed = await showDeleteConfirmDialog(context);
+    if (confirmed) {
+      setState(() => _assignments.remove(assignment));
+    }
   }
 
   @override
@@ -58,9 +68,9 @@ class AssignmentView extends StatelessWidget {
                         SliverPadding(
                           padding: const EdgeInsets.only(bottom: 92),
                           sliver: SliverList.builder(
-                            itemCount: sampleAssignments.length,
+                            itemCount: _assignments.length,
                             itemBuilder: (context, index) {
-                              final assignment = sampleAssignments[index];
+                              final assignment = _assignments[index];
                               return AssignmentCard(
                                 assignment: assignment,
                                 onTap: () => context.push(
