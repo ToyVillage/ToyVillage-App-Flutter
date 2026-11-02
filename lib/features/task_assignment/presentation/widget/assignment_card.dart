@@ -25,7 +25,12 @@ class AssignmentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final status = assignmentTaskStatusTag(assignment.status);
     final priority = taskPriorityTag(assignment.priority);
-    final assigneeNames = assignment.assignees.map((a) => a.name).join(', ');
+    final assignees = assignment.assignees;
+    final assigneeLabel = assignees.isEmpty
+        ? '담당자 없음'
+        : assignees.length == 1
+        ? assignees.first.name
+        : '${assignees.first.name} 외 ${assignees.length - 1}명';
 
     return GestureDetector(
       onTap: onTap,
@@ -71,9 +76,8 @@ class AssignmentCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  assigneeNames.isEmpty ? '담당자 없음' : assigneeNames,
+                  assigneeLabel,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: ToyVillageTextStyle.caption3.copyWith(
                     color: ToyVillageColor.gray60,
                   ),
