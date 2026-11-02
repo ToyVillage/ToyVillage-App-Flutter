@@ -10,8 +10,11 @@ import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_date_field.dart';
+import 'package:toy_village_app/features/task/data/model/report_attachment.dart';
 import 'package:toy_village_app/features/task/data/model/task_detail_model.dart';
 import 'package:toy_village_app/features/task/data/model/task_status.dart';
+import 'package:toy_village_app/features/task/presentation/widget/attachment_editor.dart';
+import 'package:toy_village_app/features/task/presentation/widget/attachment_picker.dart';
 import 'package:toy_village_app/features/task_assignment/data/model/assignment_request.dart';
 import 'package:toy_village_app/features/task_assignment/data/model/employee.dart';
 import 'package:toy_village_app/features/task_assignment/presentation/view_model/assignment_detail_view_model.dart';
@@ -42,6 +45,8 @@ class _AssignmentCreateViewState extends ConsumerState<AssignmentCreateView> {
   final _searchController = TextEditingController();
   final _searchFocus = FocusNode();
   final Set<int> _selected = {};
+  List<ReportAttachment> _files = [];
+  bool _uploadingFile = false;
   List<Employee> _employees = const [];
   final _dropdownLink = LayerLink();
   final _dropdownController = OverlayPortalController();
@@ -71,7 +76,29 @@ class _AssignmentCreateViewState extends ConsumerState<AssignmentCreateView> {
     _selected
       ..clear()
       ..addAll(detail.assignees.map((a) => a.id));
+    _files = [
+      for (final file in detail.files)
+        ReportAttachment(fileName: file.fileName, fileKey: file.fileKey),
+    ];
     _prefilled = true;
+  }
+
+  Future<void> _addAttachment() async {
+    if (_uploadingFile) return;
+    setState(() => _uploadingFile = true);
+    try {
+      final attachment = await pickAndUploadAttachment(context, ref);
+      if (!mounted) return;
+      if (attachment != null) {
+        setState(() => _files = [..._files, attachment]);
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingFile = false);
+    }
+  }
+
+  void _deleteAttachment(int index) {
+    setState(() => _files = [..._files]..removeAt(index));
   }
 
   void _onSearchFocusChange() {
@@ -174,6 +201,7 @@ class _AssignmentCreateViewState extends ConsumerState<AssignmentCreateView> {
       assigneeIds: _selected.toList(),
       finishDate: _dueDate!,
       priority: _priority!,
+      files: _files.isEmpty ? null : _files.map((f) => f.fileKey).toList(),
     );
 
     final notifier = ref.read(assignmentMutationViewModelProvider.notifier);
@@ -309,6 +337,15 @@ class _AssignmentCreateViewState extends ConsumerState<AssignmentCreateView> {
           hintText: '상세 업무 내용',
           controller: _contentController,
           minLines: 7,
+        ),
+        const SizedBox(height: 24),
+        const ToyVillageLabel(label: '첨부파일', isOptional: true),
+        const SizedBox(height: 8),
+        AttachmentEditor(
+          files: _files,
+          onAdd: _addAttachment,
+          onDelete: _deleteAttachment,
+          uploading: _uploadingFile,
         ),
       ],
     );
