@@ -3,12 +3,12 @@ import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/dropdown/menu_dropdown.dart';
 import 'package:toy_village_app/core/widgets/tag_chip.dart';
+import 'package:toy_village_app/features/task/data/model/task_model.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_tag_style.dart';
-import 'package:toy_village_app/features/task_assignment/data/model/assignment.dart';
 import 'package:toy_village_app/features/task_assignment/presentation/widget/assignment_tag_style.dart';
 
 class AssignmentCard extends StatelessWidget {
-  final Assignment assignment;
+  final TaskModel assignment;
   final VoidCallback onTap;
   final VoidCallback onDelete;
   final VoidCallback onUpdate;
@@ -23,8 +23,9 @@ class AssignmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final status = assignmentStatusTag(assignment.status);
+    final status = assignmentTaskStatusTag(assignment.status);
     final priority = taskPriorityTag(assignment.priority);
+    final assigneeNames = assignment.assignees.map((a) => a.name).join(', ');
 
     return GestureDetector(
       onTap: onTap,
@@ -70,7 +71,7 @@ class AssignmentCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  assignment.description,
+                  assigneeNames.isEmpty ? '담당자 없음' : assigneeNames,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: ToyVillageTextStyle.caption3.copyWith(
@@ -93,7 +94,7 @@ class AssignmentCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     TagChip(
-                      label: assignmentDueLabel(assignment.dueDate),
+                      label: assignmentFinishLabel(assignment.finishDate),
                       textColor: ToyVillageColor.gray90,
                       backgroundColor: ToyVillageColor.gray20,
                     ),
