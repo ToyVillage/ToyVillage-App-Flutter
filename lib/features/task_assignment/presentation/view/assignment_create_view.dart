@@ -40,11 +40,11 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
   void initState() {
     super.initState();
     final assignment = widget.assignment;
+    _dueDate = assignment?.dueDate ?? DateTime.now();
     if (assignment != null) {
       _titleController.text = assignment.title;
       _contentController.text = assignment.description;
       _priority = assignment.priority;
-      _dueDate = assignment.dueDate;
     }
     _searchFocus.addListener(_onSearchFocusChange);
   }
@@ -260,7 +260,6 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
         const SizedBox(height: 12),
         FeedDateField(
           value: _dueDate,
-          selectTodayByDefault: true,
           onChanged: (date) => setState(() => _dueDate = date),
         ),
       ],
