@@ -70,6 +70,11 @@ class MenuView extends ConsumerWidget {
                         onTap: () => context.push('/feed-info'),
                       ),
                       MenuCard(
+                        icon: SvgAssets.navTask,
+                        title: '업무 관리',
+                        onTap: () => context.push('/task-assignment'),
+                      ),
+                      MenuCard(
                         icon: SvgAssets.lock,
                         title: '비밀번호 변경하기',
                         onTap: () => context.push('/password'),
