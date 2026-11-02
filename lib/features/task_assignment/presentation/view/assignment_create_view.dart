@@ -54,7 +54,6 @@ class _AssignmentCreateViewState extends ConsumerState<AssignmentCreateView> {
   @override
   void initState() {
     super.initState();
-    _dueDate = DateTime.now();
     _searchFocus.addListener(_onSearchFocusChange);
   }
 
