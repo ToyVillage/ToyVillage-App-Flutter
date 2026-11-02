@@ -57,12 +57,14 @@ class AssignmentReportView extends ConsumerWidget {
                 value: report.content,
                 minLines: 4,
               ),
-              const SizedBox(height: 40),
-              ToyVillageReadonlyField(
-                label: '특이사항',
-                value: note == null || note.isEmpty ? '특이사항 없음' : note,
-                minLines: 4,
-              ),
+              if (note != null && note.isNotEmpty) ...[
+                const SizedBox(height: 40),
+                ToyVillageReadonlyField(
+                  label: '특이사항',
+                  value: note,
+                  minLines: 4,
+                ),
+              ],
               if (files.isNotEmpty) ...[
                 const SizedBox(height: 40),
                 AttachmentSection(files: files),
