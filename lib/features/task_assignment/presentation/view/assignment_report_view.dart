@@ -9,6 +9,7 @@ import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/file/attachment_section.dart';
 import 'package:toy_village_app/core/widgets/text_field/readonly_field.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
+import 'package:toy_village_app/features/task/data/model/task_status.dart';
 import 'package:toy_village_app/features/task_assignment/data/model/work_report_detail_model.dart';
 import 'package:toy_village_app/features/task_assignment/presentation/view_model/assignment_report_view_model.dart';
 
@@ -42,12 +43,13 @@ class AssignmentReportView extends ConsumerWidget {
         (fileName: file.fileName, fileKey: file.fileKey),
     ];
     final note = report.note;
+    final reviewed = report.status == ReportStatus.approved;
 
     return Stack(
       fit: StackFit.expand,
       children: [
         SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 92),
+          padding: EdgeInsets.fromLTRB(20, 0, 20, reviewed ? 40 : 92),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -72,31 +74,32 @@ class AssignmentReportView extends ConsumerWidget {
             ],
           ),
         ),
-        Positioned(
-          left: 20,
-          right: 20,
-          bottom: 16,
-          child: Row(
-            children: [
-              Expanded(
-                child: ToyVillageButton(
-                  label: '반려하기',
-                  background: ToyVillageColor.gray10,
-                  textColor: ToyVillageColor.red,
-                  border: Border.all(color: ToyVillageColor.red),
-                  onTap: () => _showRejectDialog(context, ref),
+        if (!reviewed)
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 16,
+            child: Row(
+              children: [
+                Expanded(
+                  child: ToyVillageButton(
+                    label: '반려하기',
+                    background: ToyVillageColor.gray10,
+                    textColor: ToyVillageColor.red,
+                    border: Border.all(color: ToyVillageColor.red),
+                    onTap: () => _showRejectDialog(context, ref),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ToyVillageButton(
-                  label: '승인하기',
-                  onTap: () => _approve(context, ref),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ToyVillageButton(
+                    label: '승인하기',
+                    onTap: () => _approve(context, ref),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
