@@ -160,6 +160,7 @@ class AssignmentDetailView extends ConsumerWidget {
               label: tag.label,
               textColor: tag.text,
               backgroundColor: tag.background,
+              borderColor: tag.border,
             ),
             if (tappable) ...[
               const SizedBox(width: 8),

@@ -5,12 +5,14 @@ class TagChip extends StatelessWidget {
   final String label;
   final Color textColor;
   final Color backgroundColor;
+  final Color? borderColor;
 
   const TagChip({
     super.key,
     required this.label,
     required this.textColor,
     required this.backgroundColor,
+    this.borderColor,
   });
 
   @override
@@ -19,6 +21,7 @@ class TagChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(25),
+        border: borderColor == null ? null : Border.all(color: borderColor!),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
