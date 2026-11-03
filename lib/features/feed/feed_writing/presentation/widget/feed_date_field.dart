@@ -28,7 +28,7 @@ class _FeedDateFieldState extends State<FeedDateField> {
     setState(() {
       _open = !_open;
       if (_open) {
-        _tempSelected = widget.value;
+        _tempSelected = widget.value ?? DateTime.now();
         _focusedDay = widget.value ?? DateTime.now();
       }
     });
