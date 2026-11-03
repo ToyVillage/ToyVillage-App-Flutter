@@ -71,8 +71,8 @@ class _PasswordViewState extends ConsumerState<PasswordView> {
         body: SafeArea(
           child: Stack(
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+              SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
                 child: Column(
                   children: [
                     const SizedBox(height: 32),
