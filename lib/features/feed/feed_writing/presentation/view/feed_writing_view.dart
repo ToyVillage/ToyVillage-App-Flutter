@@ -10,9 +10,11 @@ import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_info_list_view.dart';
 import 'package:toy_village_app/features/feed/feed_log/data/model/feed_log.dart';
+import 'package:toy_village_app/features/feed/feed_log/data/model/fifth_floor_feed_log.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/animal_feed_logs_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/feed_log_detail_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/feed_log_write_view_model.dart';
+import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/fifth_floor_feed_log_write_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/my_feed_logs_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_amount_field.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/floor_dropdown.dart';
@@ -128,7 +130,10 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
   }
 
   Future<void> _complete() async {
-    if (ref.read(feedLogWriteViewModelProvider).isLoading) return;
+    if (ref.read(feedLogWriteViewModelProvider).isLoading ||
+        ref.read(fifthFloorFeedLogWriteViewModelProvider).isLoading) {
+      return;
+    }
     final overlay = Overlay.of(context, rootOverlay: true);
     final date = _date;
     final time = _time;
@@ -164,19 +169,31 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
       hour,
       time.minute,
     );
-    final request = FeedLogRequest(
-      feedDateTime: feedDateTime,
-      feedType: feedType,
-      feedAmount: amount,
-      remainingAmount: remain,
-      feedUnit: feedUnitCode(_unit),
-      significant: note,
-    );
-
-    final notifier = ref.read(feedLogWriteViewModelProvider.notifier);
-    final success = widget.isEdit
-        ? await notifier.edit(widget.feedLogId!, request)
-        : await notifier.create(widget.animalManageId!, request);
+    final bool success;
+    if (_is5F) {
+      final request = FifthFloorFeedLogRequest(
+        feedDateTime: feedDateTime,
+        feedType: feedType,
+        feedAmount: amount,
+        feedUnit: feedUnitCode(_unit),
+      );
+      success = await ref
+          .read(fifthFloorFeedLogWriteViewModelProvider.notifier)
+          .create(widget.animalManageId!, request);
+    } else {
+      final request = FeedLogRequest(
+        feedDateTime: feedDateTime,
+        feedType: feedType,
+        feedAmount: amount,
+        remainingAmount: remain,
+        feedUnit: feedUnitCode(_unit),
+        significant: note,
+      );
+      final notifier = ref.read(feedLogWriteViewModelProvider.notifier);
+      success = widget.isEdit
+          ? await notifier.edit(widget.feedLogId!, request)
+          : await notifier.create(widget.animalManageId!, request);
+    }
     if (!mounted) return;
 
     if (!success) {
@@ -205,7 +222,9 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
 
   @override
   Widget build(BuildContext context) {
-    final isSaving = ref.watch(feedLogWriteViewModelProvider).isLoading;
+    final isSaving =
+        ref.watch(feedLogWriteViewModelProvider).isLoading ||
+        ref.watch(fifthFloorFeedLogWriteViewModelProvider).isLoading;
 
     return GestureDetector(
       onTap: FocusScope.of(context).unfocus,
