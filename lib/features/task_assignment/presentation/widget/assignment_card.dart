@@ -145,6 +145,7 @@ class AssignmentCard extends StatelessWidget {
               style: ToyVillageTextStyle.caption3.copyWith(
                 color: ToyVillageColor.blue,
                 decoration: TextDecoration.underline,
+                decorationColor: ToyVillageColor.blue
               ),
             ),
           ],
