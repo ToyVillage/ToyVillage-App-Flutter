@@ -71,7 +71,12 @@ class MenuView extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Text(displayName, style: ToyVillageTextStyle.subTitle2),
+                    Expanded(
+                      child: Text(
+                        displayName,
+                        style: ToyVillageTextStyle.subTitle2,
+                      ),
+                    ),
                   ],
                 ),
               ),
