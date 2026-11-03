@@ -47,7 +47,7 @@ class FifthFloorFeedLog {
       feedType: json['feedType'] as String? ?? '',
       feedAmount: (json['feedAmount'] as num).toDouble(),
       feedUnit: json['feedUnit'] as String? ?? 'GML',
-      feedDateTime: parseServerTime(json['feedDateTime'] as String),
+      feedDateTime: parseServerTime(json['feedDate'] as String),
     );
   }
 }
@@ -73,7 +73,7 @@ class FifthFloorFeedLogDetail {
       feedType: json['feedType'] as String? ?? '',
       feedAmount: (json['feedAmount'] as num).toDouble(),
       feedUnit: json['feedUnit'] as String? ?? 'GML',
-      feedDateTime: parseServerTime(json['feedDateTime'] as String),
+      feedDateTime: parseServerTime(json['feedDate'] as String),
     );
   }
 }
@@ -92,7 +92,7 @@ class FifthFloorFeedLogRequest {
   });
 
   Map<String, dynamic> toJson() => {
-    'feedDateTime': feedDateTime.toIso8601String(),
+    'feedDate': feedDateTime.toIso8601String(),
     'feedType': feedType,
     'feedAmount': feedAmount,
     'feedUnit': feedUnit,
