@@ -19,7 +19,9 @@ class AssignmentView extends ConsumerWidget {
 
   Future<void> _onRefresh(WidgetRef ref) async {
     ref.invalidate(assignmentListViewModelProvider);
-    await ref.read(assignmentListViewModelProvider.future);
+    try {
+      await ref.read(assignmentListViewModelProvider.future);
+    } catch (_) {}
   }
 
   Future<void> _onDelete(
