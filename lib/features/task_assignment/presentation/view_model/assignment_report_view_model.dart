@@ -8,7 +8,7 @@ import 'package:toy_village_app/features/task_assignment/data/repository/assignm
 const _defaultErrorMessage = '문제가 발생했어요. 다시 시도해주세요.';
 
 final assignmentReportViewModelProvider =
-    AsyncNotifierProvider.family<
+    AsyncNotifierProvider.autoDispose.family<
       AssignmentReportViewModel,
       WorkReportDetailModel,
       int

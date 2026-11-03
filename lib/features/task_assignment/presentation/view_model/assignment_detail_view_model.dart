@@ -4,7 +4,7 @@ import 'package:toy_village_app/features/task/data/model/task_detail_model.dart'
 import 'package:toy_village_app/features/task/data/repository/task_detail_repository.dart';
 
 final assignmentDetailViewModelProvider =
-    AsyncNotifierProvider.family<
+    AsyncNotifierProvider.autoDispose.family<
       AssignmentDetailViewModel,
       TaskDetailModel,
       int
