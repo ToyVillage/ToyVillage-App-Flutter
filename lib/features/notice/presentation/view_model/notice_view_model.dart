@@ -46,7 +46,10 @@ class NoticeViewModel extends AsyncNotifier<List<NoticeModel>> {
           if (existingIds.add(notice.id)) notice,
       ];
       _hasMore = next.length == _size && fresh.isNotEmpty;
-      if (fresh.isEmpty) return;
+      if (fresh.isEmpty) {
+        state = AsyncData([...current]);
+        return;
+      }
       state = AsyncData([...current, ...fresh]);
     } catch (e, s) {
       debugPrint('loadMore failed: $e\n$s');
