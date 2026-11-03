@@ -54,6 +54,7 @@ class _FileUploadFieldState extends ConsumerState<FileUploadField> {
       onAdd: _add,
       onDelete: _delete,
       uploading: _uploading,
+      canAddMore: _files.length < widget.maxCount,
     );
   }
 }
