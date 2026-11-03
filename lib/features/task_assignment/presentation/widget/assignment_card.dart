@@ -3,8 +3,10 @@ import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/dropdown/menu_dropdown.dart';
 import 'package:toy_village_app/core/widgets/tag_chip.dart';
+import 'package:toy_village_app/features/task/data/model/assignee.dart';
 import 'package:toy_village_app/features/task/data/model/task_model.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_tag_style.dart';
+import 'package:toy_village_app/features/task_assignment/presentation/widget/assignee_list_dialog.dart';
 import 'package:toy_village_app/features/task_assignment/presentation/widget/assignment_tag_style.dart';
 
 class AssignmentCard extends StatelessWidget {
@@ -18,7 +20,7 @@ class AssignmentCard extends StatelessWidget {
     required this.assignment,
     required this.onTap,
     required this.onDelete,
-    required this.onUpdate
+    required this.onUpdate,
   });
 
   @override
@@ -97,11 +99,55 @@ class AssignmentCard extends StatelessWidget {
                       textColor: ToyVillageColor.gray90,
                       backgroundColor: ToyVillageColor.gray20,
                     ),
+                    const Spacer(),
+                    _assigneeLabel(context, assignment.assignees),
                   ],
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _assigneeLabel(BuildContext context, List<Assignee> assignees) {
+    if (assignees.isEmpty) {
+      return Text(
+        '담당자 없음',
+        style: ToyVillageTextStyle.caption3.copyWith(
+          color: ToyVillageColor.gray60,
+        ),
+      );
+    }
+
+    final first = assignees.first.name;
+    if (assignees.length == 1) {
+      return Text(
+        first,
+        style: ToyVillageTextStyle.caption3.copyWith(
+          color: ToyVillageColor.gray90,
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: () => showAssigneeListDialog(context, assignees),
+      child: Text.rich(
+        TextSpan(
+          style: ToyVillageTextStyle.caption3.copyWith(
+            color: ToyVillageColor.gray90,
+          ),
+          children: [
+            TextSpan(text: '$first 외 '),
+            TextSpan(
+              text: '${assignees.length - 1}명',
+              style: ToyVillageTextStyle.caption3.copyWith(
+                color: ToyVillageColor.blue,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
         ),
       ),
     );
