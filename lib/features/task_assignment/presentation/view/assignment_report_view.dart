@@ -105,6 +105,7 @@ class AssignmentReportView extends ConsumerWidget {
   }
 
   Future<void> _approve(BuildContext context, WidgetRef ref) async {
+    if (ref.read(reportReviewViewModelProvider).isLoading) return;
     final error = await ref
         .read(reportReviewViewModelProvider.notifier)
         .approve(workReportId);
@@ -228,6 +229,7 @@ class AssignmentReportView extends ConsumerWidget {
       showTopToast(Overlay.of(dialogContext), '반려 사유를 입력해주세요', isError: true);
       return;
     }
+    if (ref.read(reportReviewViewModelProvider).isLoading) return;
     final error = await ref
         .read(reportReviewViewModelProvider.notifier)
         .reject(workReportId, reason);
