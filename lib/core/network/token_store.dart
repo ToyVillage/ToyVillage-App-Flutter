@@ -19,13 +19,13 @@ class TokenStore {
     name = prefs.getString(_nameKey);
   }
 
-  Future<void> setProfile({required String role, required String name}) async {
+  Future<void> setProfile({String? role, String? name}) async {
     this.role = role;
     this.name = name;
     final prefs = await SharedPreferences.getInstance();
     await Future.wait([
-      prefs.setString(_roleKey, role),
-      prefs.setString(_nameKey, name),
+      role == null ? prefs.remove(_roleKey) : prefs.setString(_roleKey, role),
+      name == null ? prefs.remove(_nameKey) : prefs.setString(_nameKey, name),
     ]);
   }
 
