@@ -1,74 +1,125 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
+import 'package:toy_village_app/core/widgets/custom_async_value.dart';
+import 'package:toy_village_app/core/widgets/file/attachment_section.dart';
 import 'package:toy_village_app/core/widgets/text_field/readonly_field.dart';
+import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
+import 'package:toy_village_app/features/task/data/model/task_status.dart';
+import 'package:toy_village_app/features/task_assignment/data/model/work_report_detail_model.dart';
+import 'package:toy_village_app/features/task_assignment/presentation/view_model/assignment_report_view_model.dart';
 
-class AssignmentReportView extends StatelessWidget {
-  const AssignmentReportView({super.key});
+class AssignmentReportView extends ConsumerWidget {
+  final int workReportId;
+
+  const AssignmentReportView({super.key, required this.workReportId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true),
       body: SafeArea(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            const SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(20, 0, 20, 92),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 32),
-                  ToyVillageReadonlyField(
-                    label: '내용',
-                    value: '배고픈 우현이에게 복숭아 500g을 줬어요',
-                    minLines: 4,
-                  ),
-                  SizedBox(height: 40),
-                  ToyVillageReadonlyField(
-                    label: '특이사항',
-                    value: '알러지가 올라왔어요',
-                    minLines: 4,
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              left: 20,
-              right: 20,
-              bottom: 16,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ToyVillageButton(
-                      label: '반려하기',
-                      background: ToyVillageColor.gray10,
-                      textColor: ToyVillageColor.red,
-                      border: Border.all(color: ToyVillageColor.red),
-                      onTap: () => _showRejectDialog(context),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ToyVillageButton(
-                      label: '승인하기',
-                      onTap: () => context.pop(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+        child: CustomAsyncValue(
+          value: ref.watch(assignmentReportViewModelProvider(workReportId)),
+          onRetry: () =>
+              ref.invalidate(assignmentReportViewModelProvider(workReportId)),
+          data: (report) => _content(context, ref, report),
         ),
       ),
     );
   }
 
-  void _showRejectDialog(BuildContext context) {
+  Widget _content(
+    BuildContext context,
+    WidgetRef ref,
+    WorkReportDetailModel report,
+  ) {
+    final files = [
+      for (final file in report.files)
+        (fileName: file.fileName, fileKey: file.fileKey),
+    ];
+    final note = report.note;
+    final reviewed = report.status == ReportStatus.approved;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(20, 0, 20, reviewed ? 40 : 92),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 32),
+              ToyVillageReadonlyField(
+                label: '내용',
+                value: report.content,
+                minLines: 4,
+              ),
+              if (note != null && note.isNotEmpty) ...[
+                const SizedBox(height: 40),
+                ToyVillageReadonlyField(
+                  label: '특이사항',
+                  value: note,
+                  minLines: 4,
+                ),
+              ],
+              if (files.isNotEmpty) ...[
+                const SizedBox(height: 40),
+                AttachmentSection(files: files),
+              ],
+            ],
+          ),
+        ),
+        if (!reviewed)
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 16,
+            child: Row(
+              children: [
+                Expanded(
+                  child: ToyVillageButton(
+                    label: '반려하기',
+                    background: ToyVillageColor.gray10,
+                    textColor: ToyVillageColor.red,
+                    border: Border.all(color: ToyVillageColor.red),
+                    onTap: () => _showRejectDialog(context, ref),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ToyVillageButton(
+                    label: '승인하기',
+                    onTap: () => _approve(context, ref),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _approve(BuildContext context, WidgetRef ref) async {
+    if (ref.read(reportReviewViewModelProvider).isLoading) return;
+    final error = await ref
+        .read(reportReviewViewModelProvider.notifier)
+        .approve(workReportId);
+    if (!context.mounted) return;
+    if (error != null) {
+      showTopToast(Overlay.of(context), error, isError: true);
+      return;
+    }
+    showTopToast(Overlay.of(context), '업무 보고를 승인했어요', isError: false);
+    context.pop();
+  }
+
+  void _showRejectDialog(BuildContext context, WidgetRef ref) {
+    final controller = TextEditingController();
     showDialog<void>(
       context: context,
       builder: (dialogContext) => Dialog(
@@ -96,6 +147,7 @@ class AssignmentReportView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: TextField(
+                  controller: controller,
                   maxLines: null,
                   expands: true,
                   textAlignVertical: TextAlignVertical.top,
@@ -135,10 +187,12 @@ class AssignmentReportView extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: GestureDetector(
-                      onTap: () {
-                        Navigator.of(dialogContext).pop();
-                        context.pop();
-                      },
+                      onTap: () => _reject(
+                        context,
+                        dialogContext,
+                        ref,
+                        controller.text.trim(),
+                      ),
                       child: Container(
                         height: 44,
                         alignment: Alignment.center,
@@ -162,6 +216,30 @@ class AssignmentReportView extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ).whenComplete(controller.dispose);
+  }
+
+  Future<void> _reject(
+    BuildContext context,
+    BuildContext dialogContext,
+    WidgetRef ref,
+    String reason,
+  ) async {
+    if (reason.isEmpty) {
+      showTopToast(Overlay.of(dialogContext), '반려 사유를 입력해주세요', isError: true);
+      return;
+    }
+    if (ref.read(reportReviewViewModelProvider).isLoading) return;
+    final error = await ref
+        .read(reportReviewViewModelProvider.notifier)
+        .reject(workReportId, reason);
+    if (dialogContext.mounted) Navigator.of(dialogContext).pop();
+    if (!context.mounted) return;
+    if (error != null) {
+      showTopToast(Overlay.of(context), error, isError: true);
+      return;
+    }
+    showTopToast(Overlay.of(context), '업무 보고를 반려했어요', isError: false);
+    context.pop();
   }
 }

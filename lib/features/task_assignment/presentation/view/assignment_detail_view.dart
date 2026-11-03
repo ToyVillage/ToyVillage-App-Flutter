@@ -1,135 +1,176 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
+import 'package:toy_village_app/core/utils/time_util.dart';
 import 'package:toy_village_app/core/widgets/app_bar/app_bar.dart';
+import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/file/attachment_section.dart';
 import 'package:toy_village_app/core/widgets/section_divider.dart';
 import 'package:toy_village_app/core/widgets/tag_chip.dart';
+import 'package:toy_village_app/features/task/data/model/task_detail_model.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_tag_style.dart';
-import 'package:toy_village_app/features/task_assignment/data/model/assignment.dart';
+import 'package:toy_village_app/features/task_assignment/presentation/view_model/assignment_detail_view_model.dart';
 import 'package:toy_village_app/features/task_assignment/presentation/widget/assignment_tag_style.dart';
 
-class AssignmentDetailView extends StatelessWidget {
+class AssignmentDetailView extends ConsumerWidget {
   final int id;
 
   const AssignmentDetailView({super.key, required this.id});
 
-  static const _files = <({String fileName, String fileKey})>[
-    (fileName: '당일 지침.pdf', fileKey: 'sample-pdf'),
-    (fileName: '휴관안내.jpg', fileKey: 'sample-jpg'),
-    (fileName: '휴관안내.png', fileKey: 'sample-png'),
-  ];
-
-  static const _reporters = ['이승현 사원', '이승현 사원', '이승현 사원'];
-
-  Assignment get _assignment => sampleAssignments.firstWhere(
-    (a) => a.id == id,
-    orElse: () => sampleAssignments.first,
-  );
-
   @override
-  Widget build(BuildContext context) {
-    final assignment = _assignment;
-    final status = assignmentStatusTag(assignment.status);
-    final priority = taskPriorityTag(assignment.priority);
-
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(assignment.title, style: ToyVillageTextStyle.heading2),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  TagChip(
-                    label: status.label,
-                    textColor: status.text,
-                    backgroundColor: status.background,
-                  ),
-                  const SizedBox(width: 6),
-                  TagChip(
-                    label: priority.label,
-                    textColor: priority.text,
-                    backgroundColor: priority.background,
-                  ),
-                  const SizedBox(width: 6),
-                  TagChip(
-                    label: assignmentDueLabel(assignment.dueDate),
-                    textColor: ToyVillageColor.gray70,
-                    backgroundColor: ToyVillageColor.gray20,
-                  ),
-                  const Spacer(),
-                  const Icon(
-                    Symbols.schedule_rounded,
-                    size: 16,
-                    color: ToyVillageColor.gray60,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '3시간 전',
-                    style: ToyVillageTextStyle.caption4.copyWith(
-                      color: ToyVillageColor.gray60,
-                    ),
-                  ),
-                ],
-              ),
-              const SectionDivider(),
-              Text(
-                '배고픈 우현이에게 복숭아 500g을 주세요',
-                style: ToyVillageTextStyle.body5,
-              ),
-              const SectionDivider(),
-              const AttachmentSection(files: _files),
-              const SectionDivider(),
-              Text('업무보고', style: ToyVillageTextStyle.subTitle4),
-              const SizedBox(height: 12),
-              if (assignment.hasReport)
-                for (final reporter in _reporters) _reportRow(context, reporter)
-              else
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Center(
-                    child: Text(
-                      '아직 등록된 업무보고가 없어요',
-                      style: ToyVillageTextStyle.body5.copyWith(
-                        color: ToyVillageColor.gray60,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
+        child: CustomAsyncValue(
+          value: ref.watch(assignmentDetailViewModelProvider(id)),
+          onRetry: () =>
+              ref.invalidate(assignmentDetailViewModelProvider(id)),
+          data: (detail) => _content(context, ref, detail),
         ),
       ),
     );
   }
 
-  Widget _reportRow(BuildContext context, String name) {
-    return InkWell(
-      onTap: () => context.push('/task-assignment/report'),
-      child: Container(
-        decoration: BoxDecoration(
-          color: ToyVillageColor.white,
-          borderRadius: BorderRadius.circular(8)
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
+  Widget _content(BuildContext context, WidgetRef ref, TaskDetailModel detail) {
+    final status = assignmentTaskStatusTag(detail.status);
+    final priority = taskPriorityTag(detail.priority);
+    final files = [
+      for (final file in detail.files)
+        (fileName: file.fileName, fileKey: file.fileKey),
+    ];
+    final reports = detail.reports;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(detail.title, style: ToyVillageTextStyle.heading2),
+          const SizedBox(height: 12),
+          Row(
             children: [
-              Expanded(child: Text(name, style: ToyVillageTextStyle.body5)),
+              TagChip(
+                label: status.label,
+                textColor: status.text,
+                backgroundColor: status.background,
+              ),
+              const SizedBox(width: 6),
+              TagChip(
+                label: priority.label,
+                textColor: priority.text,
+                backgroundColor: priority.background,
+              ),
+              const SizedBox(width: 6),
+              TagChip(
+                label: assignmentFinishLabel(detail.finishDate),
+                textColor: ToyVillageColor.gray70,
+                backgroundColor: ToyVillageColor.gray20,
+              ),
+              const Spacer(),
+              const Icon(
+                Symbols.schedule_rounded,
+                size: 16,
+                color: ToyVillageColor.gray60,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                timeCheck(detail.createdAt),
+                style: ToyVillageTextStyle.caption4.copyWith(
+                  color: ToyVillageColor.gray60,
+                ),
+              ),
+            ],
+          ),
+          const SectionDivider(),
+          Text(detail.content, style: ToyVillageTextStyle.body5),
+          if (files.isNotEmpty) ...[
+            const SectionDivider(),
+            AttachmentSection(files: files),
+          ],
+          const SectionDivider(),
+          Text('업무보고', style: ToyVillageTextStyle.subTitle4),
+          const SizedBox(height: 12),
+          if (reports.isNotEmpty)
+            Container(
+              decoration: BoxDecoration(
+                color: ToyVillageColor.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  for (var i = 0; i < reports.length; i++) ...[
+                    if (i > 0)
+                      const Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: ToyVillageColor.gray20,
+                      ),
+                    _reportRow(context, ref, reports[i]),
+                  ],
+                ],
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: Text(
+                  '아직 등록된 업무보고가 없어요',
+                  style: ToyVillageTextStyle.body5.copyWith(
+                    color: ToyVillageColor.gray60,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _reportRow(
+    BuildContext context,
+    WidgetRef ref,
+    TaskReportSummary report,
+  ) {
+    final tag = assignmentReportStatusTag(report.status);
+    final workReportId = report.workReportId;
+    final tappable = workReportId != null;
+
+    return InkWell(
+      onTap: tappable
+          ? () async {
+              await context.push(
+                '/task-assignment/report',
+                extra: workReportId,
+              );
+              ref.invalidate(assignmentDetailViewModelProvider(id));
+            }
+          : null,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(child: Text(report.name, style: ToyVillageTextStyle.body5)),
+            TagChip(
+              label: tag.label,
+              textColor: tag.text,
+              backgroundColor: tag.background,
+              borderColor: tag.border,
+            ),
+            if (tappable) ...[
+              const SizedBox(width: 8),
               const Icon(
                 Symbols.chevron_right_rounded,
                 size: 18,
                 color: ToyVillageColor.gray60,
               ),
             ],
-          ),
+          ],
         ),
       ),
     );

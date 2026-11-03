@@ -30,8 +30,8 @@ class _SplashViewState extends ConsumerState<SplashView> {
     if (!mounted) return;
     context.go(destination);
     if (destination == '/notice') {
-      final noticeId = FcmService.instance.takeInitialNoticeId();
-      if (noticeId != null) FcmService.instance.navigateToNotice(noticeId);
+      final route = FcmService.instance.takeInitialRoute();
+      if (route != null) FcmService.instance.navigate(route);
     }
   }
 

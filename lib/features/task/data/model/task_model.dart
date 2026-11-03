@@ -5,6 +5,7 @@ import 'package:toy_village_app/features/task/data/model/task_status.dart';
 class TaskModel {
   final int id;
   final String title;
+  final String content;
   final List<Assignee> assignees;
   final int assigneeCount;
   final TaskStatus status;
@@ -16,6 +17,7 @@ class TaskModel {
   TaskModel({
     required this.id,
     required this.title,
+    required this.content,
     required this.assignees,
     required this.assigneeCount,
     required this.status,
@@ -32,6 +34,7 @@ class TaskModel {
     return TaskModel(
       id: json['id'] as int,
       title: json['title'] as String,
+      content: json['content'] as String? ?? '',
       assignees: assignees
           .map((e) => Assignee.fromJson(e as Map<String, dynamic>))
           .toList(),

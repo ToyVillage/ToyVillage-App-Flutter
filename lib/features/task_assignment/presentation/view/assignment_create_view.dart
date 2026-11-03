@@ -1,29 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:toy_village_app/core/constants/color.dart';
 import 'package:toy_village_app/core/constants/text_style.dart';
 import 'package:toy_village_app/core/widgets/button/toy_village_button.dart';
+import 'package:toy_village_app/core/widgets/custom_async_value.dart';
 import 'package:toy_village_app/core/widgets/text/label.dart';
 import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_date_field.dart';
+import 'package:toy_village_app/features/task/data/model/report_attachment.dart';
+import 'package:toy_village_app/features/task/data/model/task_detail_model.dart';
 import 'package:toy_village_app/features/task/data/model/task_status.dart';
-import 'package:toy_village_app/features/task_assignment/data/model/assignment.dart';
+import 'package:toy_village_app/features/task/presentation/widget/attachment_editor.dart';
+import 'package:toy_village_app/features/task/presentation/widget/attachment_picker.dart';
+import 'package:toy_village_app/features/task_assignment/data/model/assignment_request.dart';
+import 'package:toy_village_app/features/task_assignment/data/model/employee.dart';
+import 'package:toy_village_app/features/task_assignment/presentation/view_model/assignment_detail_view_model.dart';
+import 'package:toy_village_app/features/task_assignment/presentation/view_model/assignment_mutation_view_model.dart';
+import 'package:toy_village_app/features/task_assignment/presentation/view_model/employee_list_view_model.dart';
 
-class AssignmentCreateView extends StatefulWidget {
-  final Assignment? assignment;
+class AssignmentCreateView extends ConsumerStatefulWidget {
+  final int? taskId;
 
-  const AssignmentCreateView({super.key, this.assignment});
+  const AssignmentCreateView({super.key, this.taskId});
 
   @override
-  State<AssignmentCreateView> createState() => _AssignmentCreateViewState();
+  ConsumerState<AssignmentCreateView> createState() =>
+      _AssignmentCreateViewState();
 }
 
-class _AssignmentCreateViewState extends State<AssignmentCreateView> {
-  static const _employees = ['이승현 사원', '장윤호 사원', '남우현 사원', '김정욱 사원'];
+class _AssignmentCreateViewState extends ConsumerState<AssignmentCreateView> {
+  bool get _isEdit => widget.taskId != null;
 
-  bool get _isEdit => widget.assignment != null;
+  bool _prefilled = false;
+  bool _submitting = false;
 
   int _step = 0;
   TaskPriority? _priority;
@@ -32,20 +44,16 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
   final _contentController = TextEditingController();
   final _searchController = TextEditingController();
   final _searchFocus = FocusNode();
-  final Set<String> _selected = {};
+  final Set<int> _selected = {};
+  List<ReportAttachment> _files = [];
+  bool _uploadingFile = false;
+  List<Employee> _employees = const [];
   final _dropdownLink = LayerLink();
   final _dropdownController = OverlayPortalController();
 
   @override
   void initState() {
     super.initState();
-    final assignment = widget.assignment;
-    _dueDate = assignment?.dueDate ?? DateTime.now();
-    if (assignment != null) {
-      _titleController.text = assignment.title;
-      _contentController.text = assignment.description;
-      _priority = assignment.priority;
-    }
     _searchFocus.addListener(_onSearchFocusChange);
   }
 
@@ -57,6 +65,39 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
     _searchFocus.removeListener(_onSearchFocusChange);
     _searchFocus.dispose();
     super.dispose();
+  }
+
+  void _applyPrefill(TaskDetailModel detail) {
+    _titleController.text = detail.title;
+    _contentController.text = detail.content;
+    _priority = detail.priority;
+    _dueDate = detail.finishDate ?? DateTime.now();
+    _selected
+      ..clear()
+      ..addAll(detail.assignees.map((a) => a.id));
+    _files = [
+      for (final file in detail.files)
+        ReportAttachment(fileName: file.fileName, fileKey: file.fileKey),
+    ];
+    _prefilled = true;
+  }
+
+  Future<void> _addAttachment() async {
+    if (_uploadingFile) return;
+    setState(() => _uploadingFile = true);
+    try {
+      final attachment = await pickAndUploadAttachment(context, ref);
+      if (!mounted) return;
+      if (attachment != null) {
+        setState(() => _files = [..._files, attachment]);
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingFile = false);
+    }
+  }
+
+  void _deleteAttachment(int index) {
+    setState(() => _files = [..._files]..removeAt(index));
   }
 
   void _onSearchFocusChange() {
@@ -80,9 +121,18 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
     setState(() => _step -= 1);
   }
 
+  Employee? _employeeById(int id) {
+    for (final employee in _employees) {
+      if (employee.id == id) return employee;
+    }
+    return null;
+  }
+
   bool _hasCandidate(String keyword) {
     return _employees.any(
-      (name) => !_selected.contains(name) && _matchStart(name, keyword) >= 0,
+      (employee) =>
+          !_selected.contains(employee.id) &&
+          _matchStart(employee.name, keyword) >= 0,
     );
   }
 
@@ -97,8 +147,8 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
     }
   }
 
-  void _toast(String message) {
-    showTopToast(Overlay.of(context), message, isError: true);
+  void _toast(String message, {bool isError = true}) {
+    showTopToast(Overlay.of(context), message, isError: isError);
   }
 
   bool _validateStep() {
@@ -130,60 +180,114 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
     return true;
   }
 
-  void _next() {
+  Future<void> _next() async {
     FocusScope.of(context).unfocus();
     if (!_validateStep()) return;
     if (_step < 2) {
       setState(() => _step += 1);
       return;
     }
+    await _submit();
+  }
+
+  Future<void> _submit() async {
+    if (_submitting) return;
+    setState(() => _submitting = true);
+
+    final request = AssignmentRequest(
+      title: _titleController.text.trim(),
+      content: _contentController.text.trim(),
+      assigneeIds: _selected.toList(),
+      finishDate: _dueDate!,
+      priority: _priority!,
+      files: _files.isEmpty ? null : _files.map((f) => f.fileKey).toList(),
+    );
+
+    final notifier = ref.read(assignmentMutationViewModelProvider.notifier);
+    final error = _isEdit
+        ? await notifier.edit(widget.taskId!, request)
+        : await notifier.create(request);
+    if (!mounted) return;
+
+    if (error != null) {
+      setState(() => _submitting = false);
+      _toast(error);
+      return;
+    }
+    _toast(_isEdit ? '업무가 수정되었어요' : '업무가 생성되었어요', isError: false);
     context.pop();
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: FocusScope.of(context).unfocus,
-      child: Scaffold(
+    if (_isEdit && !_prefilled) {
+      final detail = ref.watch(assignmentDetailViewModelProvider(widget.taskId!));
+      return Scaffold(
         body: SafeArea(
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _header(),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.only(bottom: 92),
-                        child: switch (_step) {
-                          0 => _stepContent(),
-                          1 => _stepDifficulty(),
-                          _ => _stepEmployees(),
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                left: 20,
-                right: 20,
-                bottom: 16,
-                child: ToyVillageButton(
-                  label: _step < 2
-                      ? '다음'
-                      : _isEdit
-                      ? '수정 완료'
-                      : '업무 생성',
-                  onTap: _next,
-                ),
-              ),
-            ],
+          child: CustomAsyncValue(
+            value: detail,
+            onRetry: () => ref.invalidate(
+              assignmentDetailViewModelProvider(widget.taskId!),
+            ),
+            data: (data) {
+              _applyPrefill(data);
+              return _form();
+            },
           ),
         ),
+      );
+    }
+    return Scaffold(body: SafeArea(child: _form()));
+  }
+
+  Widget _form() {
+    _employees = [
+      for (final employee
+          in ref.watch(employeeListViewModelProvider).asData?.value ??
+              const <Employee>[])
+        if (employee.isEmployee) employee,
+    ];
+
+    return GestureDetector(
+      onTap: FocusScope.of(context).unfocus,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _header(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 92),
+                    child: switch (_step) {
+                      0 => _stepContent(),
+                      1 => _stepDifficulty(),
+                      _ => _stepEmployees(),
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 16,
+            child: ToyVillageButton(
+              label: _step < 2
+                  ? '다음'
+                  : _isEdit
+                  ? '수정 완료'
+                  : '업무 생성',
+              onTap: () {
+                if (!_submitting) _next();
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -236,6 +340,15 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
           hintText: '상세 업무 내용',
           controller: _contentController,
           minLines: 7,
+        ),
+        const SizedBox(height: 24),
+        const ToyVillageLabel(label: '첨부파일', isOptional: true),
+        const SizedBox(height: 8),
+        AttachmentEditor(
+          files: _files,
+          onAdd: _addAttachment,
+          onDelete: _deleteAttachment,
+          uploading: _uploadingFile,
         ),
       ],
     );
@@ -290,8 +403,8 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
 
   Widget _stepEmployees() {
     final selected = [
-      for (final name in _employees)
-        if (_selected.contains(name)) name,
+      for (final id in _selected)
+        if (_employeeById(id) != null) _employeeById(id)!,
     ];
 
     const searchBarHeight = 52.0;
@@ -313,8 +426,10 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
           Column(
             spacing: 8,
             children: [
-              for (final name in selected)
-                _employeeCard(_employeeRow(name, keyword: '', added: true)),
+              for (final employee in selected)
+                _employeeCard(
+                  _employeeRow(employee, keyword: '', added: true),
+                ),
             ],
           ),
         ],
@@ -325,8 +440,10 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
   Widget _dropdownOverlay() {
     final keyword = _searchController.text.trim();
     final candidates = [
-      for (final name in _employees)
-        if (!_selected.contains(name) && _matchStart(name, keyword) >= 0) name,
+      for (final employee in _employees)
+        if (!_selected.contains(employee.id) &&
+            _matchStart(employee.name, keyword) >= 0)
+          employee,
     ];
     if (keyword.isEmpty || candidates.isEmpty) {
       return const SizedBox.shrink();
@@ -347,8 +464,8 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  for (final name in candidates)
-                    _employeeRow(name, keyword: keyword, added: false),
+                  for (final employee in candidates)
+                    _employeeRow(employee, keyword: keyword, added: false),
                 ],
               ),
             ),
@@ -448,10 +565,11 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
   }
 
   Widget _employeeRow(
-    String name, {
+    Employee employee, {
     required String keyword,
     required bool added,
   }) {
+    final name = employee.name;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -476,7 +594,9 @@ class _AssignmentCreateViewState extends State<AssignmentCreateView> {
           GestureDetector(
             onTap: () {
               setState(() {
-                added ? _selected.remove(name) : _selected.add(name);
+                added
+                    ? _selected.remove(employee.id)
+                    : _selected.add(employee.id);
               });
               _updateDropdown();
             },

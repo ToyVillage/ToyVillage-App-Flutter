@@ -48,8 +48,8 @@ class _LoginViewState extends ConsumerState<LoginView> {
     }
     ref.read(passwordChangePromptProvider.notifier).set(username == password);
     context.go('/notice');
-    final noticeId = FcmService.instance.takeInitialNoticeId();
-    if (noticeId != null) FcmService.instance.navigateToNotice(noticeId);
+    final route = FcmService.instance.takeInitialRoute();
+    if (route != null) FcmService.instance.navigate(route);
   }
 
   @override

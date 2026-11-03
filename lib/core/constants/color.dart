@@ -11,6 +11,8 @@ class ToyVillageColor {
   static const pngIconBackground = Color(0xFFA9ECDD);
   static const blue = Color(0xFF4952FF);
   static const blueBackground = Color(0xFFE8E9FF);
+  static const purple = Color(0xFF8A4DFF);
+  static const purpleBackground = Color(0xFFF0E8FF);
   static const white = Color(0xFFFFFFFF);
 
   static const gray10 = Color(0xFFF5F5F7);
