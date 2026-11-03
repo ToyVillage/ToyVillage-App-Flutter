@@ -32,9 +32,11 @@ class TaskDetailView extends ConsumerStatefulWidget {
 
 class _TaskDetailViewState extends ConsumerState<TaskDetailView> {
   @override
-  void dispose() {
-    ref.invalidate(taskViewModelProvider);
-    super.dispose();
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.invalidate(taskViewModelProvider);
+    });
   }
 
   @override
