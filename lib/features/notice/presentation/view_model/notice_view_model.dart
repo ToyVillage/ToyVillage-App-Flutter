@@ -12,15 +12,15 @@ final noticeViewModelProvider =
 class NoticeViewModel extends AsyncNotifier<List<NoticeModel>> {
   static const _size = 10;
 
-  int _page = 0;
+  int _page = 1;
   int _totalPages = 1;
   bool _isLoadingMore = false;
 
-  bool get hasMore => _page + 1 < _totalPages;
+  bool get hasMore => _page < _totalPages;
 
   @override
   Future<List<NoticeModel>> build() async {
-    _page = 0;
+    _page = 1;
     final first = await ref
         .read(noticeRepositoryProvider)
         .loadNotices(page: _page, size: _size);
