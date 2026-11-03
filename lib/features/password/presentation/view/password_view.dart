@@ -70,6 +70,7 @@ class _PasswordViewState extends ConsumerState<PasswordView> {
         appBar: const ToyVillageAppBar(hasIcon: true, title: '비밀번호 변경'),
         body: SafeArea(
           child: Stack(
+            fit: StackFit.expand,
             children: [
               SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
