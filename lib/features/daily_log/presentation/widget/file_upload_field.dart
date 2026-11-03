@@ -22,17 +22,24 @@ class FileUploadField extends ConsumerStatefulWidget {
 
 class _FileUploadFieldState extends ConsumerState<FileUploadField> {
   late final List<ReportAttachment> _files = [...widget.initialFiles];
+  bool _uploading = false;
 
   Future<void> _add() async {
-    final attachment = await pickAndUploadAttachment(context, ref);
-    if (attachment == null || !mounted) return;
-    setState(() {
-      _files.add(attachment);
-      while (_files.length > widget.maxCount) {
-        _files.removeAt(0);
-      }
-    });
-    widget.onChanged?.call(List.unmodifiable(_files));
+    if (_uploading) return;
+    setState(() => _uploading = true);
+    try {
+      final attachment = await pickAndUploadAttachment(context, ref);
+      if (attachment == null || !mounted) return;
+      setState(() {
+        _files.add(attachment);
+        while (_files.length > widget.maxCount) {
+          _files.removeAt(0);
+        }
+      });
+      widget.onChanged?.call(List.unmodifiable(_files));
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
   }
 
   void _delete(int index) {
@@ -42,6 +49,11 @@ class _FileUploadFieldState extends ConsumerState<FileUploadField> {
 
   @override
   Widget build(BuildContext context) {
-    return AttachmentEditor(files: _files, onAdd: _add, onDelete: _delete);
+    return AttachmentEditor(
+      files: _files,
+      onAdd: _add,
+      onDelete: _delete,
+      uploading: _uploading,
+    );
   }
 }
