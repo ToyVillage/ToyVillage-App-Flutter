@@ -67,6 +67,7 @@ class _PasswordViewState extends ConsumerState<PasswordView> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: const ToyVillageAppBar(hasIcon: true, title: '비밀번호 변경'),
         body: SafeArea(
           child: Stack(
