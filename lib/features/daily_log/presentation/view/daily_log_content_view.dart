@@ -265,7 +265,7 @@ class _DailyLogContentViewState extends ConsumerState<DailyLogContentView> {
     try {
       await ref
           .read(dailyLogDetailRepositoryProvider)
-          .createWorkLog(widget.templateId, answers);
+          .createWorkLog(widget.templateId, template.templateTitle, answers);
       await _draftRepo.clear(widget.templateId);
       if (!mounted) return;
       _autoSaveTimer?.cancel();
