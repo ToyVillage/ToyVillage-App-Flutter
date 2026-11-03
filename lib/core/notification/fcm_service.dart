@@ -120,6 +120,10 @@ class FcmService {
 
   NotificationRoute? _routeFromPayload(String? payload) {
     if (payload == null) return null;
+    final legacyNoticeId = int.tryParse(payload);
+    if (legacyNoticeId != null) {
+      return NotificationRoute(path: '/notice/detail', extra: legacyNoticeId);
+    }
     try {
       final data = jsonDecode(payload) as Map<String, dynamic>;
       return _routeFrom(data);
