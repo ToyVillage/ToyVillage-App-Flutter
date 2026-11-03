@@ -4,7 +4,7 @@ import 'package:toy_village_app/features/feed/feed_log/data/model/feed_log.dart'
 import 'package:toy_village_app/features/feed/feed_log/data/repository/fifth_floor_feed_log_repository.dart';
 
 final fifthFloorFeedLogDetailViewModelProvider =
-    AsyncNotifierProvider.family<
+    AsyncNotifierProvider.autoDispose.family<
       FifthFloorFeedLogDetailViewModel,
       FeedLogDetail,
       int

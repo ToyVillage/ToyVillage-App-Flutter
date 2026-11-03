@@ -4,7 +4,7 @@ import 'package:toy_village_app/features/notice/data/model/notice_detail_model.d
 import 'package:toy_village_app/features/notice/data/repository/notice_detail_repository.dart';
 
 final noticeDetailViewModelProvider =
-    AsyncNotifierProvider.family<NoticeDetailViewModel, NoticeDetailModel, int>(
+    AsyncNotifierProvider.autoDispose.family<NoticeDetailViewModel, NoticeDetailModel, int>(
       NoticeDetailViewModel.new,
     );
 

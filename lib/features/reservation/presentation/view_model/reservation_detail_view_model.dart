@@ -4,7 +4,7 @@ import 'package:toy_village_app/features/reservation/data/model/reservation_deta
 import 'package:toy_village_app/features/reservation/data/repository/reservation_detail_repository.dart';
 
 final reservationDetailViewModelProvider =
-    AsyncNotifierProvider.family<
+    AsyncNotifierProvider.autoDispose.family<
       ReservationDetailViewModel,
       ReservationDetailModel,
       int
