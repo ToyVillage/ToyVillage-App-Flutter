@@ -14,6 +14,7 @@ import 'package:toy_village_app/features/feed/feed_log/data/model/fifth_floor_fe
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/animal_feed_logs_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/feed_log_detail_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/feed_log_write_view_model.dart';
+import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/fifth_floor_feed_log_detail_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/fifth_floor_feed_log_write_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/my_feed_logs_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_amount_field.dart';
@@ -26,6 +27,7 @@ class FeedWritingView extends ConsumerStatefulWidget {
   final int? feedLogId;
   final String? animalName;
   final FeedLogDetail? initial;
+  final bool isFifthFloor;
 
   const FeedWritingView({
     super.key,
@@ -33,6 +35,7 @@ class FeedWritingView extends ConsumerStatefulWidget {
     this.feedLogId,
     this.animalName,
     this.initial,
+    this.isFifthFloor = false,
   });
 
   bool get isEdit => feedLogId != null;
@@ -97,7 +100,7 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
 
   void _refresh() => setState(() {});
 
-  bool get _is5F => _floor == '5층';
+  bool get _is5F => widget.isFifthFloor || _floor == '5층';
 
   bool get _canSubmit {
     final feedType = _feedTypeController.text.trim();
@@ -177,9 +180,12 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
         feedAmount: amount,
         feedUnit: feedUnitCode(_unit),
       );
-      success = await ref
-          .read(fifthFloorFeedLogWriteViewModelProvider.notifier)
-          .create(widget.animalManageId!, request);
+      final notifier = ref.read(
+        fifthFloorFeedLogWriteViewModelProvider.notifier,
+      );
+      success = widget.isEdit
+          ? await notifier.edit(widget.feedLogId!, request)
+          : await notifier.create(widget.animalManageId!, request);
     } else {
       final request = FeedLogRequest(
         feedDateTime: feedDateTime,
@@ -202,7 +208,13 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
     }
 
     if (widget.isEdit) {
-      ref.invalidate(feedLogDetailViewModelProvider(widget.feedLogId!));
+      if (_is5F) {
+        ref.invalidate(
+          fifthFloorFeedLogDetailViewModelProvider(widget.feedLogId!),
+        );
+      } else {
+        ref.invalidate(feedLogDetailViewModelProvider(widget.feedLogId!));
+      }
     }
     ref.invalidate(animalFeedLogsViewModelProvider);
     ref.invalidate(myFeedLogsViewModelProvider);
