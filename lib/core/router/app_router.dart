@@ -298,6 +298,7 @@ final GoRouter appRouter = GoRouter(
                   int? feedLogId,
                   String? animalName,
                   FeedLogDetail? initial,
+                  bool isFifthFloor,
                 })) {
               return _invalidAccess;
             }
@@ -306,6 +307,7 @@ final GoRouter appRouter = GoRouter(
               feedLogId: extra.feedLogId,
               animalName: extra.animalName,
               initial: extra.initial,
+              isFifthFloor: extra.isFifthFloor,
             );
           },
         ),
@@ -345,8 +347,13 @@ final GoRouter appRouter = GoRouter(
           path: 'detail',
           builder: (context, state) {
             final extra = state.extra;
-            if (extra is! int) return _invalidAccess;
-            return FeedView(feedLogId: extra);
+            if (extra is! ({int feedLogId, bool isFifthFloor})) {
+              return _invalidAccess;
+            }
+            return FeedView(
+              feedLogId: extra.feedLogId,
+              isFifthFloor: extra.isFifthFloor,
+            );
           },
         ),
       ],

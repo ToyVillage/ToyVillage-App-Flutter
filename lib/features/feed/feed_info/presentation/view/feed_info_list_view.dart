@@ -57,7 +57,10 @@ class FeedInfoListView extends ConsumerWidget {
                           log: log,
                           onTap: () => context.push(
                             '/feed-info/detail',
-                            extra: log.feedLogId,
+                            extra: (
+                              feedLogId: log.feedLogId,
+                              isFifthFloor: log.isFifthFloor,
+                            ),
                           ),
                         );
                       },
