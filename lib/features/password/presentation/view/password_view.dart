@@ -101,6 +101,7 @@ class _PasswordViewState extends ConsumerState<PasswordView> {
                       hasEyesIcon: true,
                       controller: _confirmController,
                     ),
+                    const SizedBox(height: 100),
                     if (_mismatch) ...[
                       const SizedBox(height: 8),
                       Align(
