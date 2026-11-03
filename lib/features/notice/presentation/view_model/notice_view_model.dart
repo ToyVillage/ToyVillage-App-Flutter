@@ -13,10 +13,10 @@ class NoticeViewModel extends AsyncNotifier<List<NoticeModel>> {
   static const _size = 10;
 
   int _page = 0;
-  bool _hasMore = true;
+  int _totalPages = 1;
   bool _isLoadingMore = false;
 
-  bool get hasMore => _hasMore;
+  bool get hasMore => _page + 1 < _totalPages;
 
   @override
   Future<List<NoticeModel>> build() async {
@@ -24,12 +24,12 @@ class NoticeViewModel extends AsyncNotifier<List<NoticeModel>> {
     final first = await ref
         .read(noticeRepositoryProvider)
         .loadNotices(page: _page, size: _size);
-    _hasMore = first.length == _size;
-    return first;
+    _totalPages = first.totalPages;
+    return first.notices;
   }
 
   Future<void> loadMore() async {
-    if (_isLoadingMore || !_hasMore) return;
+    if (_isLoadingMore || !hasMore) return;
     final current = state.value;
     if (current == null) return;
 
@@ -39,13 +39,13 @@ class NoticeViewModel extends AsyncNotifier<List<NoticeModel>> {
           .read(noticeRepositoryProvider)
           .loadNotices(page: _page + 1, size: _size);
       _page += 1;
+      _totalPages = next.totalPages;
 
       final existingIds = {for (final notice in current) notice.id};
       final fresh = [
-        for (final notice in next)
+        for (final notice in next.notices)
           if (existingIds.add(notice.id)) notice,
       ];
-      _hasMore = next.length == _size && fresh.isNotEmpty;
       if (fresh.isEmpty) {
         state = AsyncData([...current]);
         return;
