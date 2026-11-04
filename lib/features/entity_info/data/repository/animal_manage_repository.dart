@@ -22,7 +22,7 @@ class AnimalManageRepository {
   Future<AnimalKindPage> loadKinds({
     AnimalTaxonomic? animalTaxonomic,
     String? keyword,
-    int page = 0,
+    int page = 1,
     int size = 10,
     String sort = 'id,desc',
   }) async {
@@ -49,7 +49,7 @@ class AnimalManageRepository {
   Future<PageResult<AnimalSummary>> loadAnimals(
     int animalKindId, {
     String? keyword,
-    int page = 0,
+    int page = 1,
     int size = 10,
     String sort = 'id,desc',
   }) async {
@@ -77,7 +77,7 @@ class AnimalManageRepository {
 
   Future<PageResult<Observation>> loadObservations(
     int animalManageId, {
-    int page = 0,
+    int page = 1,
     int size = 10,
     String sort = 'id,desc',
   }) async {

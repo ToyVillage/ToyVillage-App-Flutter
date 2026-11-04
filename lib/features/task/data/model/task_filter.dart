@@ -18,7 +18,8 @@ enum TaskFilter {
       case TaskFilter.all:
         return true;
       case TaskFilter.expired:
-        return task.status == TaskStatus.expired;
+        return task.myReportStatus == ReportStatus.missing &&
+            task.status == TaskStatus.expired;
       case TaskFilter.inProgress:
         return task.myReportStatus == ReportStatus.missing &&
             task.status == TaskStatus.inProgress;

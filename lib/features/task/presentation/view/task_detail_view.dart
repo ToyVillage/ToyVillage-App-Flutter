@@ -17,16 +17,31 @@ import 'package:toy_village_app/core/widgets/tag_chip.dart';
 import 'package:toy_village_app/features/task/data/model/task_detail_model.dart';
 import 'package:toy_village_app/features/task/data/model/task_status.dart';
 import 'package:toy_village_app/features/task/presentation/view_model/task_detail_view_model.dart';
+import 'package:toy_village_app/features/task/presentation/view_model/task_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/view_model/work_report_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/widget/task_tag_style.dart';
 
-class TaskDetailView extends ConsumerWidget {
+class TaskDetailView extends ConsumerStatefulWidget {
   final int id;
 
   const TaskDetailView({super.key, required this.id});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TaskDetailView> createState() => _TaskDetailViewState();
+}
+
+class _TaskDetailViewState extends ConsumerState<TaskDetailView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.invalidate(taskViewModelProvider);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final id = widget.id;
     final reportAsync = ref.watch(workReportProvider(id));
     final reportData = reportAsync.asData;
     final report = reportData?.value;

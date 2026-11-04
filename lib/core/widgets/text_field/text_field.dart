@@ -89,7 +89,7 @@ class _ToyVillageTextFieldState extends State<ToyVillageTextField> {
             ),
             contentPadding: const EdgeInsets.all(16),
             hintText: widget.hintText,
-            hintStyle: ToyVillageTextStyle.caption4.copyWith(
+            hintStyle: ToyVillageTextStyle.body5.copyWith(
               color: ToyVillageColor.gray60,
             ),
             filled: true,

@@ -25,7 +25,7 @@ class AnimalListViewModel extends AsyncNotifier<PagedList<AnimalSummary>> {
         .loadAnimals(filter.animalKindId, keyword: filter.keyword);
     return PagedList(
       items: page.content,
-      nextPage: 1,
+      nextPage: 2,
       hasMore: !page.last,
     );
   }

@@ -10,6 +10,7 @@ class AttachmentEditor extends StatelessWidget {
   final VoidCallback onAdd;
   final void Function(int index) onDelete;
   final bool uploading;
+  final bool canAddMore;
 
   const AttachmentEditor({
     super.key,
@@ -17,14 +18,17 @@ class AttachmentEditor extends StatelessWidget {
     required this.onAdd,
     required this.onDelete,
     this.uploading = false,
+    this.canAddMore = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (files.isEmpty && !uploading) return FileAddBox(onTap: onAdd);
+    if (files.isEmpty && !uploading) {
+      return canAddMore ? FileAddBox(onTap: onAdd) : const SizedBox.shrink();
+    }
 
     final uploadingCount = uploading ? 1 : 0;
-    final showAddCell = files.isNotEmpty;
+    final showAddCell = files.isNotEmpty && canAddMore;
 
     return GridView.builder(
       shrinkWrap: true,

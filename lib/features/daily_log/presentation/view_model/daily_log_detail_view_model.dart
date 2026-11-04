@@ -4,7 +4,7 @@ import 'package:toy_village_app/features/daily_log/data/model/daily_log_detail.d
 import 'package:toy_village_app/features/daily_log/data/repository/daily_log_detail_repository.dart';
 
 final dailyLogDetailViewModelProvider =
-    AsyncNotifierProvider.family<DailyLogDetailViewModel, DailyLogDetail, int>(
+    AsyncNotifierProvider.autoDispose.family<DailyLogDetailViewModel, DailyLogDetail, int>(
       DailyLogDetailViewModel.new,
     );
 

@@ -252,7 +252,7 @@ class _DailyLogEditViewState extends ConsumerState<DailyLogEditView> {
     try {
       await ref
           .read(dailyLogDetailRepositoryProvider)
-          .updateWorkLog(widget.workLogId, answers);
+          .updateWorkLog(widget.workLogId, template.templateTitle, answers);
       if (!mounted) return;
       ref.invalidate(dailyLogDetailViewModelProvider(widget.workLogId));
       ref.invalidate(myDailyLogViewModelProvider);

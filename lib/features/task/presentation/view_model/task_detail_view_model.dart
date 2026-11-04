@@ -4,9 +4,10 @@ import 'package:toy_village_app/features/task/data/model/task_detail_model.dart'
 import 'package:toy_village_app/features/task/data/repository/task_detail_repository.dart';
 
 final taskDetailViewModelProvider =
-    AsyncNotifierProvider.family<TaskDetailViewModel, TaskDetailModel, int>(
-      TaskDetailViewModel.new,
-    );
+    AsyncNotifierProvider.autoDispose
+        .family<TaskDetailViewModel, TaskDetailModel, int>(
+          TaskDetailViewModel.new,
+        );
 
 class TaskDetailViewModel extends AsyncNotifier<TaskDetailModel> {
   final int id;
