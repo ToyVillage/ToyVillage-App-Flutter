@@ -29,7 +29,7 @@ class NoticeRepository {
         .toList();
     final totalPages = map['totalPageSize'] is int
         ? map['totalPageSize'] as int
-        : 1;
+        : (notices.length < size ? page : page + 1);
     return (notices: notices, totalPages: totalPages);
   }
 }
