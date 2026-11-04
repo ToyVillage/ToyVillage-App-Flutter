@@ -23,7 +23,9 @@ class AttachmentEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (files.isEmpty && !uploading) return FileAddBox(onTap: onAdd);
+    if (files.isEmpty && !uploading) {
+      return canAddMore ? FileAddBox(onTap: onAdd) : const SizedBox.shrink();
+    }
 
     final uploadingCount = uploading ? 1 : 0;
     final showAddCell = files.isNotEmpty && canAddMore;
