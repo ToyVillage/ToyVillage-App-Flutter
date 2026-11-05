@@ -6,13 +6,19 @@ final authRepositoryProvider =
     Provider((ref) => AuthRepository(ref.read(dioProvider)));
 
 typedef AuthTokens = ({String accessToken, String refreshToken});
+typedef AuthLoginResult = ({
+  String accessToken,
+  String refreshToken,
+  String? role,
+  String? name,
+});
 
 class AuthRepository {
   final Dio _dio;
 
   AuthRepository(this._dio);
 
-  Future<AuthTokens> login({
+  Future<AuthLoginResult> login({
     required String username,
     required String password,
   }) async {
@@ -20,7 +26,13 @@ class AuthRepository {
       '/app/auth/login',
       data: {'username': username, 'password': password},
     );
-    return _tokens(res.data as Map<String, dynamic>);
+    final data = res.data as Map<String, dynamic>;
+    return (
+      accessToken: data['access_token'] as String,
+      refreshToken: data['refresh_token'] as String,
+      role: data['role'] as String?,
+      name: data['name'] as String?,
+    );
   }
 
   Future<AuthTokens> reissue(String refreshToken) async {

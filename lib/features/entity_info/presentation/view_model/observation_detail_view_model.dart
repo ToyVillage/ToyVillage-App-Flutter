@@ -6,7 +6,7 @@ import 'package:toy_village_app/features/entity_info/data/repository/animal_mana
 typedef ObservationKey = ({int animalManageId, int observationId});
 
 final observationDetailViewModelProvider =
-    AsyncNotifierProvider.family<
+    AsyncNotifierProvider.autoDispose.family<
       ObservationDetailViewModel,
       ObservationDetail,
       ObservationKey

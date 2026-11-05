@@ -23,7 +23,7 @@ class ObservationListViewModel extends AsyncNotifier<PagedList<Observation>> {
         .loadObservations(animalManageId);
     return PagedList(
       items: page.content,
-      nextPage: 1,
+      nextPage: 2,
       hasMore: !page.last,
     );
   }

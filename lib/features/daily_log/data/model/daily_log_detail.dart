@@ -1,3 +1,4 @@
+import 'package:toy_village_app/core/utils/time_util.dart';
 import 'package:toy_village_app/features/daily_log/data/model/daily_log_template.dart';
 import 'package:toy_village_app/features/daily_log/data/model/question_type.dart';
 import 'package:toy_village_app/features/task/data/model/report_attachment.dart';
@@ -25,7 +26,7 @@ class DailyLogDetail {
       templateId: json['templateId'] as int,
       templateTitle: json['templateTitle'] as String,
       writerName: json['writerName'] as String,
-      writeAt: DateTime.parse(json['writeAt'] as String),
+      writeAt: parseServerTime(json['writeAt'] as String),
       sections: (json['sections'] as List)
           .map((e) => AnswerSection.fromJson(e as Map<String, dynamic>))
           .toList(),

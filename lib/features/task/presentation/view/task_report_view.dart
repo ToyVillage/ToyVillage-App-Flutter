@@ -19,6 +19,7 @@ import 'package:toy_village_app/features/task/data/model/report_attachment.dart'
 import 'package:toy_village_app/features/task/data/model/work_report_request.dart';
 import 'package:toy_village_app/features/task/data/repository/task_report_draft_repository.dart';
 import 'package:toy_village_app/features/task/data/repository/work_report_repository.dart';
+import 'package:toy_village_app/features/task/presentation/view_model/task_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/view_model/work_report_view_model.dart';
 import 'package:toy_village_app/features/task/presentation/widget/attachment_editor.dart';
 import 'package:toy_village_app/features/task/presentation/widget/attachment_picker.dart';
@@ -222,6 +223,7 @@ class _TaskReportViewState extends ConsumerState<TaskReportView> {
       }
       await _draftRepo.clear(widget.id);
       ref.invalidate(workReportProvider(widget.id));
+      ref.invalidate(taskViewModelProvider);
       if (!mounted) return;
       context.go('/task');
     } catch (_) {

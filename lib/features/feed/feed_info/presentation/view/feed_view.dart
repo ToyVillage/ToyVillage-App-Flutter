@@ -17,11 +17,17 @@ import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_i
 import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_amount_field.dart';
 import 'package:toy_village_app/features/feed/feed_log/data/model/feed_log.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/feed_log_detail_view_model.dart';
+import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/fifth_floor_feed_log_detail_view_model.dart';
 
 class FeedView extends ConsumerWidget {
   final int feedLogId;
+  final bool isFifthFloor;
 
-  const FeedView({super.key, required this.feedLogId});
+  const FeedView({
+    super.key,
+    required this.feedLogId,
+    this.isFifthFloor = false,
+  });
 
   String _dateText(DateTime dateTime) =>
       '${dateTime.year}.${_two(dateTime.month)}.${_two(dateTime.day)}';
@@ -35,17 +41,27 @@ class FeedView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final value = isFifthFloor
+        ? ref.watch(fifthFloorFeedLogDetailViewModelProvider(feedLogId))
+        : ref.watch(feedLogDetailViewModelProvider(feedLogId));
+
     return Scaffold(
       appBar: const ToyVillageAppBar(hasIcon: true),
       body: SafeArea(
         child: CustomAsyncValue(
-          value: ref.watch(feedLogDetailViewModelProvider(feedLogId)),
+          value: value,
           loading: const FeedDetailSkeleton(),
-          onRetry: () =>
-              ref.invalidate(feedLogDetailViewModelProvider(feedLogId)),
+          onRetry: () => isFifthFloor
+              ? ref.invalidate(
+                  fifthFloorFeedLogDetailViewModelProvider(feedLogId),
+                )
+              : ref.invalidate(feedLogDetailViewModelProvider(feedLogId)),
           data: (detail) => PullToRefresh.child(
-            onRefresh: () async =>
-                ref.refresh(feedLogDetailViewModelProvider(feedLogId).future),
+            onRefresh: () async => isFifthFloor
+                ? ref.refresh(
+                    fifthFloorFeedLogDetailViewModelProvider(feedLogId).future,
+                  )
+                : ref.refresh(feedLogDetailViewModelProvider(feedLogId).future),
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: _content(context, detail),
           ),
@@ -75,6 +91,7 @@ class FeedView extends ConsumerWidget {
                             feedLogId: detail.feedLogId,
                             animalName: null,
                             initial: detail,
+                            isFifthFloor: detail.isFifthFloor,
                           ),
                         ),
                       ),
@@ -105,17 +122,19 @@ class FeedView extends ConsumerWidget {
               ],
             ),
             ToyVillageReadonlyField(label: '먹이 종류', value: detail.feedType),
-            _section(
-              '잔여량',
-              _amountBox(
-                '${formatFeedAmount(detail.remainingAmount)} ${feedUnitLabel(detail.feedUnit)}',
+            if (!detail.isFifthFloor)
+              _section(
+                '잔여량',
+                _amountBox(
+                  '${formatFeedAmount(detail.remainingAmount)} ${feedUnitLabel(detail.feedUnit)}',
+                ),
               ),
-            ),
-            ToyVillageReadonlyField(
-              label: '특이사항',
-              value: detail.significant,
-              minLines: 3,
-            ),
+            if (!detail.isFifthFloor && detail.significant.isNotEmpty)
+              ToyVillageReadonlyField(
+                label: '특이사항',
+                value: detail.significant,
+                minLines: 3,
+              ),
             const SizedBox(height: 10),
           ],
         );

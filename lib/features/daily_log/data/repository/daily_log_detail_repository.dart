@@ -21,21 +21,29 @@ class DailyLogDetailRepository {
 
   Future<void> createWorkLog(
     int templateId,
+    String title,
     List<WorkLogAnswerRequest> answers,
   ) async {
     await _dio.post(
       '${ApiEndpoints.workLog}/$templateId',
-      data: {'answers': answers.map((e) => e.toJson()).toList()},
+      data: {
+        'title': title,
+        'answers': answers.map((e) => e.toJson()).toList(),
+      },
     );
   }
 
   Future<void> updateWorkLog(
     int workLogId,
+    String title,
     List<WorkLogAnswerRequest> answers,
   ) async {
     await _dio.patch(
       '${ApiEndpoints.workLog}/$workLogId',
-      data: {'answers': answers.map((e) => e.toJson()).toList()},
+      data: {
+        'title': title,
+        'answers': answers.map((e) => e.toJson()).toList(),
+      },
     );
   }
 

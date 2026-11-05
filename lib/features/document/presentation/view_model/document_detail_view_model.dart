@@ -4,7 +4,7 @@ import 'package:toy_village_app/features/document/data/model/document_detail_mod
 import 'package:toy_village_app/features/document/data/repository/document_detail_repository.dart';
 
 final documentDetailViewModelProvider =
-    AsyncNotifierProvider.family<
+    AsyncNotifierProvider.autoDispose.family<
       DocumentDetailViewModel,
       DocumentDetailModel,
       int

@@ -35,6 +35,10 @@ import 'package:toy_village_app/features/task/presentation/view/task_detail_view
 import 'package:toy_village_app/features/task/presentation/view/task_report_detail_view.dart';
 import 'package:toy_village_app/features/task/presentation/view/task_report_view.dart';
 import 'package:toy_village_app/features/task/presentation/view/task_view.dart';
+import 'package:toy_village_app/features/task_assignment/presentation/view/assignment_create_view.dart';
+import 'package:toy_village_app/features/task_assignment/presentation/view/assignment_detail_view.dart';
+import 'package:toy_village_app/features/task_assignment/presentation/view/assignment_report_view.dart';
+import 'package:toy_village_app/features/task_assignment/presentation/view/assignment_view.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -294,6 +298,7 @@ final GoRouter appRouter = GoRouter(
                   int? feedLogId,
                   String? animalName,
                   FeedLogDetail? initial,
+                  bool isFifthFloor,
                 })) {
               return _invalidAccess;
             }
@@ -302,6 +307,7 @@ final GoRouter appRouter = GoRouter(
               feedLogId: extra.feedLogId,
               animalName: extra.animalName,
               initial: extra.initial,
+              isFifthFloor: extra.isFifthFloor,
             );
           },
         ),
@@ -341,8 +347,42 @@ final GoRouter appRouter = GoRouter(
           path: 'detail',
           builder: (context, state) {
             final extra = state.extra;
+            if (extra is! ({int feedLogId, bool isFifthFloor})) {
+              return _invalidAccess;
+            }
+            return FeedView(
+              feedLogId: extra.feedLogId,
+              isFifthFloor: extra.isFifthFloor,
+            );
+          },
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/task-assignment',
+      builder: (_, _) => const AssignmentView(),
+      routes: [
+        GoRoute(
+          path: 'create',
+          builder: (context, state) {
+            final extra = state.extra;
+            return AssignmentCreateView(taskId: extra is int ? extra : null);
+          },
+        ),
+        GoRoute(
+          path: 'detail',
+          builder: (context, state) {
+            final extra = state.extra;
             if (extra is! int) return _invalidAccess;
-            return FeedView(feedLogId: extra);
+            return AssignmentDetailView(id: extra);
+          },
+        ),
+        GoRoute(
+          path: 'report',
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra is! int) return _invalidAccess;
+            return AssignmentReportView(workReportId: extra);
           },
         ),
       ],

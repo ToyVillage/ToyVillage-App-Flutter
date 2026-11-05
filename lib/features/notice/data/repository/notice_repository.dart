@@ -13,16 +13,23 @@ class NoticeRepository {
 
   NoticeRepository(this._dio);
 
-  Future<List<NoticeModel>> loadNotices({int page = 0, int size = 10}) async {
+  Future<({List<NoticeModel> notices, int totalPages})> loadNotices({
+    int page = 0,
+    int size = 10,
+  }) async {
     final response = await _dio.get(
       ApiEndpoints.notice,
       queryParameters: {'page': page, 'size': size},
     );
     final data = response.data;
-    final list =
-        (data is Map<String, dynamic> ? data['notices'] : data) as List;
-    return list
+    final map = data is Map<String, dynamic> ? data : const <String, dynamic>{};
+    final list = (data is Map<String, dynamic> ? data['notices'] : data) as List;
+    final notices = list
         .map((e) => NoticeModel.fromJson(e as Map<String, dynamic>))
         .toList();
+    final totalPages = map['totalPageSize'] is int
+        ? map['totalPageSize'] as int
+        : (notices.length < size ? page : page + 1);
+    return (notices: notices, totalPages: totalPages);
   }
 }

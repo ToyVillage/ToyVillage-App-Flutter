@@ -1,3 +1,5 @@
+import 'package:toy_village_app/features/feed/feed_log/data/model/fifth_floor_feed_log.dart';
+
 class FeedLogSummary {
   final int feedLogId;
   final String animalKind;
@@ -26,6 +28,7 @@ class FeedLog {
   final String feedUnit;
   final DateTime feedDateTime;
   final String significant;
+  final bool isFifthFloor;
 
   const FeedLog({
     required this.feedLogId,
@@ -35,6 +38,7 @@ class FeedLog {
     required this.feedUnit,
     required this.feedDateTime,
     required this.significant,
+    this.isFifthFloor = false,
   });
 
   factory FeedLog.fromJson(Map<String, dynamic> json) {
@@ -48,6 +52,19 @@ class FeedLog {
       significant: json['significant'] as String? ?? '',
     );
   }
+
+  factory FeedLog.fromFifthFloor(FifthFloorFeedLog log) {
+    return FeedLog(
+      feedLogId: log.feedLogId,
+      animalId: log.animalId,
+      feedType: log.feedType,
+      feedAmount: log.feedAmount,
+      feedUnit: log.feedUnit,
+      feedDateTime: log.feedDateTime,
+      significant: '',
+      isFifthFloor: true,
+    );
+  }
 }
 
 class FeedLogDetail {
@@ -58,6 +75,7 @@ class FeedLogDetail {
   final String feedUnit;
   final DateTime feedDateTime;
   final String significant;
+  final bool isFifthFloor;
 
   const FeedLogDetail({
     required this.feedLogId,
@@ -67,6 +85,7 @@ class FeedLogDetail {
     required this.feedUnit,
     required this.feedDateTime,
     required this.significant,
+    this.isFifthFloor = false,
   });
 
   factory FeedLogDetail.fromJson(Map<String, dynamic> json) {
@@ -80,6 +99,19 @@ class FeedLogDetail {
       feedUnit: json['feedUnit'] as String? ?? 'GML',
       feedDateTime: DateTime.parse(json['feedDateTime'] as String),
       significant: json['significant'] as String? ?? '',
+    );
+  }
+
+  factory FeedLogDetail.fromFifthFloor(FifthFloorFeedLogDetail detail) {
+    return FeedLogDetail(
+      feedLogId: detail.feedLogId,
+      feedType: detail.feedType,
+      feedAmount: detail.feedAmount,
+      remainingAmount: 0,
+      feedUnit: detail.feedUnit,
+      feedDateTime: detail.feedDateTime,
+      significant: '',
+      isFifthFloor: true,
     );
   }
 }

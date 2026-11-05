@@ -29,7 +29,7 @@ class AnimalKindListViewModel extends AsyncNotifier<PagedList<AnimalKind>> {
         );
     return PagedList(
       items: page.animalKinds,
-      nextPage: 1,
+      nextPage: 2,
       hasMore: page.totalPageSize > 1,
     );
   }
@@ -51,7 +51,7 @@ class AnimalKindListViewModel extends AsyncNotifier<PagedList<AnimalKind>> {
         PagedList(
           items: [...current.items, ...page.animalKinds],
           nextPage: current.nextPage + 1,
-          hasMore: current.nextPage + 1 < page.totalPageSize,
+          hasMore: current.nextPage < page.totalPageSize,
         ),
       );
     } catch (_) {

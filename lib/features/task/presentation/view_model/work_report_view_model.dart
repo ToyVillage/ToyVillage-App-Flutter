@@ -4,9 +4,10 @@ import 'package:toy_village_app/features/task/data/model/work_report_model.dart'
 import 'package:toy_village_app/features/task/data/repository/work_report_repository.dart';
 
 final workReportProvider =
-    AsyncNotifierProvider.family<WorkReportViewModel, WorkReportModel?, int>(
-      WorkReportViewModel.new,
-    );
+    AsyncNotifierProvider.autoDispose
+        .family<WorkReportViewModel, WorkReportModel?, int>(
+          WorkReportViewModel.new,
+        );
 
 class WorkReportViewModel extends AsyncNotifier<WorkReportModel?> {
   final int taskId;

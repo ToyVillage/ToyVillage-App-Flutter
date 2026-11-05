@@ -10,11 +10,15 @@ import 'package:toy_village_app/core/widgets/text_field/text_field.dart';
 import 'package:toy_village_app/core/widgets/toast/top_toast.dart';
 import 'package:toy_village_app/features/feed/feed_info/presentation/view/feed_info_list_view.dart';
 import 'package:toy_village_app/features/feed/feed_log/data/model/feed_log.dart';
+import 'package:toy_village_app/features/feed/feed_log/data/model/fifth_floor_feed_log.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/animal_feed_logs_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/feed_log_detail_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/feed_log_write_view_model.dart';
+import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/fifth_floor_feed_log_detail_view_model.dart';
+import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/fifth_floor_feed_log_write_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_log/presentation/view_model/my_feed_logs_view_model.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_amount_field.dart';
+import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/floor_dropdown.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_date_field.dart';
 import 'package:toy_village_app/features/feed/feed_writing/presentation/widget/feed_time_field.dart';
 
@@ -23,6 +27,7 @@ class FeedWritingView extends ConsumerStatefulWidget {
   final int? feedLogId;
   final String? animalName;
   final FeedLogDetail? initial;
+  final bool isFifthFloor;
 
   const FeedWritingView({
     super.key,
@@ -30,6 +35,7 @@ class FeedWritingView extends ConsumerStatefulWidget {
     this.feedLogId,
     this.animalName,
     this.initial,
+    this.isFifthFloor = false,
   });
 
   bool get isEdit => feedLogId != null;
@@ -46,6 +52,7 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
   DateTime? _date;
   FeedTime? _time;
   String _unit = feedAmountUnits.first;
+  String _floor = feedFloors.first;
 
   final _feedTypeController = TextEditingController();
   final _amountController = TextEditingController();
@@ -59,6 +66,7 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
   DateTime? _originalDate;
   FeedTime? _originalTime;
   String _originalUnit = feedAmountUnits.first;
+  String _originalFloor = feedFloors.first;
 
   @override
   void initState() {
@@ -87,20 +95,22 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
     _originalDate = _date;
     _originalTime = _time;
     _originalUnit = _unit;
+    _originalFloor = _floor;
   }
 
   void _refresh() => setState(() {});
 
+  bool get _is5F => widget.isFifthFloor || _floor == '5층';
+
   bool get _canSubmit {
     final feedType = _feedTypeController.text.trim();
     final amount = double.tryParse(_amountController.text.trim());
-    final remain = double.tryParse(_remainController.text.trim());
-    if (_date == null ||
-        _time == null ||
-        feedType.isEmpty ||
-        amount == null ||
-        remain == null) {
+    if (_date == null || _time == null || feedType.isEmpty || amount == null) {
       return false;
+    }
+    if (!_is5F) {
+      final remain = double.tryParse(_remainController.text.trim());
+      if (remain == null) return false;
     }
     if (!widget.isEdit) return true;
     return _feedTypeController.text != _originalFeedType ||
@@ -109,7 +119,8 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
         _noteController.text != _originalNote ||
         _date != _originalDate ||
         _time != _originalTime ||
-        _unit != _originalUnit;
+        _unit != _originalUnit ||
+        _floor != _originalFloor;
   }
 
   @override
@@ -122,23 +133,35 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
   }
 
   Future<void> _complete() async {
-    if (ref.read(feedLogWriteViewModelProvider).isLoading) return;
+    if (ref.read(feedLogWriteViewModelProvider).isLoading ||
+        ref.read(fifthFloorFeedLogWriteViewModelProvider).isLoading) {
+      return;
+    }
     final overlay = Overlay.of(context, rootOverlay: true);
     final date = _date;
     final time = _time;
     final feedType = _feedTypeController.text.trim();
     final amount = double.tryParse(_amountController.text.trim());
-    final remain = double.tryParse(_remainController.text.trim());
 
-    if (date == null ||
-        time == null ||
-        feedType.isEmpty ||
-        amount == null ||
-        remain == null) {
-      showTopToast(overlay, '급여 날짜·시간·먹이 종류·급여량·잔여량을 입력해주세요.', isError: true);
+    if (date == null || time == null || feedType.isEmpty || amount == null) {
+      showTopToast(overlay, '급여 날짜·시간·먹이 종류·먹이 급여량을 입력해주세요.', isError: true);
       return;
     }
 
+    final double remain;
+    final String note;
+    if (_is5F) {
+      remain = 0;
+      note = '';
+    } else {
+      final remainValue = double.tryParse(_remainController.text.trim());
+      if (remainValue == null) {
+        showTopToast(overlay, '잔여량을 입력해주세요.', isError: true);
+        return;
+      }
+      remain = remainValue;
+      note = _noteController.text.trim();
+    }
     final hour = time.isPm
         ? (time.hour == 12 ? 12 : time.hour + 12)
         : (time.hour == 12 ? 0 : time.hour);
@@ -149,19 +172,34 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
       hour,
       time.minute,
     );
-    final request = FeedLogRequest(
-      feedDateTime: feedDateTime,
-      feedType: feedType,
-      feedAmount: amount,
-      remainingAmount: remain,
-      feedUnit: feedUnitCode(_unit),
-      significant: _noteController.text.trim(),
-    );
-
-    final notifier = ref.read(feedLogWriteViewModelProvider.notifier);
-    final success = widget.isEdit
-        ? await notifier.edit(widget.feedLogId!, request)
-        : await notifier.create(widget.animalManageId!, request);
+    final bool success;
+    if (_is5F) {
+      final request = FifthFloorFeedLogRequest(
+        feedDateTime: feedDateTime,
+        feedType: feedType,
+        feedAmount: amount,
+        feedUnit: feedUnitCode(_unit),
+      );
+      final notifier = ref.read(
+        fifthFloorFeedLogWriteViewModelProvider.notifier,
+      );
+      success = widget.isEdit
+          ? await notifier.edit(widget.feedLogId!, request)
+          : await notifier.create(widget.animalManageId!, request);
+    } else {
+      final request = FeedLogRequest(
+        feedDateTime: feedDateTime,
+        feedType: feedType,
+        feedAmount: amount,
+        remainingAmount: remain,
+        feedUnit: feedUnitCode(_unit),
+        significant: note,
+      );
+      final notifier = ref.read(feedLogWriteViewModelProvider.notifier);
+      success = widget.isEdit
+          ? await notifier.edit(widget.feedLogId!, request)
+          : await notifier.create(widget.animalManageId!, request);
+    }
     if (!mounted) return;
 
     if (!success) {
@@ -170,7 +208,13 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
     }
 
     if (widget.isEdit) {
-      ref.invalidate(feedLogDetailViewModelProvider(widget.feedLogId!));
+      if (_is5F) {
+        ref.invalidate(
+          fifthFloorFeedLogDetailViewModelProvider(widget.feedLogId!),
+        );
+      } else {
+        ref.invalidate(feedLogDetailViewModelProvider(widget.feedLogId!));
+      }
     }
     ref.invalidate(animalFeedLogsViewModelProvider);
     ref.invalidate(myFeedLogsViewModelProvider);
@@ -190,7 +234,9 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
 
   @override
   Widget build(BuildContext context) {
-    final isSaving = ref.watch(feedLogWriteViewModelProvider).isLoading;
+    final isSaving =
+        ref.watch(feedLogWriteViewModelProvider).isLoading ||
+        ref.watch(fifthFloorFeedLogWriteViewModelProvider).isLoading;
 
     return GestureDetector(
       onTap: FocusScope.of(context).unfocus,
@@ -210,8 +256,23 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: ToyVillageTitle(
-                          title: widget.isEdit ? '먹이 급여 수정' : '먹이 급여 작성',
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: ToyVillageTitle(
+                                title: widget.isEdit
+                                    ? '먹이 급여 수정'
+                                    : '먹이 급여 작성',
+                              ),
+                            ),
+                            if (!widget.isEdit)
+                              FloorDropdown(
+                                floors: feedFloors,
+                                value: _floor,
+                                onChanged: (value) =>
+                                    setState(() => _floor = value),
+                              ),
+                          ],
                         ),
                       ),
                       _section(
@@ -254,22 +315,24 @@ class _FeedWritingViewState extends ConsumerState<FeedWritingView> {
                         hintText: '먹이 종류 입력',
                         controller: _feedTypeController,
                       ),
-                      _section(
-                        '잔여량',
-                        FeedAmountField(
-                          controller: _remainController,
-                          unit: _unit,
-                          onUnitChanged: (value) =>
-                              setState(() => _unit = value),
-                          hintText: '잔여량 입력',
+                      if (!_is5F) ...[
+                        _section(
+                          '잔여량',
+                          FeedAmountField(
+                            controller: _remainController,
+                            unit: _unit,
+                            onUnitChanged: (value) =>
+                                setState(() => _unit = value),
+                            hintText: '잔여량 입력',
+                          ),
                         ),
-                      ),
-                      ToyVillageTextField(
-                        label: '특이사항',
-                        hintText: '특이사항 입력',
-                        controller: _noteController,
-                        scrollPadding: const EdgeInsets.only(bottom: 100),
-                      ),
+                        ToyVillageTextField(
+                          label: '특이사항',
+                          hintText: '특이사항 입력',
+                          controller: _noteController,
+                          scrollPadding: const EdgeInsets.only(bottom: 100),
+                        ),
+                      ],
                     ],
                   ),
                 ),

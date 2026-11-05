@@ -1,8 +1,33 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sentry_dio/sentry_dio.dart';
 import 'package:toy_village_app/core/config/app_env.dart';
 import 'package:toy_village_app/core/network/token_store.dart';
+
+const _sensitiveKeys = {
+  'username',
+  'password',
+  'currentPassword',
+  'newPassword',
+  'token',
+  'refresh_token',
+  'refreshToken',
+  'access_token',
+  'accessToken',
+};
+
+Object? _maskSensitive(Object? data) {
+  if (data is Map) {
+    return data.map(
+      (key, value) => _sensitiveKeys.contains(key)
+          ? MapEntry(key, '***')
+          : MapEntry(key, _maskSensitive(value)),
+    );
+  }
+  if (data is List) return data.map(_maskSensitive).toList();
+  return data;
+}
 
 final tokenStoreProvider = Provider((ref) => TokenStore());
 
@@ -86,6 +111,38 @@ final dioProvider = Provider<Dio>((ref) {
       },
     ),
   );
+
+  if (kDebugMode) {
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          debugPrint('[API] → ${options.method} ${options.uri}');
+          if (options.data != null) {
+            debugPrint('[API]   body: ${_maskSensitive(options.data)}');
+          }
+          handler.next(options);
+        },
+        onResponse: (response, handler) {
+          debugPrint(
+            '[API] ← ${response.statusCode} '
+            '${response.requestOptions.method} '
+            '${response.requestOptions.uri}',
+          );
+          debugPrint('[API]   data: ${_maskSensitive(response.data)}');
+          handler.next(response);
+        },
+        onError: (error, handler) {
+          debugPrint(
+            '[API] ✕ ${error.response?.statusCode} '
+            '${error.requestOptions.method} '
+            '${error.requestOptions.uri}',
+          );
+          debugPrint('[API]   data: ${_maskSensitive(error.response?.data)}');
+          handler.next(error);
+        },
+      ),
+    );
+  }
 
   if (AppEnv.current.sentryDsn.isNotEmpty) {
     dio.addSentry();

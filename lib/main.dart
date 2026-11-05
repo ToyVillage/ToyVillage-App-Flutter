@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' hide appFlavor;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,11 +7,21 @@ import 'package:screen_protector/screen_protector.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:toy_village_app/core/config/app_env.dart';
 import 'package:toy_village_app/core/constants/color.dart';
+import 'package:toy_village_app/core/notification/fcm_service.dart';
 import 'package:toy_village_app/core/provider_logger.dart';
 import 'package:toy_village_app/core/router/app_router.dart';
+import 'package:toy_village_app/firebase_options.dart';
 
 Future<void> main() async {
   SentryWidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    FirebaseMessaging.onBackgroundMessage(fcmBackgroundHandler);
+    await FcmService.instance.init();
+  } catch (_) {}
   try {
     await ScreenProtector.preventScreenshotOn();
     await ScreenProtector.protectDataLeakageOn();
